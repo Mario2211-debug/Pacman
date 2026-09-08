@@ -16,4 +16,4 @@ build-backend = "hatchling.build"
 packages = ["pac_man"]
 
 [tool.mypy]
-exclude = '^mazegenerator-00001/'
+exclude = '^mazegenerator/'
