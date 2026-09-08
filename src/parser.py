@@ -1,16 +1,7 @@
 import json
-from pathlib import Path
 from typing import Any
 
-def read_json_file(filename: Path) -> Any:
-    """ Read information from JSON file
-
-    Args:
-        filename (Path): address of the file
-
-    Returns:
-        Any: result of json.load()
-    """
+def read_json_file(content: str) -> Any:
     try:
         with open(filename, "r") as f:
             try:
@@ -20,7 +11,7 @@ def read_json_file(filename: Path) -> Any:
                             # map(str.strip, content.splitlines())
                             # if line and line[0] != '#']
 
-                print(json.loads(tst))
+                print(json.loads(content))
             except Exception:
                 print("\033[1;41mJSON parsing error\033[0m")
                 print(f"\033[91m File \"{filename}\" "

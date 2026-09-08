@@ -22,6 +22,9 @@ if __name__ == "__main__":
     if len(sys.argv) == 2:
         try:
             with open(sys.argv[1], "r") as f:
-                print(json.loads(f.read()))
+                config_content = f.readlines()
+                lines = "".join(line for line in config_content if not line.lstrip().startswith('#'))
+                json_lines = json.loads(lines)
+                print(json_lines)
         except Exception as err:
             print(err)
