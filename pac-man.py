@@ -14,3 +14,4 @@ if __name__ == "__main__":
     mazegen._exitx, mazegen._exity = 2, 2
     mazegen._find_short_path()
     print(mazegen._shortest_path)
+    
