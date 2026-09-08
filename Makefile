@@ -1,9 +1,11 @@
 .PHONY: all install run debug clean fclean lint lint-strict
 
 UV = @uv run
-UV_PYTHON = @uv run python -m
+UV_PYTHON = @uv run python
 MAIN = main.py
-CACHE = __pycache__ src/__pycache__ .mypy_cache src/.mypy_cache mazegenerator-00001/__pycache__ mazegenerator-00001/.mypy_cache
+CACHE = __pycache__ .mypy_cache \
+		src/__pycache__ src/.mypy_cache\
+		mazegenerator/__pycache__ mazegenerator/.mypy_cache
 MYPYFLAGS = --warn-return-any --warn-unused-ignores\
 			  --ignore-missing-imports --disallow-untyped-defs\
 			  --check-untyped-defs
