@@ -13,7 +13,7 @@ MYPYFLAGS = --warn-return-any --warn-unused-ignores\
 all: run
 
 run:
-	$(UV_PYTHON) $(MAIN)
+	$(UV_PYTHON) $(MAIN) config.json
 
 clean:
 	rm -rf $(CACHE)
