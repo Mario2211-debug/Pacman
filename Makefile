@@ -2,7 +2,7 @@
 
 UV = @uv run
 UV_PYTHON = @uv run python
-MAIN = main.py
+MAIN = pac-man.py
 CACHE = __pycache__ .mypy_cache \
 		src/__pycache__ src/.mypy_cache\
 		mazegenerator/__pycache__ mazegenerator/.mypy_cache
