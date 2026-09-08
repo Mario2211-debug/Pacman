@@ -21,3 +21,8 @@ exclude = '^mazegenerator/'
 
 [tool.uv.sources]
 mlx = { path = "mlx-2.2-py3-none-any.whl" }
+
+# pyproject.toml
+[[tool.mypy.overrides]]
+module = "mlx"
+ignore_missing_imports = true
