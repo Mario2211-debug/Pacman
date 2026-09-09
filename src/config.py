@@ -31,6 +31,14 @@ def open_config_file(filename: str) -> Any:
         with open(filename, "r") as f:
             config_content = "".join(line for line in f.readlines() if not line.lstrip().startswith(('#', '//')))
             return json.loads(config_content)
+    except FileNotFoundError as err:
+        print("\033[91mConfig file not found.")
+        print("Default config loaded.\033[0m")
+        return CONFIG_DEFAULTS
+    except PermissionError as err:
+        print("\033[91mConfig file can't be read.")
+        print("Default config loaded.\033[0m")
+        return CONFIG_DEFAULTS
     except Exception as err:
         print("\033[91mConfig file is invalid.")
         print("Default config loaded.\033[0m")
