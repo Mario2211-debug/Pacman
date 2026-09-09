@@ -8,6 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 guide_mlx.md
+manual-sobrevivencia-git.md
 .Python
 .python-version
 build/
