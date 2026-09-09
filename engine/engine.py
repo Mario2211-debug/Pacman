@@ -26,6 +26,7 @@ class Engine:
 
     def onClose(self, _param: object = None):
         mlx.mlx_loop_exit(self.mlx_ptr)
+        mlx.mlx_string_put()
 
     def onClick(self, button, x, y, _param: object):
         if self.current_scene:

@@ -14,6 +14,9 @@ class Navbar:
     def draw(self, renderer):
         renderer.fill_rect(self.x, self.y, self.width,
                            self.height, self.bg_color)
-
         for child in self.children:
             child.draw(renderer)
+
+    def handle_click(self, button, x, y):
+        print("click no navbar")
+        pass
