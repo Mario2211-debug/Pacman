@@ -26,28 +26,28 @@ if __name__ == "__main__":
 
         ghosts_positions:list = []
         ghost1.set_maze(mazegen.maze)
-        ghost1.set_position(0, 0)
+        ghost1.set_start_position(0, 0)
         print("\nGhost 1 position:", ghost1.x, ghost1.y)
         next_position = ghost1.find_movement_to(3, 3)
         ghosts_positions.append(next_position)
         print("Next position:", next_position)
 
         ghost2.set_maze(mazegen.maze)
-        ghost2.set_position(lvl["width"] - 1, 0)
+        ghost2.set_start_position(lvl["width"] - 1, 0)
         print("\nGhost 2 position:", ghost2.x, ghost2.y)
         next_position = ghost2.find_movement_to(3, 3, ghosts_positions)
         ghosts_positions.append(next_position)
         print("Next position:", next_position)
 
         ghost3.set_maze(mazegen.maze)
-        ghost3.set_position(0, lvl["height"] - 1)
+        ghost3.set_start_position(0, lvl["height"] - 1)
         print("\nGhost 3 position:", ghost3.x, ghost3.y)
         next_position = ghost3.find_movement_to(3, 3, ghosts_positions)
         ghosts_positions.append(next_position)
         print("Next position:", next_position)
 
         ghost4.set_maze(mazegen.maze)
-        ghost4.set_position(lvl["width"] - 1, lvl["height"] - 1)
+        ghost4.set_start_position(lvl["width"] - 1, lvl["height"] - 1)
         print("\nGhost 4 position:", ghost4.x, ghost4.y)
         next_position = ghost4.find_movement_to(3, 3, ghosts_positions)
         print("Next position:", next_position)

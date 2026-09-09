@@ -3,6 +3,8 @@ from collections import deque
 class Ghost:
     def __init__(self, image: int = 0, x: int = 0, y: int = 0, maze: list[list[int]] = []) -> None:
         self.image = image
+        self.start_x = x
+        self.start_y = y
         self.x = x
         self.y = y
         self.next_x = x
@@ -22,7 +24,9 @@ class Ghost:
             self._maze_width = len(maze[0])
             self._maze_height = len(maze)
 
-    def set_position(self, x: int, y: int) -> None:
+    def set_start_position(self, x: int, y: int) -> None:
+        self.start_x = x
+        self.start_y = y
         self.x = x
         self.y = y
         self.x_px = x * 10
