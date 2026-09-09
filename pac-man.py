@@ -1,4 +1,9 @@
 from mazegenerator import MazeGenerator
+from engine.engine import Engine
+
+
+engine = Engine(700, 600)
+engine.run()
 
 mazegen = MazeGenerator((15, 15), False, (0, 0), (10, 10), 42)
 
