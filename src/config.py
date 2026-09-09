@@ -1,3 +1,4 @@
+import json
 from pydantic import BaseModel, Field, ValidationInfo, model_validator
 from pydantic.functional_validators import WrapValidator
 from typing import Any, Annotated
@@ -25,7 +26,17 @@ CONFIG_DEFAULTS = {
         ]
     }
 
-def validate_config_fields(value: Any, handler, info: ValidationInfo):
+def open_config_file(filename: str) -> Any:
+    try:
+        with open(filename, "r") as f:
+            config_content = "".join(line for line in f.readlines() if not line.lstrip().startswith(('#', '//')))
+            return json.loads(config_content)
+    except Exception as err:
+        print("\033[91mConfig file is invalid.")
+        print("Default config loaded.\033[0m")
+        return CONFIG_DEFAULTS
+
+def validate_config_fields(value: Any, handler, info: ValidationInfo) -> Any:
     try:
         return handler(value)
     except ValueError:

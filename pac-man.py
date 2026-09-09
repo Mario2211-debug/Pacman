@@ -1,8 +1,7 @@
 import sys
-import json
 
 from mazegenerator import MazeGenerator
-from src.config import Config
+from src.config import Config, open_config_file
 
 mazegen = MazeGenerator((15, 15), False, (0, 0), (10, 10), 42)
 
@@ -19,18 +18,11 @@ if __name__ == "__main__":
     mazegen._find_short_path()
     # print(mazegen._shortest_path)
 
+    config_filename = ""
     if len(sys.argv) == 2:
-        try:
-            with open(sys.argv[1], "r") as f:
-                config_content = f.readlines()
-                lines = "".join(line for line in config_content if not line.lstrip().startswith('#'))
-                json_lines = json.loads(lines)
-                # print(json_lines)
-                cfg = Config.model_validate(json_lines)
-                print()
-                print()
-                print(cfg)
-
-        except Exception as err:
-            print("ERROR")
-            print(f"\033[91m{err}\033[0m")
+        config_filename = sys.argv[1]
+    config_json = open_config_file(config_filename)
+    cfg = Config.model_validate(config_json)
+    print()
+    print()
+    print(cfg)
