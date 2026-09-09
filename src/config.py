@@ -12,11 +12,16 @@ CONFIG_DEFAULTS = {
     "points_per_ghost": 200,
     "seed": 42,
     "level": [
-        {"width": 15, "height": 15},
-        {"width": 20, "height": 15},
-        {"width": 30, "height": 20},
-        {"width": 35, "height": 25},
-        {"width": 25, "height": 15}
+        {"width": 10, "height": 10},
+        {"width": 10, "height": 10},
+        {"width": 10, "height": 10},
+        {"width": 10, "height": 10},
+        {"width": 10, "height": 10},
+        {"width": 10, "height": 10},
+        {"width": 10, "height": 10},
+        {"width": 10, "height": 10},
+        {"width": 10, "height": 10},
+        {"width": 10, "height": 10}
         ]
     }
 
@@ -31,21 +36,53 @@ def validate_config_fields(value: Any, handler, info: ValidationInfo):
         print(f"Using default: {CONFIG_DEFAULTS.get(info.field_name)}.\033[0m")
         return CONFIG_DEFAULTS.get(info.field_name)
 
+
 class Config(BaseModel):
-    highscore_filename: Annotated[str, Field(min_length=1, default=None, validate_default=True), WrapValidator(validate_config_fields)]
-    level: Annotated[list[dict[str, int]], Field(min_length=1, default=None, validate_default=True), WrapValidator(validate_config_fields)]
-    lives: Annotated[int, Field(ge=1, default=None, validate_default=True), WrapValidator(validate_config_fields)]
-    pacgum: Annotated[int, Field(ge=1, default=None, validate_default=True), WrapValidator(validate_config_fields)]
-    points_per_pacgum: Annotated[int, Field(ge=1, default=None, validate_default=True), WrapValidator(validate_config_fields)]
-    points_per_super_pacgum: Annotated[int, Field(ge=1, default=None, validate_default=True), WrapValidator(validate_config_fields)]
-    points_per_ghost: Annotated[int, Field(ge=1, default=None, validate_default=True), WrapValidator(validate_config_fields)]
-    seed: Annotated[int, Field(ge=1, default=None, validate_default=True), WrapValidator(validate_config_fields)]
+    highscore_filename: Annotated[str,
+                                  Field(min_length=1,
+                                        default=None,
+                                        validate_default=True),
+                                  WrapValidator(validate_config_fields)]
+    level: Annotated[list[dict[str, int]],
+                     Field(min_length=1, default=None, validate_default=True),
+                     WrapValidator(validate_config_fields)]
+    lives: Annotated[int,
+                     Field(ge=1, default=None, validate_default=True),
+                     WrapValidator(validate_config_fields)]
+    pacgum: Annotated[int,
+                      Field(ge=1, default=None, validate_default=True),
+                      WrapValidator(validate_config_fields)]
+    points_per_pacgum: Annotated[int,
+                                 Field(ge=1,
+                                       default=None,
+                                       validate_default=True),
+                                 WrapValidator(validate_config_fields)]
+    points_per_super_pacgum: Annotated[int,
+                                       Field(ge=1,
+                                             default=None,
+                                             validate_default=True),
+                                       WrapValidator(validate_config_fields)]
+    points_per_ghost: Annotated[int,
+                                Field(ge=1,
+                                      default=None,
+                                      validate_default=True),
+                                WrapValidator(validate_config_fields)]
+    seed: Annotated[int,
+                    Field(ge=1, default=None, validate_default=True),
+                    WrapValidator(validate_config_fields)]
 
     @model_validator(mode='after')
     def check_level_list(self) -> "Config":
+
+        if not self.highscore_filename.lower().endswith(".json"):
+            print(f'\033[91mInvalid value for "highscore_filename".')
+            print(f'Using default: "highscore.json"')
+            self.highscore_filename = CONFIG_DEFAULTS.get("highscore_filename")
+
         i = 0
         while i < len(self.level):
-            if self.level[i].get("width") is None and self.level[i].get("height") is None:
+            if (self.level[i].get("width") is None
+                and self.level[i].get("height") is None):
                 self.level.pop(i)
                 continue
 
@@ -68,4 +105,11 @@ class Config(BaseModel):
                 self.level[i]["height"] = 10
 
             i += 1
+
+        if len(self.level) < 10:
+            print('\033[91mNumber of levels must be at least 10.')
+            print(f'{10 - len(self.level)} added.\033[0m')
+            for i in range(10 - len(self.level)):
+                self.level.append({"width": 10, "height": 10})
+
         return self
