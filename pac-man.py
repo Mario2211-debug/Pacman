@@ -3,16 +3,14 @@ import sys
 from mazegenerator import MazeGenerator
 from engine.engine import Engine
 from engine.scenes.menu import MenuScene
+from src.config import Config, open_config_file
+from src.ghost import Ghost
+# from src.pacgum import pacgum_generate
 
 
 engine = Engine(800, 600)
 engine.set_scene(MenuScene(engine))
 engine.run()
-
-from src.config import Config, open_config_file
-from src.ghost import Ghost
-from src.pacgum import pacgum_generate
-
 
 if __name__ == "__main__":
     config_filename = ""
@@ -22,18 +20,18 @@ if __name__ == "__main__":
     cfg = Config.model_validate(config_json)
     # print(cfg)
 
-
     ghost1 = Ghost()
     ghost2 = Ghost()
     ghost3 = Ghost()
     ghost4 = Ghost()
 
     for lvl in cfg.level:
-        mazegen = MazeGenerator((lvl["width"], lvl["height"]), False, (0, 0), (1, 1), cfg.seed)
+        mazegen = MazeGenerator((lvl["width"], lvl["height"]), False, (0, 0),
+                                (1, 1), cfg.seed)
         for x in mazegen.maze:
             print(x)
 
-        ghosts_positions:list = []
+        ghosts_positions: list = []
         ghost1.set_maze(mazegen.maze)
         ghost1.set_start_position(0, 0)
         print("\nGhost 1 position:", ghost1.x, ghost1.y)
