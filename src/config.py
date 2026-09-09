@@ -3,7 +3,8 @@ from pydantic import BaseModel, Field, ValidationInfo, model_validator
 from pydantic.functional_validators import WrapValidator
 from typing import Any, Annotated
 
-
+CONFIG_DEFAULT_WIDTH = 15
+CONFIG_DEFAULT_HEIGHT = 15
 CONFIG_DEFAULTS = {
     "highscore_filename": "highscore.json",
     "lives": 3,
@@ -12,17 +13,18 @@ CONFIG_DEFAULTS = {
     "points_per_super_pacgum": 50,
     "points_per_ghost": 200,
     "seed": 42,
+    "level_max_time": 90,
     "level": [
-        {"width": 10, "height": 10},
-        {"width": 10, "height": 10},
-        {"width": 10, "height": 10},
-        {"width": 10, "height": 10},
-        {"width": 10, "height": 10},
-        {"width": 10, "height": 10},
-        {"width": 10, "height": 10},
-        {"width": 10, "height": 10},
-        {"width": 10, "height": 10},
-        {"width": 10, "height": 10}
+        {"width": CONFIG_DEFAULT_WIDTH, "height": CONFIG_DEFAULT_HEIGHT},
+        {"width": CONFIG_DEFAULT_WIDTH, "height": CONFIG_DEFAULT_HEIGHT},
+        {"width": CONFIG_DEFAULT_WIDTH, "height": CONFIG_DEFAULT_HEIGHT},
+        {"width": CONFIG_DEFAULT_WIDTH, "height": CONFIG_DEFAULT_HEIGHT},
+        {"width": CONFIG_DEFAULT_WIDTH, "height": CONFIG_DEFAULT_HEIGHT},
+        {"width": CONFIG_DEFAULT_WIDTH, "height": CONFIG_DEFAULT_HEIGHT},
+        {"width": CONFIG_DEFAULT_WIDTH, "height": CONFIG_DEFAULT_HEIGHT},
+        {"width": CONFIG_DEFAULT_WIDTH, "height": CONFIG_DEFAULT_HEIGHT},
+        {"width": CONFIG_DEFAULT_WIDTH, "height": CONFIG_DEFAULT_HEIGHT},
+        {"width": CONFIG_DEFAULT_WIDTH, "height": CONFIG_DEFAULT_HEIGHT}
         ]
     }
 
@@ -89,6 +91,9 @@ class Config(BaseModel):
     seed: Annotated[int,
                     Field(ge=1, default=None, validate_default=True),
                     WrapValidator(validate_config_fields)]
+    level_max_time: Annotated[int,
+                              Field(ge=10, default=None, validate_default=True),
+                              WrapValidator(validate_config_fields)]
 
     @model_validator(mode='after')
     def check_level_list(self) -> "Config":
@@ -107,21 +112,21 @@ class Config(BaseModel):
 
             if self.level[i].get("width") is None:
                 print(f'\033[91mMissed value "width" for level {i + 1}')
-                print(f'Using default: 10.\033[0m')
-                self.level[i]["width"] = 10
+                print(f'Using default: {CONFIG_DEFAULT_WIDTH}.\033[0m')
+                self.level[i]["width"] = CONFIG_DEFAULT_WIDTH
             elif self.level[i].get("width") < 5:
                 print(f'\033[91mValue "width" for level {i + 1} is too small.')
-                print(f'Using default: 10.\033[0m')
-                self.level[i]["width"] = 10
+                print(f'Using default: {CONFIG_DEFAULT_WIDTH}.\033[0m')
+                self.level[i]["width"] = CONFIG_DEFAULT_WIDTH
 
             if self.level[i].get("height") is None:
                 print(f'\033[91mMissed value "height" for level {i + 1}')
-                print(f'Using default: 10.\033[0m')
-                self.level[i]["height"] = 10
+                print(f'Using default: {CONFIG_DEFAULT_HEIGHT}.\033[0m')
+                self.level[i]["height"] = CONFIG_DEFAULT_HEIGHT
             elif self.level[i].get("height") < 5:
                 print(f'\033[91mValue "height" for level {i + 1} is too small.')
-                print(f'Using default: 10.\033[0m')
-                self.level[i]["height"] = 10
+                print(f'Using default: {CONFIG_DEFAULT_HEIGHT}.\033[0m')
+                self.level[i]["height"] = CONFIG_DEFAULT_HEIGHT
 
             i += 1
 
@@ -129,6 +134,6 @@ class Config(BaseModel):
             print('\033[91mNumber of levels must be at least 10.')
             print(f'{10 - len(self.level)} added.\033[0m')
             for i in range(10 - len(self.level)):
-                self.level.append({"width": 10, "height": 10})
+                self.level.append({"width": CONFIG_DEFAULT_WIDTH, "height": 10})
 
         return self

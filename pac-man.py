@@ -3,6 +3,7 @@ import sys
 from mazegenerator import MazeGenerator
 from src.config import Config, open_config_file
 from src.ghost import Ghost
+from src.pacgum import pacgum_generate
 
 
 if __name__ == "__main__":
