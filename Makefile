@@ -23,7 +23,8 @@ fclean:
 	rm -rf .venv
 
 install:
-	@uv sync
+	uv sync
+	uv pip install mlx-2.2-py3-none-any.whl
 
 debug:
 	$(UV_PYTHON) pdb $(MAIN)

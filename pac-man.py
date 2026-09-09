@@ -1,6 +1,14 @@
 import sys
 
 from mazegenerator import MazeGenerator
+from engine.engine import Engine
+from engine.scenes.menu import MenuScene
+
+
+engine = Engine(800, 600)
+engine.set_scene(MenuScene(engine))
+engine.run()
+
 from src.config import Config, open_config_file
 from src.ghost import Ghost
 from src.pacgum import pacgum_generate

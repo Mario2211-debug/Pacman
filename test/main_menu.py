@@ -1,68 +1,48 @@
-import pygame
-import sys
+from mlx import Mlx
 
 
-pygame.init()
-screen = pygame.display.set_mode((720, 720))
-pygame.display.set_caption("Start Menu Example")
-
-WHITE = (255, 255, 255)
-LIGHT = (170, 170, 170)
-DARK = (100, 100, 100)
-BG = (60, 25, 60)
-
-font = pygame.font.SysFont("Corbel", 40)
+mlx = Mlx()
+mlx_ptr = mlx.mlx_init()
 
 
-def game():
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-        screen.fill((40, 40, 40))
-        text = font.render("Game Started!", True, WHITE)
-        screen.blit(text, (250, 250))
+win_w = 800
+win_h = 600
+win = mlx.mlx_new_window(mlx_ptr, win_w, win_h, "Packman")
 
-        pygame.display.update()
+img = mlx.mlx_new_image(mlx_ptr, win_w, win_h)
+data, bpp, size_line, img_format = mlx.mlx_get_data_addr(img)
+order = "little" if img_format == 0 else "big"
 
 
-def start_menu():
-    while True:
-
-        screen.fill(BG)
-        mouse = pygame.mouse.get_pos()
-
-        play_button = pygame.Rect(300, 300, 140, 50)
-        quit_button = pygame.Rect(300, 300, 140, 50)
-
-        pygame.draw.rect(screen,
-                         LIGHT if play_button.collidepoint(mouse) else DARK,
-                         play_button)
-        pygame.draw.rect(screen,
-                         LIGHT if quit_button.collidepoint(mouse) else DARK,
-                         quit_button)
-
-        play_text = font.render("Play", True, WHITE)
-        quit_text = font.render("Quit", True, WHITE)
-
-        screen.blit(play_text, (335, 305))
-        screen.blit(quit_text, (335, 385))
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if play_button.collidepoint(mouse):
-                    game()
-
-                if quit_button.collidepoint(mouse):
-                    pygame.quit()
-                    sys.exit()
-        pygame.display.update()
+def pack(color: int, order="big"):
+    return color.to_bytes(4, order)
 
 
-if __name__ == "__main__":
-    start_menu()
+def fill_ret(data, size_line, order, win_h, win_w, px, py, w, h, colour):
+    packed = pack(colour, order)
+    for yy in range(py, py + h):
+        base = yy * size_line
+        for xx in range(px, px + w):
+            off = base + xx * 4
+            data[off:off + 4] = packed
+
+
+fill_ret(data, size_line, order, win_w, win_h, 100, 100, 54, 24, 0xFF0000FF)
+
+
+def onClose(_param: object):
+    mlx.mlx_loop_exit(mlx_ptr)
+
+
+def onClick(button, x, y, _param: object):
+    if button == 1:
+        print("Botão esquerdo do mouse pressionado em:", x, y)
+    elif button == 3:
+        print("Botão direito do mouse pressionado em:", x, y)
+
+
+print(data)
+mlx.mlx_put_image_to_window(mlx_ptr, win, img, 0, 0)
+mlx.mlx_hook(win, 33, 0, onClose, None)
+mlx.mlx_mouse_hook(win, onClick, None)
+mlx.mlx_loop(mlx_ptr)

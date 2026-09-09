@@ -5,6 +5,7 @@ description = "Pac-Man"
 requires-python = ">=3.10"
 dependencies = [
     "flake8>=7.3.0",
+    "mlx",
     "mypy>=2.3.1",
     "pydantic>=2.13.5",
 ]
@@ -18,3 +19,11 @@ packages = ["pac_man"]
 
 [tool.mypy]
 exclude = '^mazegenerator/'
+
+[tool.uv.sources]
+mlx = { path = "mlx-2.2-py3-none-any.whl" }
+
+# pyproject.toml
+[[tool.mypy.overrides]]
+module = "mlx"
+ignore_missing_imports = true

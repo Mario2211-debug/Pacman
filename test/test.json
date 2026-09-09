@@ -1,0 +1,7 @@
+{
+  "test_name": "json_file_test",
+  "status": "success",
+  "code": 200,
+  "active": true,
+  "items": ["one", "two", "three"]
+}
