@@ -15,14 +15,20 @@ if __name__ == "__main__":
 
     for lvl in cfg.level:
         mazegen = MazeGenerator((lvl["width"], lvl["height"]), False, (0, 0), (1, 1), cfg.seed)
+        for x in mazegen.maze:
+            print(x)
+
         ghost1 = Ghost(None, 0, 0)
         ghost2 = Ghost(None, lvl["width"] - 1, 0)
         ghost3 = Ghost(None, 0, lvl["height"] - 1)
         ghost4 = Ghost(None, lvl["width"] - 1, lvl["height"] - 1)
         print("Ghost 1:", ghost1.x, ghost1.y)
+        ghost1.find_path(mazegen.maze, 3, 3)
         print("Ghost 2:", ghost2.x, ghost2.y)
+        ghost2.find_path(mazegen.maze, 3, 3)
         print("Ghost 3:", ghost3.x, ghost3.y)
+        ghost3.find_path(mazegen.maze, 3, 3)
         print("Ghost 4:", ghost4.x, ghost4.y)
-        for x in mazegen.maze:
-            print(x)
+        ghost4.find_path(mazegen.maze, 3, 3)
+
         print()
