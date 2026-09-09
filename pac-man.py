@@ -1,9 +1,12 @@
 from mazegenerator import MazeGenerator
 from engine.engine import Engine
+from engine.scenes.menu import MenuScene
 
 
-engine = Engine(700, 600)
+engine = Engine(800, 600)
+engine.set_scene(MenuScene(engine))
 engine.run()
+
 
 mazegen = MazeGenerator((15, 15), False, (0, 0), (10, 10), 42)
 
@@ -19,3 +22,4 @@ if __name__ == "__main__":
     mazegen._exitx, mazegen._exity = 2, 2
     mazegen._find_short_path()
     print(mazegen._shortest_path)
+    print(0xFF0000FF)

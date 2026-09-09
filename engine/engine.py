@@ -1,4 +1,5 @@
 from mlx import Mlx
+from engine.render import Render
 
 
 mlx = Mlx()
@@ -15,32 +16,32 @@ class Engine:
         self.img = mlx.mlx_new_image(self.mlx_ptr, self.win_w, self.win_h)
         self.data, self.bpp, self.size_line, self.img_format = (
             mlx.mlx_get_data_addr(self.img))
-        self.order = "little" if self.img_format == 0 else "big"
-        pass
+        self.render = Render(self.mlx_ptr, mlx, self.win,
+                             self.data, self.size_line, self.img_format)
+        self.current_scene = None
 
-    def pack(self, color: int, order="big"):
-        return color.to_bytes(4, order)
+    def set_scene(self, scene):
+        self.current_scene = scene
+        print(f"SCENE DEFINIDA{scene}")
 
-    def fill_ret(self, px, py, w, h, colour):
-        packed = self.pack(colour, self.order)
-        for yy in range(py, py + h):
-            base = yy * self.size_line
-            for xx in range(px, px + w):
-                off = base + xx * 4
-                self.data[off:off + 4] = packed
-
-    def onClose(self, _param: object):
+    def onClose(self, _param: object = None):
         mlx.mlx_loop_exit(self.mlx_ptr)
 
     def onClick(self, button, x, y, _param: object):
-        if button == 1:
-            print("Botão esquerdo do mouse pressionado em:", x, y)
-        elif button == 3:
-            print("Botão direito do mouse pressionado em:", x, y)
+        if self.current_scene:
+            self.current_scene.handle_click(button, x, y)
+
+    def loop_hook(self, _param: object = None):
+        print("Menu Scene")
+        if self.current_scene:
+            self.current_scene.draw(self.render)
+        mlx.mlx_put_image_to_window(self.mlx_ptr, self.win, self.img, 0, 0)
 
     def run(self):
-        print(self.data)
-        mlx.mlx_put_image_to_window(self.mlx_ptr, self.win, self.img, 0, 0)
+        print("A registrar hook")
         mlx.mlx_hook(self.win, 33, 0, self.onClose, None)
         mlx.mlx_mouse_hook(self.win, self.onClick, None)
+        print("A iniciar o loop principal")
+        mlx.mlx_loop_hook(self.mlx_ptr, self.loop_hook, None)
         mlx.mlx_loop(self.mlx_ptr)
+        print("A sair do loop principal")

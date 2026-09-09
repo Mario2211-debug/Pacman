@@ -1,5 +1,4 @@
 from mlx import Mlx
-from PIL import Image
 
 
 mlx = Mlx()
