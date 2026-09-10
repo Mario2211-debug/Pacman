@@ -83,8 +83,8 @@ class Ghost:
     def move(self, ghosts: list["Ghost"], pacman: PacMan = None):
         if self.status == GhostStatus.ACTIVE:
             self.x, self.y = self.next_x, self.next_y
-            # print(f"\nGhost {self.image} position: {self.x}, {self.y}")
-            if self.x == pacman.next_x and self.y == pacman.next_y:
+            print(f"Ghost {self.image} position: {self.x}, {self.y}")
+            if self.x == pacman.x and self.y == pacman.y:
                 print(f"!!!! CATCHED BY {self.image} at {self.x}, {self.y}")
                 exit()
             ghosts_next_positions = [(ghost.next_x, ghost.next_y) for ghost in ghosts if ghost is not self]
