@@ -89,7 +89,7 @@ class Config(BaseModel):
                                       validate_default=True),
                                 WrapValidator(validate_config_fields)]
     seed: Annotated[int,
-                    Field(ge=1, default=None, validate_default=True),
+                    Field(ge=0, default=None, validate_default=True),
                     WrapValidator(validate_config_fields)]
     level_max_time: Annotated[int,
                               Field(ge=10, default=None, validate_default=True),

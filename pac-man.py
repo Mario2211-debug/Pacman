@@ -5,7 +5,7 @@ from engine.engine import Engine
 from engine.scenes.menu import MenuScene
 from src.config import Config, open_config_file
 from src.ghost import Ghost
-# from src.pacgum import pacgum_generate
+from src.pacgum import pacgums_generate
 
 
 engine = Engine(800, 600)
@@ -29,6 +29,11 @@ if __name__ == "__main__":
         mazegen = MazeGenerator((lvl["width"], lvl["height"]), False, (0, 0),
                                 (1, 1), cfg.seed)
         for x in mazegen.maze:
+            print(x)
+
+        pacgums = pacgums_generate(mazegen.maze, cfg.pacgum)
+        print()
+        for x in pacgums:
             print(x)
 
         ghosts_positions: list = []
