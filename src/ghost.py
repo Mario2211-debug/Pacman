@@ -63,8 +63,6 @@ class Ghost:
                     prev[(nx, ny)] = ((x, y))
                     queue.append((nx, ny))
         if goal not in prev:
-            # print("MazeGenerator Class error: no shortest path found.")
-            # return
             return (self.x, self.y)
         parents = []
         cur = goal
@@ -72,7 +70,7 @@ class Ghost:
             parent = prev[cur]
             parents.append(parent)
             cur = parent
-        if len(parents) > 2:
+        if len(parents) > 1:
             # print(parents)
             self.next_x = parents[-2][0]
             self.next_y = parents[-2][1]
@@ -85,8 +83,10 @@ class Ghost:
     def move(self, ghosts: list["Ghost"], pacman: PacMan = None):
         if self.status == GhostStatus.ACTIVE:
             self.x, self.y = self.next_x, self.next_y
-            if self.x == pacman.x and self.y == pacman.y:
-                print(f"!!!! CATCHED BY {self.image}")
+            # print(f"\nGhost {self.image} position: {self.x}, {self.y}")
+            if self.x == pacman.next_x and self.y == pacman.next_y:
+                print(f"!!!! CATCHED BY {self.image} at {self.x}, {self.y}")
+                exit()
             ghosts_next_positions = [(ghost.next_x, ghost.next_y) for ghost in ghosts if ghost is not self]
             move_to_x, move_to_y = self.find_next_position(pacman.x, pacman.y, ghosts_next_positions)
             self.next_x, self.next_y = move_to_x, move_to_y
