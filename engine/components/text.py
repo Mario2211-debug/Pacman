@@ -1,5 +1,3 @@
-from utils import colors
-
 
 class Text:
     def __init__(self,  x, y, text: str, on_click: None, bg_color=0x1A1A1AFF):

@@ -1,4 +1,4 @@
-class Navbar:
+class Main:
     def __init__(self, x, y, width, height, bg_color=0x1A1A1AFF):
         self.x = x
         self.y = y
@@ -19,5 +19,5 @@ class Navbar:
             child.draw(renderer)
 
     def handle_click(self, button, x, y):
-        print("click no navbar")
+        print("click no Main")
         pass

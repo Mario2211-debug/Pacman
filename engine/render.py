@@ -1,21 +1,36 @@
 class Render:
-    def __init__(self, ptr, mlx, win, data, size_line, img_format):
+    def __init__(self, ptr, mlx, win, win_w,
+                 win_h, data, size_line, img_format):
         self.mlx = mlx
         self.win = win
         self.ptr = ptr
         self.data = data
+        self.width = win_w
+        self.height = win_h
         self.size_line = size_line
         self.img_format = img_format
         self.order = "little" if self.img_format == 0 else "big"
 
     def pack(self, color: int):
-        return color.to_bytes(4, self.order)
+        r = (color >> 24) & 0xFF
+        g = (color >> 16) & 0xFF
+        b = (color >> 8) & 0xFF
+        a = color & 0xFF
+
+        if self.order == "little":
+            return bytes([b, g, r, a])
+        else:
+            return bytes([a, r, g, b])
 
     def fill_rect(self, px, py, w, h, colour):
         packed = self.pack(colour)
         for yy in range(py, py + h):
+            if yy < 0 or yy >= self.height:
+                continue
             base = yy * self.size_line
             for xx in range(px, px + w):
+                if xx < 0 or xx >= self.width:
+                    continue
                 off = base + xx * 4
                 self.data[off:off + 4] = packed
 
@@ -26,7 +41,8 @@ class Render:
         self.fill_rect(px + w - thickness, py, thickness, h, colour)
 
     def draw_text(self, text: str, x: int, y: int, color: int):
-        self.mlx.mlx_string_put(self.ptr, self.win, x, y, color, text)
+        self.mlx.mlx_string_put(self.ptr, self.win, x, y,
+                                self.pack(color), text)
 
     def draw_sprite(self):
         pass
