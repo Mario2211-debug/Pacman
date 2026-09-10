@@ -51,6 +51,7 @@ class PacMan:
         moves = [(0, -1, 1), (1, 0, 2),
                  (0, 1, 4), (-1, 0, 8)]
         self.x, self.y = self.next_x, self.next_y
+        print(f"PacMan position: {self.x}, {self.y}")
         dx, dy, code = moves[direction.value]
         nx, ny = self.x + dx, self.y + dy
         if (0 <= nx < self._maze_width and 0 <= ny < self._maze_height
