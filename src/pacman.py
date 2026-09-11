@@ -21,6 +21,7 @@ class PacMan:
         self.next_y = y
         self.x_px = x * 10
         self.y_px = y * 10
+        self.speed = 1
         self.points = 0
         self.status = PacManStatus.NORMAL
         self._maze = maze

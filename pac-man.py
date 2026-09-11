@@ -65,7 +65,13 @@ if __name__ == "__main__":
                 # print("Next position:", next_position)
             # print("------------")
 
+            print()
+            print("   ", sep="", end="")
+            for x in range(lvl["width"]):
+                print(f"{x:<2}", sep="", end="")
+            print("\n")
             for y in range(lvl["height"]):
+                print(f"{y:<3}", sep="", end="")
                 for x in range(lvl["width"]):
                     if pacman.x == x and pacman.y == y:
                         print("🟡", sep="", end="")
