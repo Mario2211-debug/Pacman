@@ -43,7 +43,8 @@ if __name__ == "__main__":
             print(x)
 
         pacman.set_maze(mazegen.maze)
-        pacman.set_start_position(5, 5)
+        pacman.set_pacgums(pacgums)
+        pacman.set_start_position(lvl["width"] // 2, lvl["height"] // 2)
 
         ghosts[0].set_start_position(0, 0)
         ghosts[1].set_start_position(lvl["width"] - 1, 0)
@@ -52,7 +53,7 @@ if __name__ == "__main__":
 
         # ghosts_positions: list = []
         for step in range(25):
-            # print("\nSPEP", step)
+            print("\nSPEP", step + 1)
             # pacman.move(PacManDirection.BOTTOM)
             pacman.move(random.choice(list(PacManDirection)))
             for ghost in ghosts:
@@ -81,7 +82,8 @@ if __name__ == "__main__":
                         elif pacgums[y][x] == 2:
                             print("🔴", sep="", end="")
                         else:
-                            print("🟩", sep="", end="")
+                            # print("🟩", sep="", end="")
+                            print("  ", sep="", end="")
                 print()
             time.sleep(1)
             print("\n\n\n")
