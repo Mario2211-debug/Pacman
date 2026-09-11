@@ -79,3 +79,7 @@ class Render:
 
     def draw_sprite(self):
         pass
+
+    def gen_maze(self):
+        print("Generating maze")
+        pass
