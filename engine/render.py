@@ -1,3 +1,6 @@
+import sys
+
+
 class Render:
     def __init__(self, ptr, mlx, win, win_w,
                  win_h, data, size_line, img_format):
@@ -40,9 +43,16 @@ class Render:
         self.fill_rect(px, py, thickness, h, colour)
         self.fill_rect(px + w - thickness, py, thickness, h, colour)
 
+    def to_mlx_color(self, color: int):
+        r = (color >> 24) & 0xFF
+        g = (color >> 16) & 0xFF
+        b = (color >> 8) & 0xFF
+        a = color & 0xFF
+        return int.from_bytes(bytes([b, g, r, a]), sys.byteorder)
+
     def draw_text(self, text: str, x: int, y: int, color: int):
         self.mlx.mlx_string_put(self.ptr, self.win, x, y,
-                                self.pack(color), text)
+                                self.to_mlx_color(color), text)
 
     def draw_sprite(self):
         pass
