@@ -1,7 +1,6 @@
 import sys
 import random
 import time
-from mlx import Mlx
 
 from mazegenerator import MazeGenerator
 from engine.engine import Engine
@@ -35,15 +34,16 @@ if __name__ == "__main__":
 
     try:
         display.load_image("walls_png", "img/walls_100.png")
-        display.create_block_image("corridor_img", display.corridor_width, display.corridor_width, (0xFF000000))
-        display.create_block_image("block_42_img", display.corridor_width, display.corridor_width, (0xAA000066))
+        display.load_image("pacman", "img/pacman.png")
+        display.create_block_image("corridor_img", display.corridor_width, display.corridor_width, 0xFF000000)
+        display.create_block_image("block_42_img", display.corridor_width, display.corridor_width, 0xAA000066)
     except Exception as e:
         print(e)
         exit(1)
 
-
-    for i in range(10):
-        for j in range(10):
+    display.clear_all()
+    for i in range(15):
+        for j in range(15):
             display.show(display.images["walls_png"], display.images["walls_png"].width * i, display.images["walls_png"].height * j)
 
     mazegen = MazeGenerator((15, 15), False, (0, 0),
@@ -58,7 +58,7 @@ if __name__ == "__main__":
             pos_x += display.corridor_width
             if mazegen.maze[y][x] == 15:
                 pos_x += display.wall_width
-                display.show(display.images["corridor_img"], pos_x, pos_y + display.wall_width)
+                display.show(display.images["block_42_img"], pos_x, pos_y + display.wall_width)
                 continue
 
             if not mazegen.maze[y][x] & 8:
@@ -72,11 +72,31 @@ if __name__ == "__main__":
         pos_y += display.wall_width
 
 
-
     def gere_close_1(display):
         display.mlx.mlx_loop_exit(display.mlx_ptr)
     # event hooks
     display.mlx.mlx_hook(display.win, 33, 0, gere_close_1, display)  # WM_DELETE_WINDOW
+
+
+    pacman = PacMan()
+
+    pacgums = pacgums_generate(mazegen.maze, cfg.pacgum)
+    pacman.set_maze(mazegen.maze)
+    pacman.set_pacgums(pacgums)
+    pacman.set_start_position(0, 1)
+
+    def moving(nothing):
+        print("moving...")
+        pos_x = display.corridor_width * 2 + pacman.x * (display.corridor_width + display.wall_width) - int(display.images["pacman"].width / 2)
+        pos_y = display.corridor_width * 2 + pacman.y * (display.corridor_width + display.wall_width) - int(display.images["pacman"].height / 2)
+        display.show(display.images["corridor_img"], pos_x, pos_y)
+        pacman.move(random.choice(list(PacManDirection)))
+        pos_x = display.corridor_width * 2 + pacman.x * (display.corridor_width + display.wall_width) - int(display.images["pacman"].width / 2)
+        pos_y = display.corridor_width * 2 + pacman.y * (display.corridor_width + display.wall_width) - int(display.images["pacman"].height / 2)
+        display.show(display.images["pacman"], pos_x, pos_y)
+        time.sleep(0.1)
+
+    display.mlx.mlx_loop_hook(display.mlx_ptr, moving, None)
 
     # Main loop
     display.mlx.mlx_loop(display.mlx_ptr)
