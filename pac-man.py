@@ -33,9 +33,9 @@ class Display:
         self.corridor_img = ImgData()
 
 
-engine = Engine(800, 600)
-engine.set_scene(MenuScene(engine))
-engine.run()
+# engine = Engine(800, 600)
+# engine.set_scene(MenuScene(engine))
+# engine.run()
 
 if __name__ == "__main__":
     config_filename = ""
