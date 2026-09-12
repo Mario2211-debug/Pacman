@@ -18,5 +18,6 @@ class Navbar:
             child.draw(renderer)
 
     def handle_click(self, button, x, y):
-        print("click no navbar")
+        if self.x <= x <= self.width and self.y <= y <= self.height:
+            print("click no navbar", x, y)
         pass

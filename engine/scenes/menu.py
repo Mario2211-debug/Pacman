@@ -21,6 +21,7 @@ class MenuScene(Scene):
         self.navbar.draw(renderer)
 
     def handle_click(self, button, x, y):
+        print("menu scene clisk")
         self.navbar.handle_click(button, x, y)
 
     def start_game(self):
