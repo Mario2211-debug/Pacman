@@ -58,8 +58,11 @@ class Display:
             self.mlx.mlx_get_data_addr(new_img.img)
         # Fill image with color
         for i in range(0, new_img.sl * new_img.width, 4):
-            new_img.data[i:i + 4] = (0xFF000000).to_bytes(4, 'little')
+            new_img.data[i:i + 4] = color.to_bytes(4, 'little')
         self.images.update({name: new_img})
 
     def show(self, img, x, y) -> None:
         self.mlx.mlx_put_image_to_window(self.mlx_ptr, self.win, img.img, x, y)
+
+    def clear_all(self) -> None:
+        self.mlx.mlx_clear_window(self.mlx_ptr, self.win)
