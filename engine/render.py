@@ -14,6 +14,7 @@ class Render:
         self.img_format = img_format
         self.order = "little" if self.img_format == 0 else "big"
         self.text_queue = []
+        self.clear_cache = (None, b"")
 
     def pack(self, color: int):
         r = (color >> 24) & 0xFF
@@ -25,6 +26,13 @@ class Render:
             return bytes([b, g, r, a])
         else:
             return bytes([a, r, g, b])
+
+    def clear(self, colour):
+        cached_colour, frame = self.clear_cache
+        if cached_colour != colour:
+            frame = self.pack(colour) * (len(self.data) // 4)
+            self.clear_cache = (colour, frame)
+        self.data[:] = frame
 
     def fill_rect(self, px, py, w, h, colour):
         x0, x1 = max(px, 0), min(px + w, self.width)

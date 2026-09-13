@@ -4,6 +4,8 @@ from engine.render import Render
 
 mlx = Mlx()
 
+BACKGROUND = 0x000000FF
+
 
 class Engine:
 
@@ -25,7 +27,6 @@ class Engine:
 
     def set_scene(self, scene):
         self.current_scene = scene
-        print(f"SCENE DEFINIDA{scene}")
 
     def onClose(self, _param: object = None):
         mlx.mlx_loop_exit(self.mlx_ptr)
@@ -35,7 +36,7 @@ class Engine:
             self.current_scene.handle_click(button, x, y)
 
     def loop_hook(self, _param: object = None):
-        print("Menu Scene")
+        self.render.clear(BACKGROUND)
         if self.current_scene:
             self.current_scene.draw(self.render)
         mlx.mlx_put_image_to_window(self.mlx_ptr, self.win, self.img, 0, 0)
