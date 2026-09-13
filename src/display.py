@@ -32,8 +32,8 @@ class Display:
 
         self.images: dict[str, ImgData] = {}
 
-        self.corridor_width = 40
-        self.wall_width = 20
+        self.corridor_width = 36
+        self.wall_width = 10
 
     def load_image(self, name, img) -> None:
         new_img = ImgData()

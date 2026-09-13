@@ -33,28 +33,32 @@ if __name__ == "__main__":
         exit(1)
 
     try:
-        display.load_image("walls_png", "img/walls_100.png")
-        display.load_image("pacman", "img/pacman.png")
-        display.create_block_image("corridor_img", display.corridor_width, display.corridor_width, 0xFF000000)
+        display.load_image("logo", "img/logo_400.png")
+        display.load_image("background", "img/walls_100.png")
+        display.load_image("corridor", "img/corridor.png")
+        display.load_image("pacman", "img/pacman_24.png")
+        # display.create_block_image("corridor", display.corridor_width, display.corridor_width, 0xFF000000)
         display.create_block_image("block_42_img", display.corridor_width, display.corridor_width, 0xAA000066)
+        display.create_block_image("pacman_mask", display.images["pacman"].width, display.images["pacman"].height, 0xFF000000)
     except Exception as e:
         print(e)
         exit(1)
 
     display.clear_all()
-    for i in range(15):
+    for i in range(25):
         for j in range(15):
-            display.show(display.images["walls_png"], display.images["walls_png"].width * i, display.images["walls_png"].height * j)
+            display.show(display.images["background"], display.images["background"].width * i, display.images["background"].height * j)
 
-    mazegen = MazeGenerator((15, 15), False, (0, 0),
-                                (1, 1), cfg.seed)
+    display.show(display.images["logo"], 1350, 70)
+
+    mazegen = MazeGenerator((25, 20), False, (0, 0), (1, 1), cfg.seed)
     for x in mazegen.maze:
         print(x)
     pos_y = 0
-    for y in range(15):
+    for y in range(20):
         pos_y += display.corridor_width
         pos_x = 0
-        for x in range(15):
+        for x in range(25):
             pos_x += display.corridor_width
             if mazegen.maze[y][x] == 15:
                 pos_x += display.wall_width
@@ -63,12 +67,12 @@ if __name__ == "__main__":
 
             if not mazegen.maze[y][x] & 8:
                 # print(x, y, "don't has left wall")
-                display.show(display.images["corridor_img"], pos_x, pos_y + display.wall_width)
+                display.show(display.images["corridor"], pos_x, pos_y + display.wall_width)
             pos_x += display.wall_width
             if not mazegen.maze[y][x] & 1:
                 # print(x, y, "don't has top wall")
-                display.show(display.images["corridor_img"], pos_x, pos_y)
-            display.show(display.images["corridor_img"], pos_x, pos_y + display.wall_width)
+                display.show(display.images["corridor"], pos_x, pos_y)
+            display.show(display.images["corridor"], pos_x, pos_y + display.wall_width)
         pos_y += display.wall_width
 
 
@@ -87,14 +91,24 @@ if __name__ == "__main__":
 
     def moving(nothing):
         print("moving...")
-        pos_x = display.corridor_width * 2 + pacman.x * (display.corridor_width + display.wall_width) - int(display.images["pacman"].width / 2)
-        pos_y = display.corridor_width * 2 + pacman.y * (display.corridor_width + display.wall_width) - int(display.images["pacman"].height / 2)
-        display.show(display.images["corridor_img"], pos_x, pos_y)
+        # pos_x = display.corridor_width * 2 + pacman.x * (display.corridor_width + display.wall_width) - int(display.images["pacman"].width / 2)
+        # pos_y = display.corridor_width * 2 + pacman.y * (display.corridor_width + display.wall_width) - int(display.images["pacman"].height / 2)
+        # display.show(display.images["corridor"], pos_x, pos_y)
+        # pacman.move(random.choice(list(PacManDirection)))
+        # pos_x = display.corridor_width * 2 + pacman.x * (display.corridor_width + display.wall_width) - int(display.images["pacman"].width / 2)
+        # pos_y = display.corridor_width * 2 + pacman.y * (display.corridor_width + display.wall_width) - int(display.images["pacman"].height / 2)
+        # display.show(display.images["pacman"], pos_x, pos_y)
+
+        shuff_x = display.corridor_width + display.wall_width + 1
+        shuff_y = display.corridor_width + display.wall_width + 1
+        pos_x = shuff_x + pacman.x * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].width / 2)
+        pos_y = shuff_y + pacman.y * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].height / 2)
+        display.show(display.images["pacman_mask"], pos_x, pos_y)
         pacman.move(random.choice(list(PacManDirection)))
-        pos_x = display.corridor_width * 2 + pacman.x * (display.corridor_width + display.wall_width) - int(display.images["pacman"].width / 2)
-        pos_y = display.corridor_width * 2 + pacman.y * (display.corridor_width + display.wall_width) - int(display.images["pacman"].height / 2)
+        pos_x = shuff_x + pacman.x * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].width / 2)
+        pos_y = shuff_y + pacman.y * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].height / 2)
         display.show(display.images["pacman"], pos_x, pos_y)
-        time.sleep(0.1)
+        time.sleep(0.3)
 
     display.mlx.mlx_loop_hook(display.mlx_ptr, moving, None)
 
