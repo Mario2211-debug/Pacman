@@ -1,3 +1,5 @@
+import time
+
 from mlx import Mlx
 from engine.render import Render
 
@@ -5,6 +7,7 @@ from engine.render import Render
 mlx = Mlx()
 
 BACKGROUND = 0x000000FF
+MAX_DT = 0.1
 
 
 class Engine:
@@ -14,6 +17,8 @@ class Engine:
         self.win_h = win_h
         self.win_h = win_h
         self.mlx_ptr = mlx.mlx_init()
+        if not self.mlx_ptr:
+            raise RuntimeError("mlx_init failed (no display?)")
         self.win = mlx.mlx_new_window(self.mlx_ptr,
                                       self.win_w, self.win_h, "Packman")
         self.img = mlx.mlx_new_image(self.mlx_ptr, self.win_w, self.win_h)
@@ -24,6 +29,7 @@ class Engine:
                              self.data, self.size_line,
                              self.img_format)
         self.current_scene = None
+        self.last_time = time.perf_counter()
 
     def set_scene(self, scene):
         self.current_scene = scene
@@ -36,7 +42,12 @@ class Engine:
             self.current_scene.handle_click(button, x, y)
 
     def loop_hook(self, _param: object = None):
+        now = time.perf_counter()
+        dt = min(now - self.last_time, MAX_DT)
+        self.last_time = now
         self.render.clear(BACKGROUND)
+        if self.current_scene:
+            self.current_scene.update(dt)
         if self.current_scene:
             self.current_scene.draw(self.render)
         mlx.mlx_put_image_to_window(self.mlx_ptr, self.win, self.img, 0, 0)
@@ -46,4 +57,5 @@ class Engine:
         mlx.mlx_hook(self.win, 33, 0, self.onClose, None)
         mlx.mlx_mouse_hook(self.win, self.onClick, None)
         mlx.mlx_loop_hook(self.mlx_ptr, self.loop_hook, None)
+        self.last_time = time.perf_counter()
         mlx.mlx_loop(self.mlx_ptr)
