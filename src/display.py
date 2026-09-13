@@ -35,7 +35,7 @@ class Display:
         self.corridor_width = 36
         self.wall_width = 10
 
-    def show(self, img, x: int, y: int) -> None:
+    def show(self, img: ImgData, x: int, y: int) -> None:
         self.mlx.mlx_put_image_to_window(self.mlx_ptr, self.win, img.img, x, y)
 
     def clear_all(self) -> None:
@@ -53,7 +53,7 @@ class Display:
             self.mlx.mlx_get_data_addr(new_img.img)
         self.images.update({name: new_img})
 
-    def create_block_image(self, name: str, width: int, height: int, color) -> None:
+    def create_rectangle(self, name: str, width: int, height: int, color) -> None:
         new_img = ImgData()
         new_img.width = width
         new_img.height = height
@@ -66,6 +66,11 @@ class Display:
         for i in range(0, new_img.sl * new_img.width, 4):
             new_img.data[i:i + 4] = color.to_bytes(4, 'little')
         self.images.update({name: new_img})
+
+    def show_filled_block(self, img: ImgData, x: int, y: int, num_x: int, num_y: int, shift_x: int = 0, shift_y: int = 0) -> None:
+        for i in range(num_x):
+            for j in range(num_y):
+                self.show(img, x + (img.width - shift_x) * i, y + (img.height - shift_y) * j)
 
     def create_text(self, text: str, x: int, y: int) -> None:
         pos_x = x
