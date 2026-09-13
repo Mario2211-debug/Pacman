@@ -27,16 +27,14 @@ class Render:
             return bytes([a, r, g, b])
 
     def fill_rect(self, px, py, w, h, colour):
-        packed = self.pack(colour)
-        for yy in range(py, py + h):
-            if yy < 0 or yy >= self.height:
-                continue
+        x0, x1 = max(px, 0), min(px + w, self.width)
+        y0, y1 = max(py, 0), min(py + h, self.height)
+        if x0 >= x1 or y0 >= y1:
+            return
+        row = self.pack(colour) * (x1 - x0)
+        for yy in range(y0, y1):
             base = yy * self.size_line
-            for xx in range(px, px + w):
-                if xx < 0 or xx >= self.width:
-                    continue
-                off = base + xx * 4
-                self.data[off:off + 4] = packed
+            self.data[base + x0 * 4:base + x1 * 4] = row
 
     def draw_rect(self, px, py, w, h, colour, thickness=1):
         self.fill_rect(px, py, w, thickness, colour)
