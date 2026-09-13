@@ -6,6 +6,9 @@ from engine.render import Render
 
 mlx = Mlx()
 
+KEY_PRESS = 2
+KEY_PRESS_MASK = 1
+DESTROY_NOTIFY = 33
 BACKGROUND = 0x000000FF
 MAX_DT = 0.1
 
@@ -41,6 +44,10 @@ class Engine:
         if self.current_scene:
             self.current_scene.handle_click(button, x, y)
 
+    def onKey(self, key, _param: object = None):
+        if self.current_scene:
+            self.current_scene.handle_key(key)
+
     def loop_hook(self, _param: object = None):
         now = time.perf_counter()
         dt = min(now - self.last_time, MAX_DT)
@@ -54,7 +61,8 @@ class Engine:
         self.render.flush_text()
 
     def run(self):
-        mlx.mlx_hook(self.win, 33, 0, self.onClose, None)
+        mlx.mlx_hook(self.win, DESTROY_NOTIFY, 0, self.onClose, None)
+        mlx.mlx_hook(self.win, KEY_PRESS, KEY_PRESS_MASK, self.onKey, None)
         mlx.mlx_mouse_hook(self.win, self.onClick, None)
         mlx.mlx_loop_hook(self.mlx_ptr, self.loop_hook, None)
         self.last_time = time.perf_counter()
