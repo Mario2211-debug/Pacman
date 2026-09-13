@@ -35,7 +35,13 @@ class Display:
         self.corridor_width = 36
         self.wall_width = 10
 
-    def load_image(self, name, img) -> None:
+    def show(self, img, x: int, y: int) -> None:
+        self.mlx.mlx_put_image_to_window(self.mlx_ptr, self.win, img.img, x, y)
+
+    def clear_all(self) -> None:
+        self.mlx.mlx_clear_window(self.mlx_ptr, self.win)
+
+    def load_image(self, name: str, img: str) -> None:
         new_img = ImgData()
         result = self.mlx.mlx_png_file_to_image(self.mlx_ptr, img)
         if not result:
@@ -47,7 +53,7 @@ class Display:
             self.mlx.mlx_get_data_addr(new_img.img)
         self.images.update({name: new_img})
 
-    def create_block_image(self, name, width, height, color) -> None:
+    def create_block_image(self, name: str, width: int, height: int, color) -> None:
         new_img = ImgData()
         new_img.width = width
         new_img.height = height
@@ -61,8 +67,17 @@ class Display:
             new_img.data[i:i + 4] = color.to_bytes(4, 'little')
         self.images.update({name: new_img})
 
-    def show(self, img, x, y) -> None:
-        self.mlx.mlx_put_image_to_window(self.mlx_ptr, self.win, img.img, x, y)
-
-    def clear_all(self) -> None:
-        self.mlx.mlx_clear_window(self.mlx_ptr, self.win)
+    def create_text(self, text: str, x: int, y: int) -> None:
+        pos_x = x
+        pos_y = y
+        for letter in text.lower():
+            if letter == "\n":
+                pos_x = x
+                pos_y += int(self.images.get("q").height * 1.5)
+            elif letter == " ":
+                pos_x += self.images.get("i").width
+            else:
+                letter_img = self.images.get(letter)
+                if letter_img:
+                    self.show(letter_img, pos_x, pos_y)
+                    pos_x += letter_img.width

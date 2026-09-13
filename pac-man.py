@@ -1,6 +1,8 @@
 import sys
 import random
 import time
+from os import listdir
+from os.path import isfile, join
 
 from mazegenerator import MazeGenerator
 from engine.engine import Engine
@@ -33,6 +35,9 @@ if __name__ == "__main__":
         exit(1)
 
     try:
+        for file in [f for f in listdir("img/chars/letters") if isfile(join("img/chars/letters", f)) and f.endswith(".png")]:
+            display.load_image(file[0], join("img/chars/letters", file))
+
         display.load_image("logo", "img/logo_400.png")
         display.load_image("background", "img/walls_100.png")
         display.load_image("corridor", "img/corridor.png")
@@ -51,9 +56,11 @@ if __name__ == "__main__":
 
     display.show(display.images["logo"], 1350, 70)
 
+    display.create_text("Test text.\nOnly letters yet", 1200, 350)
+
     mazegen = MazeGenerator((25, 20), False, (0, 0), (1, 1), cfg.seed)
-    for x in mazegen.maze:
-        print(x)
+    # for x in mazegen.maze:
+    #     print(x)
     pos_y = 0
     for y in range(20):
         pos_y += display.corridor_width
