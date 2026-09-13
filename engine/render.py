@@ -13,6 +13,7 @@ class Render:
         self.size_line = size_line
         self.img_format = img_format
         self.order = "little" if self.img_format == 0 else "big"
+        self.text_queue = []
 
     def pack(self, color: int):
         r = (color >> 24) & 0xFF
@@ -51,8 +52,13 @@ class Render:
         return int.from_bytes(bytes([b, g, r, a]), sys.byteorder)
 
     def draw_text(self, text: str, x: int, y: int, color: int):
-        self.mlx.mlx_string_put(self.ptr, self.win, x, y,
-                                self.to_mlx_color(color), text)
+        self.text_queue.append((text, x, y, color))
+
+    def flush_text(self):
+        for text, x, y, color in self.text_queue:
+            self.mlx.mlx_string_put(self.ptr, self.win, x, y,
+                                    self.to_mlx_color(color), text)
+        self.text_queue.clear()
 
     def draw_sprite(self):
         pass

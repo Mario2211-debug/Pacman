@@ -39,6 +39,7 @@ class Engine:
         if self.current_scene:
             self.current_scene.draw(self.render)
         mlx.mlx_put_image_to_window(self.mlx_ptr, self.win, self.img, 0, 0)
+        self.render.flush_text()
 
     def run(self):
         mlx.mlx_hook(self.win, 33, 0, self.onClose, None)
