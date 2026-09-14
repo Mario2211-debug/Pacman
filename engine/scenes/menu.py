@@ -34,8 +34,6 @@ class MenuScene(Scene):
 
     def handle_key(self, key):
         self.menu.handle_key(key)
-        print("menu scene clisk")
-        self.navbar.handle_click(button, x, y)
 
     def start_game(self):
         from engine.scenes.game import GameScene
