@@ -23,6 +23,7 @@ class PacMan:
         self.y_px = y * 10
         self.speed = 1
         self.points = 0
+        self.direction = PacManDirection.RIGHT
         self.status = PacManStatus.NORMAL
         self._maze = maze
         if maze:
@@ -66,7 +67,7 @@ class PacMan:
                  (0, 1, 4), (-1, 0, 8)]
         self.x, self.y = self.next_x, self.next_y
         self.eat()
-        print(f"PacMan position: {self.x}, {self.y} ({self.points} points)")
+        # print(f"PacMan position: {self.x}, {self.y} ({self.points} points)")
         dx, dy, code = moves[direction.value]
         nx, ny = self.x + dx, self.y + dy
         if (0 <= nx < self._maze_width and 0 <= ny < self._maze_height
