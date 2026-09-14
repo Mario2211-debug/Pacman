@@ -71,7 +71,7 @@ class Display:
             self.load_image("ghost_pink", "img/ghosts/pink.png")
             self.load_image("ghost_dead", "img/ghosts/dead.png")
         except Exception as e:
-            raise(e)
+            raise (e)
 
     def load_image(self, name: str, img: str) -> None:
         new_img = ImgData()
@@ -85,11 +85,13 @@ class Display:
             self.mlx.mlx_get_data_addr(new_img.img)
         self.images.update({name: new_img})
 
-    def create_rectangle(self, name: str, width: int, height: int, color) -> None:
+    def create_rectangle(self, name: str,
+                         width: int, height: int, color) -> None:
         new_img = ImgData()
         new_img.width = width
         new_img.height = height
-        new_img.img = self.mlx.mlx_new_image(self.mlx_ptr, new_img.width, new_img.height)
+        new_img.img = self.mlx.mlx_new_image(self.mlx_ptr,
+                                             new_img.width, new_img.height)
         if not new_img.img:
             raise Exception(f"Can't create image {name}")
         new_img.data, new_img.bpp, new_img.sl, new_img.iformat = \
@@ -99,10 +101,13 @@ class Display:
             new_img.data[i:i + 4] = color.to_bytes(4, 'little')
         self.images.update({name: new_img})
 
-    def show_filled_block(self, img: ImgData, x: int, y: int, num_x: int, num_y: int, shift_x: int = 0, shift_y: int = 0) -> None:
+    def show_filled_block(self, img: ImgData, x: int, y: int,
+                          num_x: int, num_y: int,
+                          shift_x: int = 0, shift_y: int = 0) -> None:
         for i in range(num_x):
             for j in range(num_y):
-                self.show(img, x + (img.width - shift_x) * i, y + (img.height - shift_y) * j)
+                self.show(img, x + (img.width - shift_x) * i,
+                          y + (img.height - shift_y) * j)
 
     def create_text(self, text: str, x: int, y: int) -> None:
         pos_x = x

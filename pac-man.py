@@ -1,21 +1,19 @@
 import sys
-import random
-import time
-
-from mazegenerator import MazeGenerator
-from engine.engine import Engine
-from engine.scenes.menu import MenuScene
-from src.config import Config, open_config_file
 from src.ghost import Ghost
-from src.highscores import Highscores
-from src.pacman import PacMan, PacManDirection
-from src.pacgum import pacgums_generate
 from src.display import Display
+from engine.engine import Engine
+from src.highscores import Highscores
+from mazegenerator import MazeGenerator
+from src.pacgum import pacgums_generate
+from engine.scenes.menu import MenuScene
+from src.pacman import PacMan, PacManDirection
+from src.config import Config, open_config_file
 
 
-# engine = Engine(800, 600)
-# engine.set_scene(MenuScene(engine))
-# engine.run()
+WIN_W = 700
+WIN_H = 800
+MZ_W = 20
+MZ_H = 25
 
 if __name__ == "__main__":
     config_filename = ""
@@ -23,10 +21,10 @@ if __name__ == "__main__":
         config_filename = sys.argv[1]
     config_json = open_config_file(config_filename)
     cfg = Config.model_validate(config_json)
-    # print(cfg)
+    engine = Engine(WIN_W, WIN_H, cfg, Highscores)
+    engine.set_scene(MenuScene(engine))
+    engine.run()
 
-
-    # ------------------------
     try:
         display = Display()
     except Exception as e:
@@ -35,27 +33,33 @@ if __name__ == "__main__":
 
     try:
         display.load_all_images()
-        display.create_rectangle("block_42_img", display.corridor_width, display.corridor_width, 0xAA000066)
-        display.create_rectangle("pacman_mask", display.images["pacman"].width, display.images["pacman"].height, 0xFF000000)
-        display.create_rectangle("ghost_mask", display.images["ghost_red"].width, display.images["ghost_orange"].height + 5, 0xFF000000)
+        display.create_rectangle("block_42_img", display.corridor_width,
+                                 display.corridor_width, 0xAA000066)
+        display.create_rectangle("pacman_mask", display.images["pacman"].width,
+                                 display.images["pacman"].height, 0xFF000000)
+        display.create_rectangle("ghost_mask",
+                                 display.images["ghost_red"].width,
+                                 display.images["ghost_orange"].height + 5, 0xFF000000)
     except Exception as e:
         print(e)
         exit(1)
 
     display.clear_all()
-    display.show_filled_block(display.images["background1"], 0, 0, int(display.screen_width / display.images["background1"].width) + 1, int(display.screen_height / display.images["background1"].height) + 1)
+    display.show_filled_block(display.images["background1"], 0, 0,
+                              int(display.screen_width / display.images["background1"].width) + 1, int(display.screen_height / display.images["background1"].height) + 1)
 
-    display.show_filled_block(display.images["emptiness"], 1300, 670, 15, 5, 4, 4)
+    display.show_filled_block(display.images["emptiness"],
+                              1300, 670, 15, 5, 4, 4)
 
     display.show(display.images["logo"], 1350, 50)
 
     display.create_text("Test text.\n0123456789\n!?+-=.:,", 1200, 350)
 
-
     maze_width = 25
     maze_height = 20
 
-    mazegen = MazeGenerator((maze_width, maze_height), False, (0, 0), (1, 1), cfg.seed)
+    mazegen = MazeGenerator((maze_width, maze_height), False,
+                            (0, 0), (1, 1), cfg.seed)
     # for x in mazegen.maze:
     #     print(x)
     pos_y = 0
@@ -140,69 +144,14 @@ if __name__ == "__main__":
                 pacman.y_px += pacman.speed
             if pacman.y_px >= pacman.next_y * (display.corridor_width + display.wall_width):
                 pacman.move()
-        # Show new
         pos_x = shift_x + pacman.x_px
         pos_y = shift_y + pacman.y_px
         display.show(display.images["pacman"], pos_x, pos_y)
-        # time.sleep(0.5)
 
-    # def make_turn(nothing):
-    #     shift_x = display.corridor_width + display.wall_width + 1
-    #     shift_y = display.corridor_width + display.wall_width + 1
-    #     # Clear old
-    #     pos_x = shift_x + pacman.x * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].width / 2)
-    #     pos_y = shift_y + pacman.y * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].height / 2)
-    #     display.show(display.images["pacman_mask"], pos_x, pos_y)
-    #     # Show new
-    #     # pacman.move(random.choice(list(PacManDirection)))
-    #     # print(pacman.direction)
-    #     pacman.move(pacman.direction)
-    #     pos_x = shift_x + pacman.x * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].width / 2)
-    #     pos_y = shift_y + pacman.y * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].height / 2)
-    #     display.show(display.images["pacman"], pos_x, pos_y)
-
-    #     for ghost in ghosts:
-    #     # Clear old
-    #         pos_x = shift_x + ghost.x * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(ghost.image.width / 2)
-    #         pos_y = shift_y + ghost.y * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(ghost.image.height / 2)
-    #         display.show(display.images["ghost_mask"], pos_x, pos_y)
-    #         # Show new
-    #         ghost.move(ghosts, pacman)
-    #         pos_x = shift_x + ghost.x * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(ghost.image.width / 2)
-    #         pos_y = shift_y + ghost.y * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(ghost.image.height / 2)
-    #         display.show(ghost.image, pos_x, pos_y)
-    #     time.sleep(0.5)
-
-
-
-    display.mlx.mlx_hook(display.win, 33, 0, gere_close_1, display)  # WM_DELETE_WINDOW
-    display.mlx.mlx_key_hook(display.win, gere_key_press, pacman)
-
-    display.mlx.mlx_loop_hook(display.mlx_ptr, make_turn, None)
-
-    # Main loop
+    display.mlx.mlx_hook(display.win, 33, 0, gere_close_1, display)
     display.mlx.mlx_loop(display.mlx_ptr)
-    # ------------------------
-
-    #
-    # python3 -c "from PIL import Image; Image.open('img/walls_100.png').convert('RGB').save('img/walls_100_new.png')"
-    #
-
-    # !!!!!!!!!!!!!
-    # mlx.mlx_destroy_image(mlx_ptr, img_ptr)
-    # !!!!!!!!!!!!!
 
     exit()
-
-
-
-
-
-    # ghost1 = Ghost()
-    # ghost2 = Ghost()
-    # ghost3 = Ghost()
-    # ghost4 = Ghost()
-
     ghosts = [Ghost(1), Ghost(2), Ghost(3), Ghost(4)]
     pacman = PacMan()
 
@@ -225,57 +174,11 @@ if __name__ == "__main__":
         ghosts[2].set_start_position(0, lvl["height"] - 1)
         ghosts[3].set_start_position(lvl["width"] - 1, lvl["height"] - 1)
 
-        # ghosts_positions: list = []
-        for step in range(25):
-            # print("\nSPEP", step)
-            # pacman.move(PacManDirection.BOTTOM)
-            pacman.move(random.choice(list(PacManDirection)))
-            for ghost in ghosts:
-                ghost.set_maze(mazegen.maze)
-                # next_position = ghost.find_movement_to(3, 3,
-                #                                        ghosts_positions)
-                # ghosts_positions.append(next_position)
-                ghost.move(ghosts, pacman)
-                # print(f"\nGhost {ghost.image} position: {ghost.x}, "
-                #       f"{ghost.y}")
-                # print("Next position:", next_position)
-            # print("------------")
-
-            for y in range(lvl["height"]):
-                for x in range(lvl["width"]):
-                    if pacman.x == x and pacman.y == y:
-                        print("🟡", sep="", end="")
-                        continue
-                    for ghost in ghosts:
-                        if ghost.x == x and ghost.y == y:
-                            print("👻", sep="", end="")
-                            break
-                    else:
-                        if mazegen.maze[y][x] == 15:
-                            print("🟦", sep="", end="")
-                        elif pacgums[y][x] == 1:
-                            print("ㆍ", sep="", end="")
-                        elif pacgums[y][x] == 2:
-                            print("🔴", sep="", end="")
-                        else:
-                            print("🟩", sep="", end="")
-                print()
-            time.sleep(1)
-            print("\n\n\n")
-
-        print()
-        break
-
 
 def main() -> None:
     args = [arg for arg in sys.argv[1:] if not arg.startswith("--")]
     config_filename = args[0] if args else ""
     cfg = Config.model_validate(open_config_file(config_filename))
-
-    if "--terminal" in sys.argv:
-        terminal_simulation(cfg)
-        return
-
     try:
         engine = Engine(WIN_W, WIN_H, cfg, Highscores(cfg.highscore_filename))
     except RuntimeError as err:

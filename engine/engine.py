@@ -1,8 +1,7 @@
 import time
-
 from mlx import Mlx
 from engine.render import Render
-
+from models.ImageModel import ImgData
 
 mlx = Mlx()
 
@@ -23,9 +22,6 @@ class Engine:
         self.mlx_ptr = mlx.mlx_init()
         if not self.mlx_ptr:
             raise RuntimeError("mlx_init failed (no display?)")
-        # screen_size = mlx.mlx_get_screen_size(self.mlx_ptr)
-        # self.win_w = screen_size[1]
-        # self.win_h = screen_size[2]
         self.win = mlx.mlx_new_window(self.mlx_ptr,
                                       self.win_w, self.win_h, "Packman")
         self.img = mlx.mlx_new_image(self.mlx_ptr, self.win_w, self.win_h)
