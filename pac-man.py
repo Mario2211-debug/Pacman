@@ -4,8 +4,8 @@ import time
 from enum import Enum
 
 from mazegenerator import MazeGenerator
+from src.types import Direction, GameStatus
 from src.game import Game
-from src.types import Direction
 from engine.engine import Engine
 from engine.scenes.menu import MenuScene
 from src.config import Config, open_config_file
@@ -164,9 +164,16 @@ if __name__ == "__main__":
 
 
     def make_turn(nothing):
+        if game.status != GameStatus.RUN:
+            return
         move_object(pacman)
         for ghost in ghosts:
             move_object(ghost)
+            if (pacman.x_px - ghost.speed <= ghost.x_px <= pacman.x_px + ghost.speed
+                and pacman.y_px - ghost.speed <= ghost.y_px <= pacman.y_px + ghost.speed):
+                print(f"!!!! CATCHED BY {ghost.image} at {ghost.x}, {ghost.y}")
+                game.status = GameStatus.DEAD
+                # exit()
         # time.sleep(0.5)
 
     # def make_turn(nothing):
