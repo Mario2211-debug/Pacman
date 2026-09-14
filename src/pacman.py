@@ -1,20 +1,21 @@
 from enum import Enum
 
-from .display import Display
+from .display import ImgData
+from .types import Direction
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .game import Game
 
 class PacManStatus(Enum):
   NORMAL = 1
   INVISIBLE = 2
   FAST = 3
 
-class PacManDirection(Enum):
-  TOP = 0
-  RIGHT = 1
-  BOTTOM = 2
-  LEFT = 3
-
 class PacMan:
-    def __init__(self, x: int = 0, y: int = 0, maze: list[list[int]] = [], pacgums: list[list[int]] = []) -> None:
+    def __init__(self, image: ImgData, mask: ImgData, x: int = 0, y: int = 0, maze: list[list[int]] = [], pacgums: list[list[int]] = []) -> None:
+        self.image = image
+        self.mask = mask
         self.start_x = x
         self.start_y = y
         self.x = x
@@ -23,9 +24,9 @@ class PacMan:
         self.next_y = y
         self.x_px = x
         self.y_px = y
-        self.speed = 5
+        self.speed = 2
         self.points = 0
-        self.direction = PacManDirection.RIGHT
+        self.direction = Direction.RIGHT
         self.direction_next = self.direction
         self.status = PacManStatus.NORMAL
         self._maze = maze
@@ -33,7 +34,7 @@ class PacMan:
             self._maze_width = len(maze[0])
             self._maze_height = len(maze)
         self._pacgums = pacgums
-        self.display: Display
+        self.game: Game
 
     def set_maze(self, maze: list[list[int]]) -> None:
         self._maze = maze
@@ -44,7 +45,7 @@ class PacMan:
     def set_pacgums(self, pacgums: list[list[int]]) -> None:
         self._pacgums = pacgums
 
-    def set_start_position(self, x: int, y: int, shift: int = 0) -> None:
+    def set_start_position(self, x: int, y: int) -> None:
         if self._maze[y][x] == 15:
             x += 1
         if self._maze[y][x] == 15:
@@ -55,8 +56,8 @@ class PacMan:
         self.y = y
         self.next_x = x
         self.next_y = y
-        self.x_px = x * shift
-        self.y_px = y * shift
+        self.x_px = x * (self.game.display.corridor_width + self.game.display.wall_width)
+        self.y_px = y  * (self.game.display.corridor_width + self.game.display.wall_width)
 
     def eat(self):
         if self._pacgums[self.y][self.x] == 2:
@@ -70,8 +71,8 @@ class PacMan:
         moves = [(0, -1, 1), (1, 0, 2),
                  (0, 1, 4), (-1, 0, 8)]
         self.x, self.y = self.next_x, self.next_y
-        self.x_px = self.x * (self.display.corridor_width + self.display.wall_width)
-        self.y_px = self.y * (self.display.corridor_width + self.display.wall_width)
+        self.x_px = self.x * (self.game.display.corridor_width + self.game.display.wall_width)
+        self.y_px = self.y * (self.game.display.corridor_width + self.game.display.wall_width)
         self.eat()
         # print(f"PacMan position: {self.x}, {self.y} ({self.points} points)")
         dx, dy, code = moves[self.direction_next.value]
