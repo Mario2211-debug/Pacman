@@ -1,3 +1,6 @@
+from os import listdir
+from os.path import isfile, join
+
 from mlx import Mlx
 
 class ImgData:
@@ -40,6 +43,29 @@ class Display:
 
     def clear_all(self) -> None:
         self.mlx.mlx_clear_window(self.mlx_ptr, self.win)
+
+    def load_all_images(self) -> None:
+        try:
+            for file in [f for f in listdir("img/chars/letters") if isfile(join("img/chars/letters", f)) and f.endswith(".png")]:
+                self.load_image(file[0], join("img/chars/letters", file))
+            for file in [f for f in listdir("img/chars/numbers") if isfile(join("img/chars/numbers", f)) and f.endswith(".png")]:
+                self.load_image(file[0], join("img/chars/numbers", file))
+            self.load_image(":", "img/chars/colon.png")
+            self.load_image(",", "img/chars/comma.png")
+            self.load_image(".", "img/chars/dot.png")
+            self.load_image("=", "img/chars/equal.png")
+            self.load_image("!", "img/chars/exclamation.png")
+            self.load_image("-", "img/chars/minus.png")
+            self.load_image("+", "img/chars/plus.png")
+            self.load_image("?", "img/chars/question.png")
+
+            self.load_image("logo", "img/logo_400.png")
+            self.load_image("background1", "img/walls_100.png")
+            self.load_image("background2", "img/walls_200.png")
+            self.load_image("emptiness", "img/emptiness.png")
+            self.load_image("pacman", "img/pacman_24.png")
+        except Exception as e:
+            raise(e)
 
     def load_image(self, name: str, img: str) -> None:
         new_img = ImgData()
