@@ -1,23 +1,53 @@
+import sys
+
+# mlx_string_put draws each glyph as 10x20 px with y at the top
+# (disassembled from libmlx.so, the font atlas cells are 12 px wide)
+CHAR_W = 10
+CHAR_H = 20
+
+
 class Render:
-    def __init__(self, ptr, mlx, win, data, size_line, img_format):
+    def __init__(self, ptr, mlx, win, win_w,
+                 win_h, data, size_line, img_format):
         self.mlx = mlx
         self.win = win
         self.ptr = ptr
         self.data = data
+        self.width = win_w
+        self.height = win_h
         self.size_line = size_line
         self.img_format = img_format
         self.order = "little" if self.img_format == 0 else "big"
+        self.text_queue = []
+        self.clear_cache = (None, b"")
 
     def pack(self, color: int):
-        return color.to_bytes(4, self.order)
+        r = (color >> 24) & 0xFF
+        g = (color >> 16) & 0xFF
+        b = (color >> 8) & 0xFF
+        a = color & 0xFF
+
+        if self.order == "little":
+            return bytes([b, g, r, a])
+        else:
+            return bytes([a, r, g, b])
+
+    def clear(self, colour):
+        cached_colour, frame = self.clear_cache
+        if cached_colour != colour:
+            frame = self.pack(colour) * (len(self.data) // 4)
+            self.clear_cache = (colour, frame)
+        self.data[:] = frame
 
     def fill_rect(self, px, py, w, h, colour):
-        packed = self.pack(colour)
-        for yy in range(py, py + h):
+        x0, x1 = max(px, 0), min(px + w, self.width)
+        y0, y1 = max(py, 0), min(py + h, self.height)
+        if x0 >= x1 or y0 >= y1:
+            return
+        row = self.pack(colour) * (x1 - x0)
+        for yy in range(y0, y1):
             base = yy * self.size_line
-            for xx in range(px, px + w):
-                off = base + xx * 4
-                self.data[off:off + 4] = packed
+            self.data[base + x0 * 4:base + x1 * 4] = row
 
     def draw_rect(self, px, py, w, h, colour, thickness=1):
         self.fill_rect(px, py, w, thickness, colour)
@@ -25,8 +55,27 @@ class Render:
         self.fill_rect(px, py, thickness, h, colour)
         self.fill_rect(px + w - thickness, py, thickness, h, colour)
 
+    def to_mlx_color(self, color: int):
+        r = (color >> 24) & 0xFF
+        g = (color >> 16) & 0xFF
+        b = (color >> 8) & 0xFF
+        a = color & 0xFF
+        return int.from_bytes(bytes([b, g, r, a]), sys.byteorder)
+
+    def text_width(self, text: str):
+        return len(text) * CHAR_W
+
     def draw_text(self, text: str, x: int, y: int, color: int):
-        self.mlx.mlx_string_put(self.ptr, self.win, x, y, color, text)
+        self.text_queue.append((text, x, y, color))
+
+    def draw_text_centered(self, text: str, cx: int, y: int, color: int):
+        self.draw_text(text, max(0, cx - self.text_width(text) // 2), y, color)
+
+    def flush_text(self):
+        for text, x, y, color in self.text_queue:
+            self.mlx.mlx_string_put(self.ptr, self.win, x, y,
+                                    self.to_mlx_color(color), text)
+        self.text_queue.clear()
 
     def draw_sprite(self):
         pass

@@ -221,3 +221,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Pac-Man highscores (local game data, written by src/highscores.py)
+highscore.json
+*.json.tmp

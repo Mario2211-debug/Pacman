@@ -19,7 +19,6 @@ class Ghost:
         self.next_y = y
         self.x_px = x * 10
         self.y_px = y * 10
-        self.speed = 1
         self.status = GhostStatus.ACTIVE
         self.freeze = False
         self._maze = maze

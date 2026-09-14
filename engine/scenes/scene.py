@@ -15,6 +15,10 @@ class Scene(ABC):
         """Manipula cliques - OBRIGATÓRIO implementar nas subclasses"""
         pass
 
+    def handle_key(self, key):
+        """Manipula teclas (engine/keys.py) - OPCIONAL implementar"""
+        pass
+
     def update(self, dt):
         """Atualiza a lógica - OPCIONAL implementar"""
         pass

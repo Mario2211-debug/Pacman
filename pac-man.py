@@ -1,139 +1,22 @@
 import sys
 import random
 import time
-from os import listdir
-from os.path import isfile, join
 
 from mazegenerator import MazeGenerator
 from engine.engine import Engine
 from engine.scenes.menu import MenuScene
 from src.config import Config, open_config_file
 from src.ghost import Ghost
+from src.highscores import Highscores
 from src.pacman import PacMan, PacManDirection
 from src.pacgum import pacgums_generate
-from src.display import Display
+
+WIN_W = 800
+WIN_H = 600
 
 
-# engine = Engine(800, 600)
-# engine.set_scene(MenuScene(engine))
-# engine.run()
-
-if __name__ == "__main__":
-    config_filename = ""
-    if len(sys.argv) == 2:
-        config_filename = sys.argv[1]
-    config_json = open_config_file(config_filename)
-    cfg = Config.model_validate(config_json)
-    # print(cfg)
-
-
-    # ------------------------
-    try:
-        display = Display()
-    except Exception as e:
-        print(e)
-        exit(1)
-
-    try:
-        for file in [f for f in listdir("img/chars/letters") if isfile(join("img/chars/letters", f)) and f.endswith(".png")]:
-            display.load_image(file[0], join("img/chars/letters", file))
-
-        display.load_image("logo", "img/logo_400.png")
-        display.load_image("background1", "img/walls_100.png")
-        display.load_image("background2", "img/walls_200.png")
-        display.load_image("emptiness", "img/emptiness.png")
-        display.load_image("pacman", "img/pacman_24.png")
-        display.create_rectangle("block_42_img", display.corridor_width, display.corridor_width, 0xAA000066)
-        display.create_rectangle("pacman_mask", display.images["pacman"].width, display.images["pacman"].height, 0xFF000000)
-    except Exception as e:
-        print(e)
-        exit(1)
-
-    display.clear_all()
-    display.show_filled_block(display.images["background1"], 0, 0, int(display.screen_width / display.images["background1"].width) + 1, int(display.screen_height / display.images["background1"].height) + 1)
-
-    display.show_filled_block(display.images["emptiness"], 1300, 170, 15, 20, 4, 4)
-
-    display.show(display.images["logo"], 1350, 50)
-
-    display.create_text("Test text.\nOnly letters yet", 1200, 350)
-
-    mazegen = MazeGenerator((25, 20), False, (0, 0), (1, 1), cfg.seed)
-    # for x in mazegen.maze:
-    #     print(x)
-    pos_y = 0
-    for y in range(20):
-        pos_y += display.corridor_width
-        pos_x = 0
-        for x in range(25):
-            pos_x += display.corridor_width
-            if mazegen.maze[y][x] == 15:
-                pos_x += display.wall_width
-                display.show(display.images["block_42_img"], pos_x, pos_y + display.wall_width)
-                continue
-
-            if not mazegen.maze[y][x] & 8:
-                # print(x, y, "don't has left wall")
-                display.show(display.images["emptiness"], pos_x, pos_y + display.wall_width)
-            pos_x += display.wall_width
-            if not mazegen.maze[y][x] & 1:
-                # print(x, y, "don't has top wall")
-                display.show(display.images["emptiness"], pos_x, pos_y)
-            display.show(display.images["emptiness"], pos_x, pos_y + display.wall_width)
-        pos_y += display.wall_width
-
-
-    def gere_close_1(display):
-        display.mlx.mlx_loop_exit(display.mlx_ptr)
-    # event hooks
-    display.mlx.mlx_hook(display.win, 33, 0, gere_close_1, display)  # WM_DELETE_WINDOW
-
-
-    pacman = PacMan()
-
-    pacgums = pacgums_generate(mazegen.maze, cfg.pacgum)
-    pacman.set_maze(mazegen.maze)
-    pacman.set_pacgums(pacgums)
-    pacman.set_start_position(0, 1)
-
-    def moving(nothing):
-        print("moving...")
-        shift_x = display.corridor_width + display.wall_width + 1
-        shift_y = display.corridor_width + display.wall_width + 1
-        pos_x = shift_x + pacman.x * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].width / 2)
-        pos_y = shift_y + pacman.y * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].height / 2)
-        display.show(display.images["pacman_mask"], pos_x, pos_y)
-        pacman.move(random.choice(list(PacManDirection)))
-        pos_x = shift_x + pacman.x * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].width / 2)
-        pos_y = shift_y + pacman.y * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].height / 2)
-        display.show(display.images["pacman"], pos_x, pos_y)
-        time.sleep(0.3)
-
-    display.mlx.mlx_loop_hook(display.mlx_ptr, moving, None)
-
-    # Main loop
-    display.mlx.mlx_loop(display.mlx_ptr)
-    # ------------------------
-
-    #
-    # python3 -c "from PIL import Image; Image.open('img/walls_100.png').convert('RGB').save('img/walls_100_new.png')"
-    #
-
-    # !!!!!!!!!!!!!
-    # mlx.mlx_destroy_image(mlx_ptr, img_ptr)
-    # !!!!!!!!!!!!!
-
-    exit()
-
-
-
-
-
-    # ghost1 = Ghost()
-    # ghost2 = Ghost()
-    # ghost3 = Ghost()
-    # ghost4 = Ghost()
-
+def terminal_simulation(cfg: Config) -> None:
+    """Debug view of the maze, pacman and ghosts in the terminal."""
     ghosts = [Ghost(1), Ghost(2), Ghost(3), Ghost(4)]
     pacman = PacMan()
 
@@ -149,8 +32,7 @@ if __name__ == "__main__":
             print(x)
 
         pacman.set_maze(mazegen.maze)
-        pacman.set_pacgums(pacgums)
-        pacman.set_start_position(lvl["width"] // 2, lvl["height"] // 2)
+        pacman.set_start_position(5, 5)
 
         ghosts[0].set_start_position(0, 0)
         ghosts[1].set_start_position(lvl["width"] - 1, 0)
@@ -159,25 +41,21 @@ if __name__ == "__main__":
 
         # ghosts_positions: list = []
         for step in range(25):
-            print("\nSPEP", step + 1)
+            # print("\nSPEP", step)
             # pacman.move(PacManDirection.BOTTOM)
             pacman.move(random.choice(list(PacManDirection)))
             for ghost in ghosts:
                 ghost.set_maze(mazegen.maze)
-                # next_position = ghost.find_movement_to(3, 3, ghosts_positions)
+                # next_position = ghost.find_movement_to(3, 3,
+                #                                        ghosts_positions)
                 # ghosts_positions.append(next_position)
                 ghost.move(ghosts, pacman)
-                # print(f"\nGhost {ghost.image} position: {ghost.x}, {ghost.y}")
+                # print(f"\nGhost {ghost.image} position: {ghost.x}, "
+                #       f"{ghost.y}")
                 # print("Next position:", next_position)
             # print("------------")
 
-            print()
-            print("   ", sep="", end="")
-            for x in range(lvl["width"]):
-                print(f"{x:<2}", sep="", end="")
-            print("\n")
             for y in range(lvl["height"]):
-                print(f"{y:<3}", sep="", end="")
                 for x in range(lvl["width"]):
                     if pacman.x == x and pacman.y == y:
                         print("🟡", sep="", end="")
@@ -194,12 +72,32 @@ if __name__ == "__main__":
                         elif pacgums[y][x] == 2:
                             print("🔴", sep="", end="")
                         else:
-                            # print("🟩", sep="", end="")
-                            print("  ", sep="", end="")
+                            print("🟩", sep="", end="")
                 print()
             time.sleep(1)
             print("\n\n\n")
 
-
         print()
         break
+
+
+def main() -> None:
+    args = [arg for arg in sys.argv[1:] if not arg.startswith("--")]
+    config_filename = args[0] if args else ""
+    cfg = Config.model_validate(open_config_file(config_filename))
+
+    if "--terminal" in sys.argv:
+        terminal_simulation(cfg)
+        return
+
+    try:
+        engine = Engine(WIN_W, WIN_H, cfg, Highscores(cfg.highscore_filename))
+    except RuntimeError as err:
+        print(f"\033[91m{err}\033[0m")
+        sys.exit(1)
+    engine.set_scene(MenuScene(engine))
+    engine.run()
+
+
+if __name__ == "__main__":
+    main()
