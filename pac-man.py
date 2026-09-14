@@ -83,6 +83,7 @@ if __name__ == "__main__":
         pos_y += display.wall_width
 
     pacman = PacMan()
+    pacman.display = display
 
     ghosts = [Ghost(display.images["ghost_red"]),
               Ghost(display.images["ghost_blue"]),
@@ -98,52 +99,87 @@ if __name__ == "__main__":
     pacgums = pacgums_generate(mazegen.maze, cfg.pacgum)
     pacman.set_maze(mazegen.maze)
     pacman.set_pacgums(pacgums)
-    pacman.set_start_position(10, 10)
+    pacman.set_start_position(0, 0, display.corridor_width + display.wall_width)
 
     def gere_close_1(display):
         display.mlx.mlx_loop_exit(display.mlx_ptr)
 
     def gere_key_press(key, pacman):
         print(f"Pressed key {key}")
-        if key == 119:
-            pacman.direction = PacManDirection.TOP
-        elif key == 100:
-            pacman.direction = PacManDirection.RIGHT
-        elif key == 115:
-            pacman.direction = PacManDirection.BOTTOM
-        elif key == 97:
-            pacman.direction = PacManDirection.LEFT
+        if key == 119 or key == 65362:
+            pacman.direction_next = PacManDirection.TOP
+        elif key == 100 or key == 65363:
+            pacman.direction_next = PacManDirection.RIGHT
+        elif key == 115 or key == 65364:
+            pacman.direction_next = PacManDirection.BOTTOM
+        elif key == 97 or key == 65361:
+            pacman.direction_next = PacManDirection.LEFT
 
     def make_turn(nothing):
         shift_x = display.corridor_width + display.wall_width + 1
         shift_y = display.corridor_width + display.wall_width + 1
         # Clear old
-        pos_x = shift_x + pacman.x * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].width / 2)
-        pos_y = shift_y + pacman.y * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].height / 2)
+        pos_x = shift_x + pacman.x_px
+        pos_y = shift_y + pacman.y_px
         display.show(display.images["pacman_mask"], pos_x, pos_y)
+
+        if pacman.direction == PacManDirection.RIGHT:
+            if pacman.x_px < pacman.next_x * (display.corridor_width + display.wall_width):
+                pacman.x_px += pacman.speed
+            if pacman.x_px >= pacman.next_x * (display.corridor_width + display.wall_width):
+                pacman.move()
+        elif pacman.direction == PacManDirection.LEFT:
+            if pacman.x_px > pacman.next_x * (display.corridor_width + display.wall_width):
+                pacman.x_px -= pacman.speed
+            if pacman.x_px <= pacman.next_x * (display.corridor_width + display.wall_width):
+                pacman.move()
+        elif pacman.direction == PacManDirection.TOP:
+            if pacman.y_px > pacman.next_y * (display.corridor_width + display.wall_width):
+                pacman.y_px -= pacman.speed
+            if pacman.y_px <= pacman.next_y * (display.corridor_width + display.wall_width):
+                pacman.move()
+        elif pacman.direction == PacManDirection.BOTTOM:
+            if pacman.y_px < pacman.next_y * (display.corridor_width + display.wall_width):
+                pacman.y_px += pacman.speed
+            if pacman.y_px >= pacman.next_y * (display.corridor_width + display.wall_width):
+                pacman.move()
         # Show new
-        # pacman.move(random.choice(list(PacManDirection)))
-        # print(pacman.direction)
-        pacman.move(pacman.direction)
-        pos_x = shift_x + pacman.x * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].width / 2)
-        pos_y = shift_y + pacman.y * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].height / 2)
+        pos_x = shift_x + pacman.x_px
+        pos_y = shift_y + pacman.y_px
         display.show(display.images["pacman"], pos_x, pos_y)
+        # time.sleep(0.5)
 
-        for ghost in ghosts:
-        # Clear old
-            pos_x = shift_x + ghost.x * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(ghost.image.width / 2)
-            pos_y = shift_y + ghost.y * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(ghost.image.height / 2)
-            display.show(display.images["ghost_mask"], pos_x, pos_y)
-            # Show new
-            ghost.move(ghosts, pacman)
-            pos_x = shift_x + ghost.x * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(ghost.image.width / 2)
-            pos_y = shift_y + ghost.y * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(ghost.image.height / 2)
-            display.show(ghost.image, pos_x, pos_y)
+    # def make_turn(nothing):
+    #     shift_x = display.corridor_width + display.wall_width + 1
+    #     shift_y = display.corridor_width + display.wall_width + 1
+    #     # Clear old
+    #     pos_x = shift_x + pacman.x * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].width / 2)
+    #     pos_y = shift_y + pacman.y * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].height / 2)
+    #     display.show(display.images["pacman_mask"], pos_x, pos_y)
+    #     # Show new
+    #     # pacman.move(random.choice(list(PacManDirection)))
+    #     # print(pacman.direction)
+    #     pacman.move(pacman.direction)
+    #     pos_x = shift_x + pacman.x * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].width / 2)
+    #     pos_y = shift_y + pacman.y * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].height / 2)
+    #     display.show(display.images["pacman"], pos_x, pos_y)
+
+    #     for ghost in ghosts:
+    #     # Clear old
+    #         pos_x = shift_x + ghost.x * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(ghost.image.width / 2)
+    #         pos_y = shift_y + ghost.y * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(ghost.image.height / 2)
+    #         display.show(display.images["ghost_mask"], pos_x, pos_y)
+    #         # Show new
+    #         ghost.move(ghosts, pacman)
+    #         pos_x = shift_x + ghost.x * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(ghost.image.width / 2)
+    #         pos_y = shift_y + ghost.y * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(ghost.image.height / 2)
+    #         display.show(ghost.image, pos_x, pos_y)
+    #     time.sleep(0.5)
 
 
-            display.mlx.mlx_hook(display.win, 33, 0, gere_close_1, display)  # WM_DELETE_WINDOW
-            display.mlx.mlx_key_hook(display.win, gere_key_press, pacman)
-        time.sleep(0.5)
+
+    display.mlx.mlx_hook(display.win, 33, 0, gere_close_1, display)  # WM_DELETE_WINDOW
+    display.mlx.mlx_key_hook(display.win, gere_key_press, pacman)
 
     display.mlx.mlx_loop_hook(display.mlx_ptr, make_turn, None)
 
