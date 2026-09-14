@@ -24,6 +24,7 @@ def pacgums_generate(maze: list[list[int]], number: int) -> list[list[int]]:
                 pacgums_max -= 1
             if pacgums_max == 0:
                 break
+
         if pacgums_max == 0:
             break
 
