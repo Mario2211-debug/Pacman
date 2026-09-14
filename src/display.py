@@ -85,6 +85,19 @@ class Display:
             self.mlx.mlx_get_data_addr(new_img.img)
         self.images.update({name: new_img})
 
+    def create_mask(self, name: str) -> ImgData:
+        new_img = ImgData()
+        new_img.width = self.images[name].width + 1
+        new_img.height = self.images[name].height + 1
+        new_img.img = self.mlx.mlx_new_image(self.mlx_ptr, new_img.width, new_img.height)
+        if not new_img.img:
+            raise Exception(f"Can't create image {name}")
+        new_img.data, new_img.bpp, new_img.sl, new_img.iformat = \
+            self.mlx.mlx_get_data_addr(new_img.img)
+        for i in range(0, new_img.sl * new_img.width, 4):
+            new_img.data[i:i + 4] = (0xFF000000).to_bytes(4, 'little')
+        self.images.update({name+"_mask": new_img})
+
     def create_rectangle(self, name: str, width: int, height: int, color) -> None:
         new_img = ImgData()
         new_img.width = width
