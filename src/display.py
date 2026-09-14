@@ -64,6 +64,12 @@ class Display:
             self.load_image("background2", "img/walls_200.png")
             self.load_image("emptiness", "img/emptiness.png")
             self.load_image("pacman", "img/pacman_24.png")
+
+            self.load_image("ghost_red", "img/ghosts/red.png")
+            self.load_image("ghost_blue", "img/ghosts/blue.png")
+            self.load_image("ghost_orange", "img/ghosts/orange.png")
+            self.load_image("ghost_pink", "img/ghosts/pink.png")
+            self.load_image("ghost_dead", "img/ghosts/dead.png")
         except Exception as e:
             raise(e)
 
