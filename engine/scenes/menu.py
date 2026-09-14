@@ -35,7 +35,6 @@ class MenuScene(Scene):
     def handle_key(self, key):
         self.menu.handle_key(key)
 
-    # Scenes are imported here to avoid circular imports between scenes
     def start_game(self):
         from engine.scenes.game import GameScene
         self.engine.set_scene(GameScene(self.engine))
