@@ -12,7 +12,7 @@ class PacManDirection(Enum):
   LEFT = 3
 
 class PacMan:
-    def __init__(self, x: int = 0, y: int = 0, maze: list[list[int]] = []) -> None:
+    def __init__(self, x: int = 0, y: int = 0, maze: list[list[int]] = [], pacgums: list[list[int]] = []) -> None:
         self.start_x = x
         self.start_y = y
         self.x = x
@@ -30,12 +30,16 @@ class PacMan:
         if maze:
             self._maze_width = len(maze[0])
             self._maze_height = len(maze)
+        self._pacgums = pacgums
 
     def set_maze(self, maze: list[list[int]]) -> None:
         self._maze = maze
         if maze:
             self._maze_width = len(maze[0])
             self._maze_height = len(maze)
+
+    def set_pacgums(self, pacgums: list[list[int]]) -> None:
+        self._pacgums = pacgums
 
     def set_start_position(self, x: int, y: int) -> None:
         if self._maze[y][x] == 15:
@@ -50,6 +54,14 @@ class PacMan:
         self.next_y = y
         self.x_px = x * 10
         self.y_px = y * 10
+
+    def eat(self):
+        if self._pacgums[self.y][self.x] == 2:
+            self.points += 20
+            self._pacgums[self.y][self.x] = 0
+        elif self._pacgums[self.y][self.x] == 1:
+            self.points += 1
+            self._pacgums[self.y][self.x] = 0
 
     def move(self, direction: PacManDirection):
         moves = [(0, -1, 1), (1, 0, 2),
