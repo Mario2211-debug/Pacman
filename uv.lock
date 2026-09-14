@@ -324,6 +324,7 @@ dependencies = [
     { name = "flake8" },
     { name = "mlx" },
     { name = "mypy" },
+    { name = "pillow" },
     { name = "pydantic" },
 ]
 
