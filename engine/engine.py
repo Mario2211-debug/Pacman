@@ -15,10 +15,11 @@ MAX_DT = 0.1
 
 class Engine:
 
-    def __init__(self,  win_w: int, win_h: int):
+    def __init__(self, win_w: int, win_h: int, config, highscores):
         self.win_w = win_w
         self.win_h = win_h
-        self.win_h = win_h
+        self.config = config
+        self.highscores = highscores
         self.mlx_ptr = mlx.mlx_init()
         if not self.mlx_ptr:
             raise RuntimeError("mlx_init failed (no display?)")

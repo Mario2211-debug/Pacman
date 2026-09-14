@@ -7,22 +7,16 @@ from engine.engine import Engine
 from engine.scenes.menu import MenuScene
 from src.config import Config, open_config_file
 from src.ghost import Ghost
+from src.highscores import Highscores
 from src.pacman import PacMan, PacManDirection
 from src.pacgum import pacgums_generate
 
+WIN_W = 800
+WIN_H = 600
 
-engine = Engine(800, 600)
-engine.set_scene(MenuScene(engine))
-engine.run()
 
-if __name__ == "__main__":
-    config_filename = ""
-    if len(sys.argv) == 2:
-        config_filename = sys.argv[1]
-    config_json = open_config_file(config_filename)
-    cfg = Config.model_validate(config_json)
-    # print(cfg)
-
+def terminal_simulation(cfg: Config) -> None:
+    """Debug view of the maze, pacman and ghosts in the terminal."""
     ghosts = [Ghost(1), Ghost(2), Ghost(3), Ghost(4)]
     pacman = PacMan()
 
@@ -52,10 +46,12 @@ if __name__ == "__main__":
             pacman.move(random.choice(list(PacManDirection)))
             for ghost in ghosts:
                 ghost.set_maze(mazegen.maze)
-                # next_position = ghost.find_movement_to(3, 3, ghosts_positions)
+                # next_position = ghost.find_movement_to(3, 3,
+                #                                        ghosts_positions)
                 # ghosts_positions.append(next_position)
                 ghost.move(ghosts, pacman)
-                # print(f"\nGhost {ghost.image} position: {ghost.x}, {ghost.y}")
+                # print(f"\nGhost {ghost.image} position: {ghost.x}, "
+                #       f"{ghost.y}")
                 # print("Next position:", next_position)
             # print("------------")
 
@@ -81,6 +77,27 @@ if __name__ == "__main__":
             time.sleep(1)
             print("\n\n\n")
 
-
         print()
         break
+
+
+def main() -> None:
+    args = [arg for arg in sys.argv[1:] if not arg.startswith("--")]
+    config_filename = args[0] if args else ""
+    cfg = Config.model_validate(open_config_file(config_filename))
+
+    if "--terminal" in sys.argv:
+        terminal_simulation(cfg)
+        return
+
+    try:
+        engine = Engine(WIN_W, WIN_H, cfg, Highscores(cfg.highscore_filename))
+    except RuntimeError as err:
+        print(f"\033[91m{err}\033[0m")
+        sys.exit(1)
+    engine.set_scene(MenuScene(engine))
+    engine.run()
+
+
+if __name__ == "__main__":
+    main()
