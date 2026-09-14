@@ -31,6 +31,11 @@ class Engine:
                              self.win_w, self.win_h,
                              self.data, self.size_line,
                              self.img_format)
+        self.render.load_all_images()
+        self.render.create_rectangle("block_42_img",
+                                     self.render.corridor_width,
+                                     self.render.corridor_width, 0xAA000066)
+
         self.current_scene = None
         self.last_time = time.perf_counter()
 

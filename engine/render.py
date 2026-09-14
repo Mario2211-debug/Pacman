@@ -83,6 +83,40 @@ class Render:
                                     self.to_mlx_color(color), text)
         self.text_queue.clear()
 
+    def tile_image(self, img, x, y, w, h):
+        x0, x1 = max(x, 0), min(x + w, self.width)
+        y0, y1 = max(y, 0), min(y + h, self.height)
+        if x0 >= x1 or y0 >= y1:
+            return
+        rows = []
+        reps = (x1 - x0) // img.width + 2
+        start = ((x0 - x) % img.width) * 4
+        for ty in range(img.height):
+            src = bytes(img.data[ty * img.sl:ty * img.sl + img.width * 4])
+            rows.append((src * reps)[start:start + (x1 - x0) * 4])
+        for yy in range(y0, y1):
+            base = yy * self.size_line
+            self.data[base + x0 * 4:base + x1 * 4] = rows[(yy - y) % img.height]
+
+    def draw_maze(self, maze, x, y, cell, wall, wall_img,
+                  corridor_color, block_color):
+        width, height = len(maze[0]), len(maze)
+        self.tile_image(wall_img, x, y, width * cell + wall,
+                        height * cell + wall)
+        inner = cell - wall
+        for cy, row in enumerate(maze):
+            for cx, walls in enumerate(row):
+                px, py = x + cx * cell + wall, y + cy * cell + wall
+                if walls == 15:
+                    self.fill_rect(px, py, inner, inner, block_color)
+                    continue
+                self.fill_rect(px, py, inner, inner, corridor_color)
+                if not walls & 2 and cx + 1 < width:
+                    self.fill_rect(px + inner, py, wall, inner, corridor_color)
+                if not walls & 4 and cy + 1 < height:
+                    self.fill_rect(px, py + inner, inner, wall, corridor_color)
+
+
     def show(self, img: ImgData, x: int, y: int) -> None:
         self.mlx.mlx_put_image_to_window(self.ptr, self.win, img.img, x, y)
 
