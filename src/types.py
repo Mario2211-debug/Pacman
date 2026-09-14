@@ -5,3 +5,8 @@ class Direction(Enum):
   RIGHT = 1
   BOTTOM = 2
   LEFT = 3
+
+class GameStatus(Enum):
+  RUN = 1
+  PAUSED = 2
+  DEAD = 3

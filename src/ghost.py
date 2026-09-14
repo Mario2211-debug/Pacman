@@ -1,7 +1,7 @@
 from collections import deque
 from enum import Enum
 
-from .types import Direction
+from .types import Direction, GameStatus
 from .display import ImgData
 
 from typing import TYPE_CHECKING
@@ -27,7 +27,7 @@ class Ghost:
         self.next_y = y
         self.x_px = x
         self.y_px = y
-        self.speed = 1
+        self.speed = 2
         self.direction = Direction.RIGHT
         self.status = GhostStatus.ACTIVE
         self.freeze = False
@@ -97,9 +97,6 @@ class Ghost:
         if self.status == GhostStatus.ACTIVE:
             self.x, self.y = self.next_x, self.next_y
             # print(f"Ghost {self.image} position: {self.x}, {self.y}")
-            # if self.x == self.game.pacman.x and self.y == self.game.pacman.y:
-            #     print(f"!!!! CATCHED BY {self.image} at {self.x}, {self.y}")
-            #     exit(1)
             ghosts_next_positions = [(ghost.next_x, ghost.next_y) for ghost in self.game.ghosts if ghost is not self]
             move_to_x, move_to_y = self.find_next_position(self.game.pacman.x, self.game.pacman.y, ghosts_next_positions)
             self.next_x, self.next_y = move_to_x, move_to_y
