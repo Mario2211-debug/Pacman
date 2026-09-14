@@ -1,5 +1,10 @@
 import sys
 
+# mlx_string_put draws each glyph as 10x20 px with y at the top
+# (disassembled from libmlx.so, the font atlas cells are 12 px wide)
+CHAR_W = 10
+CHAR_H = 20
+
 
 class Render:
     def __init__(self, ptr, mlx, win, win_w,
@@ -57,8 +62,14 @@ class Render:
         a = color & 0xFF
         return int.from_bytes(bytes([b, g, r, a]), sys.byteorder)
 
+    def text_width(self, text: str):
+        return len(text) * CHAR_W
+
     def draw_text(self, text: str, x: int, y: int, color: int):
         self.text_queue.append((text, x, y, color))
+
+    def draw_text_centered(self, text: str, cx: int, y: int, color: int):
+        self.draw_text(text, max(0, cx - self.text_width(text) // 2), y, color)
 
     def flush_text(self):
         for text, x, y, color in self.text_queue:
