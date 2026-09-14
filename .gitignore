@@ -12,6 +12,8 @@ manual-sobrevivencia-git.md
 .Python
 .python-version
 build/
+mlx-2.2-py3-none-any/
+mazegenerator/
 develop-eggs/
 dist/
 downloads/
