@@ -1,8 +1,6 @@
 import sys
 import random
 import time
-from os import listdir
-from os.path import isfile, join
 
 from mazegenerator import MazeGenerator
 from engine.engine import Engine
@@ -35,14 +33,7 @@ if __name__ == "__main__":
         exit(1)
 
     try:
-        for file in [f for f in listdir("img/chars/letters") if isfile(join("img/chars/letters", f)) and f.endswith(".png")]:
-            display.load_image(file[0], join("img/chars/letters", file))
-
-        display.load_image("logo", "img/logo_400.png")
-        display.load_image("background1", "img/walls_100.png")
-        display.load_image("background2", "img/walls_200.png")
-        display.load_image("emptiness", "img/emptiness.png")
-        display.load_image("pacman", "img/pacman_24.png")
+        display.load_all_images()
         display.create_rectangle("block_42_img", display.corridor_width, display.corridor_width, 0xAA000066)
         display.create_rectangle("pacman_mask", display.images["pacman"].width, display.images["pacman"].height, 0xFF000000)
     except Exception as e:
@@ -52,11 +43,12 @@ if __name__ == "__main__":
     display.clear_all()
     display.show_filled_block(display.images["background1"], 0, 0, int(display.screen_width / display.images["background1"].width) + 1, int(display.screen_height / display.images["background1"].height) + 1)
 
-    display.show_filled_block(display.images["emptiness"], 1300, 170, 15, 20, 4, 4)
+    display.show_filled_block(display.images["emptiness"], 1300, 670, 15, 5, 4, 4)
 
     display.show(display.images["logo"], 1350, 50)
 
-    display.create_text("Test text.\nOnly letters yet", 1200, 350)
+    display.create_text("Test text.\n0123456789\n!?+-=.:,", 1200, 350)
+
 
     mazegen = MazeGenerator((25, 20), False, (0, 0), (1, 1), cfg.seed)
     # for x in mazegen.maze:
