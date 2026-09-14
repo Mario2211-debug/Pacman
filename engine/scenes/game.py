@@ -2,6 +2,8 @@ import math
 
 from engine import keys
 from src.game_state import GameState
+from src.pacman import PacMan, PacManDirection
+from src.pacgum import pacgums_generate
 from engine.scenes.scene import Scene
 from ..components.navbar import Navbar
 from mazegenerator import MazeGenerator
@@ -11,6 +13,8 @@ from utils.colors import Basic, Grays, Pacman
 HUD_H = 40
 MZ_W = 20
 MZ_H = 25
+PACMAN_SPEED = 5  # cells per second
+
 
 
 class GameScene(Scene):
@@ -34,6 +38,14 @@ class GameScene(Scene):
                          0x000000FF, 0x2121DEFF)
         self.background = bytes(render.data)
 
+
+        self.pacgums = pacgums_generate(self.maze, engine.config.pacgum)
+        self.pacman = PacMan()
+        self.pacman.pitch = cell
+        self.pacman.set_maze(self.maze)
+        self.pacman.set_pacgums(self.pacgums)
+        self.pacman.set_start_position(MZ_W // 2, MZ_H // 2, cell)
+
         # ========================= Components ================================
         self.navbar = Navbar(0, 0, engine.win_w, HUD_H, Grays.DARK_3)
         self.pause_button = Button(engine.win_w - 90, 8,
@@ -46,10 +58,56 @@ class GameScene(Scene):
         self.state.tick(dt)
         if self.state.finished:
             self.end_game()
+            return
+        self.move_pacman(dt)
+
+    def move_pacman(self, dt):
+        pacman = self.pacman
+        step = PACMAN_SPEED * self.cell * dt
+        target_x = pacman.next_x * self.cell
+        target_y = pacman.next_y * self.cell
+        if pacman.x_px < target_x:
+            pacman.x_px = min(pacman.x_px + step, target_x)
+        elif pacman.x_px > target_x:
+            pacman.x_px = max(pacman.x_px - step, target_x)
+        if pacman.y_px < target_y:
+            pacman.y_px = min(pacman.y_px + step, target_y)
+        elif pacman.y_px > target_y:
+            pacman.y_px = max(pacman.y_px - step, target_y)
+        if pacman.x_px == target_x and pacman.y_px == target_y:
+            eaten = self.pacgums[pacman.next_y][pacman.next_x]
+            pacman.move()
+            if eaten == 1:
+                self.state.eat_pacgum()
+            elif eaten == 2:
+                self.state.eat_super_pacgum()
+
 
     def draw(self, renderer):
-        self.draw_hud(renderer)
         renderer.data[:] = self.background
+        self.draw_pacgums(renderer)
+        sprite = renderer.images["pacman"]
+        offset = (self.cell - self.wall - sprite.width) // 2
+        renderer.blit(sprite,
+                      self.maze_x + self.wall + offset + int(self.pacman.x_px),
+                      self.maze_y + self.wall + offset + int(self.pacman.y_px))
+        self.draw_hud(renderer)
+
+
+    def draw_pacgums(self, renderer):
+        inner = self.cell - self.wall
+        small = max(2, inner // 6)
+        big = max(4, inner // 2)
+        for y, row in enumerate(self.pacgums):
+            for x, value in enumerate(row):
+                if not value:
+                    continue
+                size = small if value == 1 else big
+                color = Pacman.DOT if value == 1 else Pacman.POWER_DOT
+                renderer.fill_rect(
+                    self.maze_x + self.wall + x * self.cell + (inner - size) // 2,
+                    self.maze_y + self.wall + y * self.cell + (inner - size) // 2,
+                    size, size, color)
 
     def draw_hud(self, renderer):
         state = self.state
@@ -77,6 +135,15 @@ class GameScene(Scene):
     def handle_key(self, key):
         if key in keys.PAUSE:
             self.pause()
+        elif key in (keys.UP, keys.W):
+            self.pacman.direction_next = PacManDirection.TOP
+        elif key in (keys.RIGHT, keys.D):
+            self.pacman.direction_next = PacManDirection.RIGHT
+        elif key in (keys.DOWN, keys.S):
+            self.pacman.direction_next = PacManDirection.BOTTOM
+        elif key in (keys.LEFT, keys.A):
+            self.pacman.direction_next = PacManDirection.LEFT
+
         # Temporary test keys until the gameplay is plugged in
         elif key == keys.ONE:
             self.state.eat_pacgum()
@@ -92,7 +159,6 @@ class GameScene(Scene):
     def pause(self):
         from engine.scenes.pause import PauseScene
         self.engine.set_scene(PauseScene(self.engine, self))
-        # render.data[:] = self.game_scene.background
 
     def end_game(self):
         from engine.scenes.game_over import GameOverScene

@@ -27,7 +27,7 @@ class PauseScene(Scene):
                              ], bg_color=Basic.NAVY)
 
     def draw(self, renderer):
-        self.game_scene.draw_hud(renderer)
+        self.game_scene.draw(renderer)
         self.main.draw(renderer)
         renderer.draw_rect(self.main.x, self.main.y, self.main.width,
                            self.main.height, Pacman.YELLOW, 2)

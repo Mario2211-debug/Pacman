@@ -1,6 +1,6 @@
 from enum import Enum
 
-from .display import Display
+# from .display import Display
 
 class PacManStatus(Enum):
   NORMAL = 1
@@ -33,7 +33,7 @@ class PacMan:
             self._maze_width = len(maze[0])
             self._maze_height = len(maze)
         self._pacgums = pacgums
-        self.display: Display
+        self.pitch = 1
 
     def set_maze(self, maze: list[list[int]]) -> None:
         self._maze = maze
@@ -70,8 +70,8 @@ class PacMan:
         moves = [(0, -1, 1), (1, 0, 2),
                  (0, 1, 4), (-1, 0, 8)]
         self.x, self.y = self.next_x, self.next_y
-        self.x_px = self.x * (self.display.corridor_width + self.display.wall_width)
-        self.y_px = self.y * (self.display.corridor_width + self.display.wall_width)
+        self.x_px = self.x * self.pitch
+        self.y_px = self.y * self.pitch
         self.eat()
         # print(f"PacMan position: {self.x}, {self.y} ({self.points} points)")
         dx, dy, code = moves[self.direction_next.value]

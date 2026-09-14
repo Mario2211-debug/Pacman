@@ -3,6 +3,7 @@ from os import listdir
 from os.path import isfile, join
 from models.ImageModel import ImgData
 from mazegenerator import MazeGenerator
+from utils.colors import Pacman
 # mlx_string_put draws each glyph as 10x20 px with y at the top
 # (disassembled from libmlx.so, the font atlas cells are 12 px wide)
 CHAR_W = 10
@@ -116,6 +117,17 @@ class Render:
                 if not walls & 4 and cy + 1 < height:
                     self.fill_rect(px, py + inner, inner, wall, corridor_color)
 
+    def blit(self, img, x, y):
+        x0, x1 = max(x, 0), min(x + img.width, self.width)
+        y0, y1 = max(y, 0), min(y + img.height, self.height)
+        if x0 >= x1 or y0 >= y1:
+            return
+        sx = (x0 - x) * 4
+        for yy in range(y0, y1):
+            src = (yy - y) * img.sl + sx
+            base = yy * self.size_line
+            self.data[base + x0 * 4:base + x1 * 4] = \
+                img.data[src:src + (x1 - x0) * 4]
 
     def show(self, img: ImgData, x: int, y: int) -> None:
         self.mlx.mlx_put_image_to_window(self.ptr, self.win, img.img, x, y)
