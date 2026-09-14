@@ -2,6 +2,7 @@ from collections import deque
 from enum import Enum
 
 from .pacman import PacMan
+from .display import ImgData
 
 class GhostStatus(Enum):
   ACTIVE = 1
@@ -9,7 +10,7 @@ class GhostStatus(Enum):
   DEATH = 3
 
 class Ghost:
-    def __init__(self, image: int = 0, x: int = 0, y: int = 0, maze: list[list[int]] = []) -> None:
+    def __init__(self, image: ImgData, x: int = 0, y: int = 0, maze: list[list[int]] = []) -> None:
         self.image = image
         self.start_x = x
         self.start_y = y
@@ -83,10 +84,10 @@ class Ghost:
     def move(self, ghosts: list["Ghost"], pacman: PacMan = None):
         if self.status == GhostStatus.ACTIVE:
             self.x, self.y = self.next_x, self.next_y
-            print(f"Ghost {self.image} position: {self.x}, {self.y}")
+            # print(f"Ghost {self.image} position: {self.x}, {self.y}")
             if self.x == pacman.x and self.y == pacman.y:
                 print(f"!!!! CATCHED BY {self.image} at {self.x}, {self.y}")
-                exit()
+                exit(1)
             ghosts_next_positions = [(ghost.next_x, ghost.next_y) for ghost in ghosts if ghost is not self]
             move_to_x, move_to_y = self.find_next_position(pacman.x, pacman.y, ghosts_next_positions)
             self.next_x, self.next_y = move_to_x, move_to_y
