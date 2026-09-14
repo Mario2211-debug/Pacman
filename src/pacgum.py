@@ -14,12 +14,27 @@ def pacgums_generate(maze: list[list[int]], number: int) -> list[list[int]]:
     pacgums[maze_height - 1][maze_width - 1] = 2
 
     while pacgums_max:
-        x = random.randint(0, maze_width - 1)
-        y = random.randint(0, maze_height - 1)
-        if maze[y][x] != 15 and not pacgums[y][x]:
-            # if random.getrandbits(1):
-            pacgums[y][x] = 1
-            pacgums_max -= 1
+        for y in range(maze_height):
+            zero_indexes = [i for i, v in enumerate(pacgums[y]) if v == 0]
+            if not zero_indexes:
+                continue
+            x = random.choice(zero_indexes)
+            if maze[y][x] != 15:
+                pacgums[y][x] = 1
+                pacgums_max -= 1
+            if pacgums_max == 0:
+                break
+
+        if pacgums_max == 0:
+            break
+
+    # while pacgums_max:
+    #     x = random.randint(0, maze_width - 1)
+    #     y = random.randint(0, maze_height - 1)
+    #     if maze[y][x] != 15 and not pacgums[y][x]:
+    #         # if random.getrandbits(1):
+    #         pacgums[y][x] = 1
+    #         pacgums_max -= 1
 
     # for y in range(maze_height):
     #     for x in range(maze_width):

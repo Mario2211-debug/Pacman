@@ -26,6 +26,7 @@ class PacMan:
         self.direction = PacManDirection.RIGHT
         self.status = PacManStatus.NORMAL
         self._maze = maze
+
         if maze:
             self._maze_width = len(maze[0])
             self._maze_height = len(maze)
