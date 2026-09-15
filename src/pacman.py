@@ -13,7 +13,7 @@ class PacManStatus(Enum):
   FAST = 3
 
 class PacMan:
-    def __init__(self, image: ImgData, mask: ImgData, x: int = 0, y: int = 0, maze: list[list[int]] = [], pacgums: list[list[int]] = []) -> None:
+    def __init__(self, image: ImgData, mask: ImgData, x: int = 0, y: int = 0) -> None:
         self.image = image
         self.mask = mask
         self.start_x = x
@@ -24,31 +24,16 @@ class PacMan:
         self.next_y = y
         self.x_px = x
         self.y_px = y
-        self.speed = 2
-        self.points = 0
+        self.speed = 3
         self.direction = Direction.RIGHT
         self.direction_next = self.direction
         self.status = PacManStatus.NORMAL
-        self._maze = maze
-        if maze:
-            self._maze_width = len(maze[0])
-            self._maze_height = len(maze)
-        self._pacgums = pacgums
         self.game: Game
 
-    def set_maze(self, maze: list[list[int]]) -> None:
-        self._maze = maze
-        if maze:
-            self._maze_width = len(maze[0])
-            self._maze_height = len(maze)
-
-    def set_pacgums(self, pacgums: list[list[int]]) -> None:
-        self._pacgums = pacgums
-
     def set_start_position(self, x: int, y: int) -> None:
-        if self._maze[y][x] == 15:
+        if self.game.maze[y][x] == 15:
             x += 1
-        if self._maze[y][x] == 15:
+        if self.game.maze[y][x] == 15:
             y -= 1
         self.start_x = x
         self.start_y = y
@@ -60,12 +45,13 @@ class PacMan:
         self.y_px = y  * (self.game.display.corridor_width + self.game.display.wall_width)
 
     def eat(self):
-        if self._pacgums[self.y][self.x] == 2:
-            self.points += 20
-            self._pacgums[self.y][self.x] = 0
-        elif self._pacgums[self.y][self.x] == 1:
-            self.points += 1
-            self._pacgums[self.y][self.x] = 0
+        if self.game.pacgums[self.y][self.x] == 2:
+            self.game.points += 20
+            self.game.pacgums[self.y][self.x] = 0
+        elif self.game.pacgums[self.y][self.x] == 1:
+            self.game.points += 1
+            self.game.pacgums[self.y][self.x] = 0
+            print(self.game.points)
 
     def move(self):
         moves = [(0, -1, 1), (1, 0, 2),
@@ -77,16 +63,16 @@ class PacMan:
         # print(f"PacMan position: {self.x}, {self.y} ({self.points} points)")
         dx, dy, code = moves[self.direction_next.value]
         nx, ny = self.x + dx, self.y + dy
-        if (0 <= nx < self._maze_width and 0 <= ny < self._maze_height
-            and (self._maze[self.y][self.x] & code) == 0):
+        if (0 <= nx < self.game.maze_width and 0 <= ny < self.game.maze_height
+            and (self.game.maze[self.y][self.x] & code) == 0):
             self.next_x, self.next_y = nx, ny
             self.direction = self.direction_next
             # print(f"PacMan change {self.direction_next.name} to {nx}, {ny}")
             return
         dx, dy, code = moves[self.direction.value]
         nx, ny = self.x + dx, self.y + dy
-        if (0 <= nx < self._maze_width and 0 <= ny < self._maze_height
-            and (self._maze[self.y][self.x] & code) == 0):
+        if (0 <= nx < self.game.maze_width and 0 <= ny < self.game.maze_height
+            and (self.game.maze[self.y][self.x] & code) == 0):
             self.next_x, self.next_y = nx, ny
             # print(f"PacMan move {self.direction.name} to {nx}, {ny}")
             return

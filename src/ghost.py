@@ -16,7 +16,7 @@ class GhostStatus(Enum):
 
 
 class Ghost:
-    def __init__(self, image: ImgData, mask: ImgData, x: int = 0, y: int = 0, maze: list[list[int]] = []) -> None:
+    def __init__(self, image: ImgData, mask: ImgData, x: int = 0, y: int = 0) -> None:
         self.image = image
         self.mask = mask
         self.start_x = x
@@ -31,18 +31,7 @@ class Ghost:
         self.direction = Direction.RIGHT
         self.status = GhostStatus.ACTIVE
         self.freeze = False
-        self._maze = maze
-        if maze:
-            self._maze_width = len(maze[0])
-            self._maze_height = len(maze)
-
         self.game: Game
-
-    def set_maze(self, maze: list[list[int]]) -> None:
-        self._maze = maze
-        if maze:
-            self._maze_width = len(maze[0])
-            self._maze_height = len(maze)
 
     def set_start_position(self, x: int, y: int) -> None:
         self.start_x = x
@@ -69,8 +58,8 @@ class Ghost:
                 nx, ny = x + dx, y + dy
                 if (nx, ny) in ghosts_positions:
                     continue
-                if (0 <= nx < self._maze_width and 0 <= ny < self._maze_height
-                        and (self._maze[y][x] & code) == 0
+                if (0 <= nx < self.game.maze_width and 0 <= ny < self.game.maze_height
+                        and (self.game.maze[y][x] & code) == 0
                         and (nx, ny) not in prev):
                     prev[(nx, ny)] = ((x, y))
                     queue.append((nx, ny))
