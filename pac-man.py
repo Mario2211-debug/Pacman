@@ -30,6 +30,7 @@ if __name__ == "__main__":
     cfg = Config.model_validate(config_json)
 
     game = Game()
+    game.config = cfg
 
     try:
         display = Display()
@@ -54,6 +55,34 @@ if __name__ == "__main__":
         print(e)
         exit(1)
 
+
+    maze_width = 25
+    maze_height = 20
+
+    mazegen = MazeGenerator((maze_width, maze_height), False, (0, 0), (1, 1), cfg.seed)
+    game.set_maze(mazegen.maze)
+
+    pacman = PacMan(display.images["pacman"], display.images["pacman_mask"])
+    game.pacman = pacman
+    pacman.game = game
+
+    pacgums = pacgums_generate(mazegen.maze, cfg.pacgum)
+    game.pacgums = pacgums
+    pacman.set_start_position(maze_width // 2, maze_height // 2)
+
+    ghosts = [Ghost(display.images["ghost_red"], display.images["ghost_red_mask"]),
+              Ghost(display.images["ghost_blue"], display.images["ghost_blue_mask"]),
+              Ghost(display.images["ghost_orange"], display.images["ghost_orange_mask"]),
+              Ghost(display.images["ghost_pink"], display.images["ghost_pink_mask"])]
+    for ghost in ghosts:
+        ghost.game = game
+    ghosts[0].set_start_position(0, 0)
+    ghosts[1].set_start_position(maze_width - 1, 0)
+    ghosts[2].set_start_position(0, maze_height - 1)
+    ghosts[3].set_start_position(maze_width - 1, maze_height - 1)
+    game.ghosts = ghosts
+
+
     display.clear_all()
     display.show_filled_block(display.images["background1"], 0, 0, int(display.screen_width / display.images["background1"].width) + 1, int(display.screen_height / display.images["background1"].height) + 1)
 
@@ -63,13 +92,6 @@ if __name__ == "__main__":
 
     display.create_text("Test text.\n0123456789\n!?+-=.:,", 1200, 350)
 
-
-    maze_width = 25
-    maze_height = 20
-
-    mazegen = MazeGenerator((maze_width, maze_height), False, (0, 0), (1, 1), cfg.seed)
-    # for x in mazegen.maze:
-    #     print(x)
     pos_y = 0
     for y in range(maze_height):
         pos_y += display.corridor_width
@@ -88,39 +110,20 @@ if __name__ == "__main__":
             if not mazegen.maze[y][x] & 1:
                 # print(x, y, "don't has top wall")
                 display.show(display.images["emptiness"], pos_x, pos_y)
+
             display.show(display.images["emptiness"], pos_x, pos_y + display.wall_width)
+            if pacgums[y][x] == 1:
+                display.show(display.images["."], pos_x + 5, pos_y + display.wall_width + 5)
+            elif pacgums[y][x] == 2:
+                display.show(display.images["+"], pos_x, pos_y + display.wall_width)
+
         pos_y += display.wall_width
 
-    pacman = PacMan(display.images["pacman"], display.images["pacman_mask"])
-    game.pacman = pacman
-    pacman.game = game
-    # pacman.direction = Direction.RIGHT
-    # pacman.direction_next = pacman.direction
 
-    pacgums = pacgums_generate(mazegen.maze, cfg.pacgum)
-    pacman.set_maze(mazegen.maze)
-    pacman.set_pacgums(pacgums)
-    pacman.set_start_position(10, 10)
-
-    ghosts = [Ghost(display.images["ghost_red"], display.images["ghost_red_mask"]),
-              Ghost(display.images["ghost_blue"], display.images["ghost_blue_mask"]),
-              Ghost(display.images["ghost_orange"], display.images["ghost_orange_mask"]),
-              Ghost(display.images["ghost_pink"], display.images["ghost_pink_mask"])]
-    for ghost in ghosts:
-        ghost.set_maze(mazegen.maze)
-        # ghost.display = display
-        ghost.game = game
-        # ghost.direction = Direction.RIGHT
-    ghosts[0].set_start_position(0, 0)
-    ghosts[1].set_start_position(maze_width - 1, 0)
-    ghosts[2].set_start_position(0, maze_height - 1)
-    ghosts[3].set_start_position(maze_width - 1, maze_height - 1)
-    game.ghosts = ghosts
-
-    def gere_close_1(display):
+    def handle_close(display):
         display.mlx.mlx_loop_exit(display.mlx_ptr)
 
-    def gere_key_press(key, pacman):
+    def handle_key_press(key, pacman):
         # print(f"Pressed key {key}")
         if key == 119 or key == 65362:
             pacman.direction_next = Direction.TOP
@@ -132,8 +135,8 @@ if __name__ == "__main__":
             pacman.direction_next = Direction.LEFT
 
     def move_object(obj: PacMan | Ghost):
-        shift_x = display.corridor_width + display.wall_width + 1
-        shift_y = display.corridor_width + display.wall_width + 1
+        shift_x = display.corridor_width + display.wall_width + 5
+        shift_y = display.corridor_width + display.wall_width + 5
         # Clear old
         pos_x = shift_x + obj.x_px
         pos_y = shift_y + obj.y_px
@@ -160,6 +163,15 @@ if __name__ == "__main__":
                 obj.y_px += obj.speed
             if obj.y_px >= obj.next_y * (display.corridor_width + display.wall_width):
                 obj.move()
+
+        #Show pacgum
+        if type(obj) == Ghost:
+            if pacgums[obj.y][obj.x] == 1:
+                display.show(display.images["."], (obj.x + 1) * (display.corridor_width + display.wall_width) + 5, (obj.y + 1) * (display.corridor_width + display.wall_width) + 5)
+            elif pacgums[obj.y][obj.x] == 2:
+                display.show(display.images["+"], (obj.x + 1) * (display.corridor_width + display.wall_width) + 5, (obj.y + 1) * (display.corridor_width + display.wall_width) + 5)
+        # if pacgums[y][x] == 2:
+        #     display.show(display.images["+"], pos_x, pos_y + display.wall_width)
         # Show new
         pos_x = shift_x + obj.x_px
         pos_y = shift_y + obj.y_px
@@ -172,45 +184,18 @@ if __name__ == "__main__":
         move_object(pacman)
         for ghost in ghosts:
             move_object(ghost)
-            if (pacman.x_px - ghost.speed <= ghost.x_px <= pacman.x_px + ghost.speed
-                and pacman.y_px - ghost.speed <= ghost.y_px <= pacman.y_px + ghost.speed):
+            if (pacman.x_px - pacman.image.width // 1.5 <= ghost.x_px <= pacman.x_px + pacman.image.width // 1.5
+                and pacman.y_px - pacman.image.height // 1.5 <= ghost.y_px <= pacman.y_px + pacman.image.height // 1.5):
                 print(f"!!!! CATCHED BY {ghost.image} at {ghost.x}, {ghost.y}")
                 game.status = GameStatus.DEAD
                 # exit()
         # time.sleep(0.5)
 
-    # def make_turn(nothing):
-    #     shift_x = display.corridor_width + display.wall_width + 1
-    #     shift_y = display.corridor_width + display.wall_width + 1
-    #     # Clear old
-    #     pos_x = shift_x + pacman.x * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].width / 2)
-    #     pos_y = shift_y + pacman.y * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].height / 2)
-    #     display.show(display.images["pacman_mask"], pos_x, pos_y)
-    #     # Show new
-    #     # pacman.move(random.choice(list(PacManDirection)))
-    #     # print(pacman.direction)
-    #     pacman.move(pacman.direction)
-    #     pos_x = shift_x + pacman.x * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].width / 2)
-    #     pos_y = shift_y + pacman.y * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(display.images["pacman"].height / 2)
-    #     display.show(display.images["pacman"], pos_x, pos_y)
-
-    #     for ghost in ghosts:
-    #     # Clear old
-    #         pos_x = shift_x + ghost.x * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(ghost.image.width / 2)
-    #         pos_y = shift_y + ghost.y * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(ghost.image.height / 2)
-    #         display.show(display.images["ghost_mask"], pos_x, pos_y)
-    #         # Show new
-    #         ghost.move(ghosts, pacman)
-    #         pos_x = shift_x + ghost.x * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(ghost.image.width / 2)
-    #         pos_y = shift_y + ghost.y * (display.corridor_width + display.wall_width) + int(display.corridor_width / 2) - int(ghost.image.height / 2)
-    #         display.show(ghost.image, pos_x, pos_y)
-    #     time.sleep(0.5)
 
 
-
-    display.mlx.mlx_hook(display.win, 33, 0, gere_close_1, display)  # WM_DELETE_WINDOW
+    display.mlx.mlx_hook(display.win, 33, 0, handle_close, display)  # WM_DELETE_WINDOW
     # display.mlx.mlx_key_hook(display.win, gere_key_press, pacman)
-    display.mlx.mlx_hook(display.win, 2, 1, gere_key_press, pacman)
+    display.mlx.mlx_hook(display.win, 2, 1, handle_key_press, pacman)
 
     display.mlx.mlx_loop_hook(display.mlx_ptr, make_turn, None)
 
