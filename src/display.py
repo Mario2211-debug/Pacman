@@ -13,6 +13,7 @@ class ImgData:
         self.sl = 0  # size line
         self.bpp = 0  # bits per pixel
         self.iformat = 0
+        self.name = None
 
 class Display:
     """Structure for main vars"""
@@ -83,6 +84,7 @@ class Display:
             raise Exception(f"Can't create png {name}")
         new_img.data, new_img.bpp, new_img.sl, new_img.iformat = \
             self.mlx.mlx_get_data_addr(new_img.img)
+        new_img.name = name
         self.images.update({name: new_img})
 
     def create_mask(self, name: str) -> ImgData:
@@ -99,7 +101,41 @@ class Display:
             if self.images[name].data[i + 3] == 0:
                 color = 0x00000000
             new_img.data[i:i + 4] = color.to_bytes(4, 'little')
-        self.images.update({name+"_mask": new_img})
+        new_img.name = name + "_mask"
+        self.images.update({name + "_mask": new_img})
+
+    def create_mirror(self, name: str) -> ImgData:
+        new_img = ImgData()
+        new_img.width = self.images[name].width
+        new_img.height = self.images[name].height
+        new_img.img = self.mlx.mlx_new_image(self.mlx_ptr, new_img.width, new_img.height)
+        if not new_img.img:
+            raise Exception(f"Can't create image {name}")
+        new_img.data, new_img.bpp, new_img.sl, new_img.iformat = \
+            self.mlx.mlx_get_data_addr(new_img.img)
+        j = self.images[name].sl * self.images[name].height
+        for i in range(0, self.images[name].sl * self.images[name].height, 4):
+            j -= 4
+            new_img.data[j:j + 4] = self.images[name].data[i:i + 4]
+        new_img.name = name + "_mirror"
+        self.images.update({name + "_mirror": new_img})
+
+    def create_rotate90(self, name: str) -> ImgData:
+        new_img = ImgData()
+        new_img.width = self.images[name].height
+        new_img.height = self.images[name].width
+        new_img.img = self.mlx.mlx_new_image(self.mlx_ptr, new_img.width, new_img.height)
+        if not new_img.img:
+            raise Exception(f"Can't create image {name}")
+        new_img.data, new_img.bpp, new_img.sl, new_img.iformat = \
+            self.mlx.mlx_get_data_addr(new_img.img)
+        for y in range(0, self.images[name].height):
+            for x in range(0, self.images[name].sl, 4):
+                pos = x + (y * new_img.sl)
+                pos_new = (self.images[name].height - y - 1) * 4 + x * self.images[name].height
+                # print(pos, "=>", pos_new)
+                new_img.data[pos_new:pos_new + 4] = self.images[name].data[pos:pos + 4]
+        self.images.update({name + "_rotate90": new_img})
 
     def create_rectangle(self, name: str, width: int, height: int, color) -> None:
         new_img = ImgData()
@@ -113,6 +149,7 @@ class Display:
         # Fill image with color
         for i in range(0, new_img.sl * new_img.height, 4):
             new_img.data[i:i + 4] = color.to_bytes(4, 'little')
+        new_img.name = name
         self.images.update({name: new_img})
 
     def show_filled_block(self, img: ImgData, x: int, y: int, num_x: int, num_y: int, shift_x: int = 0, shift_y: int = 0) -> None:

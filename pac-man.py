@@ -41,6 +41,9 @@ if __name__ == "__main__":
         display.load_all_images()
         display.create_rectangle("block_42_img", display.corridor_width, display.corridor_width, 0xAA000066)
         display.create_mask("pacman")
+        display.create_mirror("pacman")
+        display.create_rotate90("pacman")
+        display.create_mirror("pacman_rotate90")
         display.create_mask("ghost_red")
         display.create_mask("ghost_blue")
         display.create_mask("ghost_orange")
@@ -50,22 +53,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(e)
         exit(1)
-
-    # print(display.images["ghost_blue"].sl)
-    # print(display.images["ghost_blue"].iformat)
-    # exit()
-
-    # for i in range(0, display.images["ghost_blue"].sl * display.images["ghost_blue"].width, 4):
-    #     for j in (display.images["ghost_blue"].data[i: i + 4]):
-    #         print("  ", j, end="")
-    #     print()
-    #     if i == display.images["ghost_blue"].sl * 4:
-    #         print()
-
-    # for i in range(3, display.images["ghost_blue"].sl * display.images["ghost_blue"].width, 4):
-    #     print(display.images["ghost_blue"].data[i])
-
-    # exit()
 
 
     maze_width = 25
@@ -105,7 +92,7 @@ if __name__ == "__main__":
     display.create_text("Test text.\n0123456789\n!?+-=.:,", 1200, 350)
 
 
-    # display.show(display.images["pacman_mask"], 10, 10)
+    # display.show(display.images["pacman_rorate90"], 10, 10)
     # display.show(display.images["ghost_orange_mask"], 30, 10)
 
     pos_y = 0
@@ -159,22 +146,29 @@ if __name__ == "__main__":
         display.show(obj.mask, pos_x, pos_y)
 
         if obj.direction == Direction.RIGHT:
-            # print(obj)
+            if type(obj) == PacMan:
+                pacman.image = display.images["pacman"]
             if obj.x_px < obj.next_x * (display.corridor_width + display.wall_width):
                 obj.x_px += obj.speed
             if obj.x_px >= obj.next_x * (display.corridor_width + display.wall_width):
                 obj.move()
         elif obj.direction == Direction.LEFT:
+            if type(obj) == PacMan:
+                pacman.image = display.images["pacman_mirror"]
             if obj.x_px > obj.next_x * (display.corridor_width + display.wall_width):
                 obj.x_px -= obj.speed
             if obj.x_px <= obj.next_x * (display.corridor_width + display.wall_width):
                 obj.move()
         elif obj.direction == Direction.TOP:
+            if type(obj) == PacMan:
+                pacman.image = display.images["pacman_rotate90_mirror"]
             if obj.y_px > obj.next_y * (display.corridor_width + display.wall_width):
                 obj.y_px -= obj.speed
             if obj.y_px <= obj.next_y * (display.corridor_width + display.wall_width):
                 obj.move()
         elif obj.direction == Direction.BOTTOM:
+            if type(obj) == PacMan:
+                pacman.image = display.images["pacman_rotate90"]
             if obj.y_px < obj.next_y * (display.corridor_width + display.wall_width):
                 obj.y_px += obj.speed
             if obj.y_px >= obj.next_y * (display.corridor_width + display.wall_width):
