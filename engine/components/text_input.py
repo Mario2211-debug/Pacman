@@ -10,15 +10,15 @@ class TextInput:
                  border_color=0xFFFF00FF):
         self.x: int = x
         self.y: int = y
-        self.width: int = width
-        self.height: int = CHAR_H + PADDING * 2
-        self.max_length = max_length
-        self.on_submit = on_submit
-        self.color: int = color
-        self.bg_color: int = bg_color
-        self.border_color: int = border_color
         self.value = ""
         self.blink = 0.0
+        self.color: int = color
+        self.width: int = width
+        self.on_submit = on_submit
+        self.max_length = max_length
+        self.bg_color: int = bg_color
+        self.border_color: int = border_color
+        self.height: int = CHAR_H + PADDING * 2
 
     def update(self, dt):
         self.blink = (self.blink + dt) % 1.0

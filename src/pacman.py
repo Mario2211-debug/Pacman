@@ -75,7 +75,10 @@ class PacMan:
             and (self.game.maze[self.y][self.x] & code) == 0):
             self.next_x, self.next_y = nx, ny
             # print(f"PacMan move {self.direction.name} to {nx}, {ny}")
+            # print(f"PacMan move {self.direction.name} to {nx}, {ny}")
             return
+        # print("PacMan CAN'T move", self.direction, self.direction_next, self.x, self.y)
+        # print(self.next_x, self.next_y)
         # print("PacMan CAN'T move", self.direction, self.direction_next, self.x, self.y)
         # print(self.next_x, self.next_y)
 

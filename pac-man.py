@@ -8,6 +8,7 @@ from src.types import Direction, GameStatus
 from src.game import Game
 from engine.engine import Engine
 from engine.scenes.menu import MenuScene
+from src.pacman import PacMan, PacManDirection
 from src.config import Config, open_config_file
 from src.ghost import Ghost
 from src.pacman import PacMan

@@ -72,6 +72,7 @@ class Ghost:
             parents.append(parent)
             cur = parent
 
+
         if len(parents) > 1:
             # print(parents)
             self.next_x = parents[-2][0]
