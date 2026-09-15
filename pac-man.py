@@ -97,7 +97,7 @@ if __name__ == "__main__":
     pacgums = pacgums_generate(mazegen.maze, cfg.pacgum)
     pacman.set_maze(mazegen.maze)
     pacman.set_pacgums(pacgums)
-    pacman.set_start_position(10, 10)
+    pacman.set_start_position(maze_width // 2, maze_height // 2)
 
     ghosts = [Ghost(display.images["ghost_red"], display.images["ghost_red_mask"]),
               Ghost(display.images["ghost_blue"], display.images["ghost_blue_mask"]),
@@ -129,8 +129,8 @@ if __name__ == "__main__":
             pacman.direction_next = Direction.LEFT
 
     def move_object(obj: PacMan | Ghost):
-        shift_x = display.corridor_width + display.wall_width + 1
-        shift_y = display.corridor_width + display.wall_width + 1
+        shift_x = display.corridor_width + display.wall_width + 5
+        shift_y = display.corridor_width + display.wall_width + 5
         # Clear old
         pos_x = shift_x + obj.x_px
         pos_y = shift_y + obj.y_px
@@ -169,8 +169,8 @@ if __name__ == "__main__":
         move_object(pacman)
         for ghost in ghosts:
             move_object(ghost)
-            if (pacman.x_px - ghost.speed <= ghost.x_px <= pacman.x_px + ghost.speed
-                and pacman.y_px - ghost.speed <= ghost.y_px <= pacman.y_px + ghost.speed):
+            if (pacman.x_px - pacman.image.width // 1.5 <= ghost.x_px <= pacman.x_px + pacman.image.width // 1.5
+                and pacman.y_px - pacman.image.height // 1.5 <= ghost.y_px <= pacman.y_px + pacman.image.height // 1.5):
                 print(f"!!!! CATCHED BY {ghost.image} at {ghost.x}, {ghost.y}")
                 game.status = GameStatus.DEAD
                 # exit()
