@@ -50,10 +50,25 @@ if __name__ == "__main__":
         display.create_mask("ghost_pink")
         display.create_mask("ghost_dead")
         # display.create_rectangle("pacman_mask", display.images["pacman"].width, display.images["pacman"].height, 0xFF000000)
-        display.create_rectangle("ghost_mask", display.images["ghost_red"].width, display.images["ghost_orange"].height + 5, 0xFF000000)
     except Exception as e:
         print(e)
         exit(1)
+
+    # print(display.images["ghost_blue"].sl)
+    # print(display.images["ghost_blue"].iformat)
+    # exit()
+
+    # for i in range(0, display.images["ghost_blue"].sl * display.images["ghost_blue"].width, 4):
+    #     for j in (display.images["ghost_blue"].data[i: i + 4]):
+    #         print("  ", j, end="")
+    #     print()
+    #     if i == display.images["ghost_blue"].sl * 4:
+    #         print()
+
+    # for i in range(3, display.images["ghost_blue"].sl * display.images["ghost_blue"].width, 4):
+    #     print(display.images["ghost_blue"].data[i])
+
+    # exit()
 
 
     maze_width = 25
@@ -91,6 +106,10 @@ if __name__ == "__main__":
     display.show(display.images["logo"], 1350, 50)
 
     display.create_text("Test text.\n0123456789\n!?+-=.:,", 1200, 350)
+
+
+    # display.show(display.images["pacman_mask"], 10, 10)
+    # display.show(display.images["ghost_orange_mask"], 30, 10)
 
     pos_y = 0
     for y in range(maze_height):
@@ -170,8 +189,7 @@ if __name__ == "__main__":
                 display.show(display.images["."], (obj.x + 1) * (display.corridor_width + display.wall_width) + 5, (obj.y + 1) * (display.corridor_width + display.wall_width) + 5)
             elif pacgums[obj.y][obj.x] == 2:
                 display.show(display.images["+"], (obj.x + 1) * (display.corridor_width + display.wall_width) + 5, (obj.y + 1) * (display.corridor_width + display.wall_width) + 5)
-        # if pacgums[y][x] == 2:
-        #     display.show(display.images["+"], pos_x, pos_y + display.wall_width)
+
         # Show new
         pos_x = shift_x + obj.x_px
         pos_y = shift_y + obj.y_px

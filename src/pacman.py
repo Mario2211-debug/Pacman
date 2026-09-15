@@ -51,7 +51,7 @@ class PacMan:
         elif self.game.pacgums[self.y][self.x] == 1:
             self.game.points += 1
             self.game.pacgums[self.y][self.x] = 0
-            print(self.game.points)
+            # print(self.game.points)
 
     def move(self):
         moves = [(0, -1, 1), (1, 0, 2),
