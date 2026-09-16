@@ -52,11 +52,12 @@ class PacMan:
 
     def eat(self):
         if self.game.pacgums[self.y][self.x] == 2:
-            self.game.points += 20
             self.game.pacgums[self.y][self.x] = 0
+            self.game.stats.increase_score(100)
         elif self.game.pacgums[self.y][self.x] == 1:
-            self.game.points += 1
+            # self.game.stats.score += 1
             self.game.pacgums[self.y][self.x] = 0
+            self.game.stats.increase_score(1)
             # print(self.game.points)
 
     def move(self):

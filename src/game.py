@@ -8,6 +8,7 @@ from mazegenerator import MazeGenerator
 from .types import Direction, GameStatus
 
 # if TYPE_CHECKING:
+from .stats import Stats
 from .pacman import PacMan
 from .ghost import Ghost, Behavior as GhostBehavior
 from .config import Config
@@ -16,12 +17,16 @@ from .pacgum import pacgums_generate
 class Game:
     def __init__(self):
         self.config: Config
+
+        self.stats: Stats = Stats(self)
+        self.stats.level = 1
+        self.stats.points = 0
+
         self.pacman: PacMan
         self.ghosts: list[Ghost]
         self.display: Display
         self.status = GameStatus.PAUSED
-        self.level = 1
-        self.points = 0
+
         self.maze: list[list[int]] = []
         self.maze_width: int
         self.maze_height: int
@@ -273,6 +278,8 @@ class Game:
         self.display.show(self.display.images["logo_small"], 1350, 50)
         self.display.show_maze()
 
+        self.stats.show_stats()
+
         self.status = GameStatus.RUN
 
         self.display.mlx.mlx_hook(self.display.win, 2, 1, self.game_handle_key_press, self.pacman)
@@ -281,7 +288,8 @@ class Game:
 
     def start(self) -> None:
         print("Let's start!")
-        self.create_level(self.level)
+        self.create_level(self.stats.level)
+        self.stats.reset_stats()
         self.resume()
         # self.display.clear_window()
         # self.display.show_filled_block(self.display.images["background1"], 0, 0, self.display.screen_width // self.display.images["background1"].width + 1, self.display.screen_height // self.display.images["background1"].height + 1)
