@@ -36,24 +36,13 @@ if __name__ == "__main__":
         exit(1)
 
     game.display = display
-
     try:
         display.load_all_images()
         display.create_rectangle("block_42_img", display.corridor_width, display.corridor_width, 0xAA000066)
-        display.create_mask("pacman")
-        display.create_mirror("pacman")
-        display.create_rotate90("pacman")
-        display.create_mirror("pacman_rotate90")
-        display.create_mask("ghost_red")
-        display.create_mask("ghost_blue")
-        display.create_mask("ghost_orange")
-        display.create_mask("ghost_pink")
-        display.create_mask("ghost_dead")
         # display.create_rectangle("pacman_mask", display.images["pacman"].width, display.images["pacman"].height, 0xFF000000)
     except Exception as e:
         print(e)
         exit(1)
-
 
     maze_width = 25
     maze_height = 20
@@ -61,20 +50,22 @@ if __name__ == "__main__":
     mazegen = MazeGenerator((maze_width, maze_height), False, (0, 0), (1, 1), cfg.seed)
     game.set_maze(mazegen.maze)
 
-    pacman = PacMan(display.images["pacman"], display.images["pacman_mask"])
+    pacman = PacMan()
     game.pacman = pacman
     pacman.game = game
+    pacman.set_image("pacman_right")
 
     pacgums = pacgums_generate(mazegen.maze, cfg.pacgum)
     game.pacgums = pacgums
     pacman.set_start_position(maze_width // 2, maze_height // 2)
 
-    ghosts = [Ghost(display.images["ghost_red"], display.images["ghost_red_mask"]),
-              Ghost(display.images["ghost_blue"], display.images["ghost_blue_mask"]),
-              Ghost(display.images["ghost_orange"], display.images["ghost_orange_mask"]),
-              Ghost(display.images["ghost_pink"], display.images["ghost_pink_mask"])]
+    ghosts = [Ghost("ghost_red"),
+              Ghost("ghost_blue"),
+              Ghost("ghost_orange"),
+              Ghost("ghost_pink")]
     for ghost in ghosts:
         ghost.game = game
+        ghost.set_image(ghost.name + "_right")
     ghosts[0].set_start_position(0, 0)
     ghosts[1].set_start_position(maze_width - 1, 0)
     ghosts[2].set_start_position(0, maze_height - 1)
@@ -82,7 +73,7 @@ if __name__ == "__main__":
     game.ghosts = ghosts
 
 
-    display.clear_all()
+    display.clear_window()
     display.show_filled_block(display.images["background1"], 0, 0, int(display.screen_width / display.images["background1"].width) + 1, int(display.screen_height / display.images["background1"].height) + 1)
 
     display.show_filled_block(display.images["emptiness"], 1300, 670, 15, 5, 4, 4)
@@ -92,7 +83,11 @@ if __name__ == "__main__":
     display.create_text("Test text.\n0123456789\n!?+-=.:,", 1200, 350)
 
 
-    # display.show(display.images["pacman_rorate90"], 10, 10)
+    # display.show(display.images["ghost_orange_right"], 10, 10)
+    # display.show(display.images["ghost_orange_left"], 40, 10)
+
+    # display.show(display.images["pacman_right"], 10, 30)
+    # display.show(display.images["pacman_left"], 40, 30)
     # display.show(display.images["ghost_orange_mask"], 30, 10)
 
     pos_y = 0
@@ -146,29 +141,27 @@ if __name__ == "__main__":
         display.show(obj.mask, pos_x, pos_y)
 
         if obj.direction == Direction.RIGHT:
-            if type(obj) == PacMan:
-                pacman.image = display.images["pacman"]
+            obj.set_image(obj.name + "_right")
             if obj.x_px < obj.next_x * (display.corridor_width + display.wall_width):
                 obj.x_px += obj.speed
             if obj.x_px >= obj.next_x * (display.corridor_width + display.wall_width):
                 obj.move()
         elif obj.direction == Direction.LEFT:
-            if type(obj) == PacMan:
-                pacman.image = display.images["pacman_mirror"]
+            obj.set_image(obj.name + "_left")
             if obj.x_px > obj.next_x * (display.corridor_width + display.wall_width):
                 obj.x_px -= obj.speed
             if obj.x_px <= obj.next_x * (display.corridor_width + display.wall_width):
                 obj.move()
         elif obj.direction == Direction.TOP:
             if type(obj) == PacMan:
-                pacman.image = display.images["pacman_rotate90_mirror"]
+                obj.set_image("pacman_top")
             if obj.y_px > obj.next_y * (display.corridor_width + display.wall_width):
                 obj.y_px -= obj.speed
             if obj.y_px <= obj.next_y * (display.corridor_width + display.wall_width):
                 obj.move()
         elif obj.direction == Direction.BOTTOM:
             if type(obj) == PacMan:
-                pacman.image = display.images["pacman_rotate90"]
+                obj.set_image("pacman_bottom")
             if obj.y_px < obj.next_y * (display.corridor_width + display.wall_width):
                 obj.y_px += obj.speed
             if obj.y_px >= obj.next_y * (display.corridor_width + display.wall_width):

@@ -13,9 +13,10 @@ class PacManStatus(Enum):
   FAST = 3
 
 class PacMan:
-    def __init__(self, image: ImgData, mask: ImgData, x: int = 0, y: int = 0) -> None:
-        self.image = image
-        self.mask = mask
+    def __init__(self, name: str = "pacman", x: int = 0, y: int = 0) -> None:
+        self.name = name
+        self.image: ImgData
+        self.mask: ImgData
         self.start_x = x
         self.start_y = y
         self.x = x
@@ -29,6 +30,11 @@ class PacMan:
         self.direction_next = self.direction
         self.status = PacManStatus.NORMAL
         self.game: Game
+
+    def set_image(self, image_name):
+        if self.game.display.images:
+            self.image = self.game.display.images[image_name]
+            self.mask = self.game.display.images[image_name + "_mask"]
 
     def set_start_position(self, x: int, y: int) -> None:
         if self.game.maze[y][x] == 15:

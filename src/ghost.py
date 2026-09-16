@@ -16,9 +16,10 @@ class GhostStatus(Enum):
 
 
 class Ghost:
-    def __init__(self, image: ImgData, mask: ImgData, x: int = 0, y: int = 0) -> None:
-        self.image = image
-        self.mask = mask
+    def __init__(self, name: str, x: int = 0, y: int = 0) -> None:
+        self.name = name
+        self.image: ImgData
+        self.mask: ImgData
         self.start_x = x
         self.start_y = y
         self.x = x
@@ -32,6 +33,11 @@ class Ghost:
         self.status = GhostStatus.ACTIVE
         self.freeze = False
         self.game: Game
+
+    def set_image(self, image_name):
+        if self.game.display.images:
+            self.image = self.game.display.images[image_name]
+            self.mask = self.game.display.images[image_name + "_mask"]
 
     def set_start_position(self, x: int, y: int) -> None:
         self.start_x = x
