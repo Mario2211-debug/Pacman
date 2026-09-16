@@ -2,6 +2,10 @@ from os import listdir
 from os.path import isfile, join
 
 from mlx import Mlx
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .game import Game
 
 class ImgData:
     """Structure for image data"""
@@ -23,7 +27,6 @@ class Display:
         except Exception as e:
             raise Exception("Error: Can't initialize MLX")
         self.mlx_ptr = self.mlx.mlx_init()
-
         screen_size = self.mlx.mlx_get_screen_size(self.mlx_ptr)
         self.screen_width = screen_size[1]
         self.screen_height = screen_size[2]
@@ -34,6 +37,7 @@ class Display:
         except Exception as e:
             raise("Can't create main window")
 
+        self.game: Game
         self.images: dict[str, ImgData] = {}
 
         self.corridor_width = 36
@@ -60,10 +64,13 @@ class Display:
             self.load_image("+", "img/chars/plus.png")
             self.load_image("?", "img/chars/question.png")
 
-            self.load_image("logo", "img/logo_400.png")
-            self.load_image("background1", "img/walls_100.png")
-            self.load_image("background2", "img/walls_200.png")
+            self.load_image("logo_small", "img/logo_400.png")
+            self.load_image("logo_big", "img/logo_800.png")
+            self.load_image("background1", "img/walls_128.png")
+            self.load_image("background2", "img/walls_256.png")
             self.load_image("emptiness", "img/emptiness.png")
+            self.load_image("button", "img/button.png")
+            self.load_image("button_hover", "img/button_hover.png")
 
             self.load_image("pacman_right", "img/pacman_24.png")
             self.create_mask("pacman_right", "pacman_right_mask")
@@ -183,7 +190,59 @@ class Display:
             for j in range(num_y):
                 self.show(img, x + (img.width - shift_x) * i, y + (img.height - shift_y) * j)
 
-    def create_text(self, text: str, x: int, y: int) -> None:
+    def show_pacgum(self, x: int, y: int, type: str) -> None:
+        pos_x = (x + 1) * (self.corridor_width + self.wall_width)
+        pos_y = y * (self.corridor_width + self.wall_width) + self.corridor_width
+        # pos_y = (y + 1) * (self.corridor_width) + y * self.wall_width
+        if type == "small":
+            self.show(self.images["."], pos_x + 5, pos_y + self.wall_width + 5)
+        elif type == "big":
+            self.show(self.images["+"], pos_x, pos_y + self.wall_width)
+
+    def show_maze(self):
+        pos_y = 0
+        for y in range(self.game.maze_height):
+            pos_y += self.corridor_width
+            pos_x = 0
+            for x in range(self.game.maze_width):
+                pos_x += self.corridor_width
+                if self.game.maze[y][x] == 15:
+                    pos_x += self.wall_width
+                    self.show(self.images["block_42_img"], pos_x, pos_y + self.wall_width)
+                    continue
+
+                if not self.game.maze[y][x] & 8:
+                    # print(x, y, "don't has left wall")
+                    self.show(self.images["emptiness"], pos_x, pos_y + self.wall_width)
+                pos_x += self.wall_width
+                if not self.game.maze[y][x] & 1:
+                    # print(x, y, "don't has top wall")
+                    self.show(self.images["emptiness"], pos_x, pos_y)
+
+                self.show(self.images["emptiness"], pos_x, pos_y + self.wall_width)
+
+                if self.game.pacgums[y][x] == 1:
+                    self.show_pacgum(x, y, "small")
+                elif self.game.pacgums[y][x] == 2:
+                    self.show_pacgum(x, y, "big")
+
+            pos_y += self.wall_width
+
+    def show_text(self, text: str, x: int, y: int, align: str = "left") -> None:
+        if align == "center":
+            max_height = 0
+            text_width =  0
+            for letter in text.lower():
+                if letter == " ":
+                    text_width += self.images.get(".").width
+                    continue
+                letter_img = self.images.get(letter)
+                if letter_img:
+                    text_width += letter_img.width
+                    max_height = max(max_height, letter_img.height)
+            x = x - text_width // 2
+            y = y - max_height // 2
+
         pos_x = x
         pos_y = y
         for letter in text.lower():
@@ -191,9 +250,20 @@ class Display:
                 pos_x = x
                 pos_y += int(self.images.get("q").height * 1.5)
             elif letter == " ":
-                pos_x += self.images.get("i").width
+                pos_x += self.images.get(".").width
             else:
                 letter_img = self.images.get(letter)
                 if letter_img:
                     self.show(letter_img, pos_x, pos_y)
                     pos_x += letter_img.width
+
+
+    def show_button(self, x: int, y: int, text: str, type: str = "normal"):
+        if type == "hover":
+            self.show(self.images["button_hover"], x, y)
+        else:
+            self.show(self.images["button"], x, y)
+        self.show_text(text,
+                       x + self.images["button"].width // 2,
+                       y + self.images["button"].height // 2,
+                       "center")

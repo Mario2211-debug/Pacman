@@ -1,3 +1,4 @@
+import random
 from collections import deque
 from enum import Enum
 
@@ -14,6 +15,11 @@ class GhostStatus(Enum):
   EDIBLE = 2
   DEATH = 3
 
+class Behavior(Enum):
+  PLAYER = 1
+  CORNERS = 2
+  RANDOM = 3
+
 
 class Ghost:
     def __init__(self, name: str, x: int = 0, y: int = 0) -> None:
@@ -29,15 +35,20 @@ class Ghost:
         self.x_px = x
         self.y_px = y
         self.speed = 2
+        self.behavior = Behavior.PLAYER
+        self.target: tuple
         self.direction = Direction.RIGHT
         self.status = GhostStatus.ACTIVE
         self.freeze = False
         self.game: Game
 
-    def set_image(self, image_name):
+    def set_image(self, image_name) -> None:
         if self.game.display.images:
             self.image = self.game.display.images[image_name]
             self.mask = self.game.display.images[image_name + "_mask"]
+
+    def set_behavior(self, behavior: Behavior):
+        self.behavior = behavior
 
     def set_start_position(self, x: int, y: int) -> None:
         self.start_x = x
@@ -48,12 +59,13 @@ class Ghost:
         self.next_y = y
         self.x_px = x * (self.game.display.corridor_width + self.game.display.wall_width)
         self.y_px = y  * (self.game.display.corridor_width + self.game.display.wall_width)
+        self.target = (x, y)
 
-    def find_next_position(self, end_x: int, end_y: int, ghosts_positions: list[tuple[int]] = []) -> tuple[int]:
+    def find_next_position(self, target: tuple, ghosts_positions: list[tuple[int]] = []) -> tuple[int]:
         moves = [(0, -1, 1), (1, 0, 2),
                  (0, 1, 4), (-1, 0, 8)]
         start = (self.x, self.y)
-        goal = (end_x, end_y)
+        goal = target
         prev: dict = {start: None}
         queue = deque([start])
         while queue:
@@ -88,12 +100,28 @@ class Ghost:
             self.next_y = goal[1]
             return goal
 
+    def get_random_corner(self):
+        corners = [(0, 0), (self.game.maze_width - 1, 0), (0, self.game.maze_height - 1), (self.game.maze_width - 1, self.game.maze_height - 1)]
+        corners.remove((self.x, self.y))
+        return random.choice(corners)
+
     def move(self):
         if self.status == GhostStatus.ACTIVE:
             self.x, self.y = self.next_x, self.next_y
             # print(f"Ghost {self.image} position: {self.x}, {self.y}")
             ghosts_next_positions = [(ghost.next_x, ghost.next_y) for ghost in self.game.ghosts if ghost is not self]
-            move_to_x, move_to_y = self.find_next_position(self.game.pacman.next_x, self.game.pacman.next_y, ghosts_next_positions)
+
+            if self.behavior == Behavior.PLAYER:
+                self.target = (self.game.pacman.next_x, self.game.pacman.next_y)
+            elif self.behavior == Behavior.CORNERS:
+                if self.target == (self.x, self.y):
+                    self.target = self.get_random_corner()
+            elif self.behavior == Behavior.RANDOM:
+                if self.target == (self.x, self.y):
+                    self.target = (random.randint(0, self.game.maze_width - 1), random.randint(0, self.game.maze_height - 1))
+                    # print("self.target", self.target)
+
+            move_to_x, move_to_y = self.find_next_position(self.target, ghosts_next_positions)
             self.next_x, self.next_y = move_to_x, move_to_y
 
             if move_to_x - self.x == 1:
