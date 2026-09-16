@@ -1,5 +1,5 @@
 import random
-import time
+# import time
 
 def pacgums_generate(maze: list[list[int]], number: int) -> list[list[int]]:
     maze_width = len(maze[0])

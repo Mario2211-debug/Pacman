@@ -118,7 +118,10 @@ class Ghost:
                     self.target = self.get_random_corner()
             elif self.behavior == Behavior.RANDOM:
                 if self.target == (self.x, self.y):
-                    self.target = (random.randint(0, self.game.maze_width - 1), random.randint(0, self.game.maze_height - 1))
+                    rand_x = random.randint(0, self.game.maze_width - 1)
+                    rand_y = random.randint(0, self.game.maze_height - 1)
+                    if self.game.maze[rand_x][rand_y] != 15:
+                        self.target = (rand_x, rand_y)
                     # print("self.target", self.target)
 
             move_to_x, move_to_y = self.find_next_position(self.target, ghosts_next_positions)

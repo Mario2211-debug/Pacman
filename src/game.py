@@ -1,14 +1,17 @@
 from enum import Enum
-from typing import TYPE_CHECKING
+import random
+# from typing import TYPE_CHECKING
 
 from .types import GameStatus
 from .display import Display
 from mazegenerator import MazeGenerator
+from .types import Direction, GameStatus
 
-if TYPE_CHECKING:
-    from .pacman import PacMan
-    from .ghost import Ghost
-    from .config import Config
+# if TYPE_CHECKING:
+from .pacman import PacMan
+from .ghost import Ghost, Behavior as GhostBehavior
+from .config import Config
+from .pacgum import pacgums_generate
 
 class Game:
     def __init__(self):
@@ -16,13 +19,12 @@ class Game:
         self.pacman: PacMan
         self.ghosts: list[Ghost]
         self.display: Display
-        self.status = GameStatus.RUN
+        self.status = GameStatus.PAUSED
         self.level = 1
         self.points = 0
         self.maze: list[list[int]] = []
-        if self.maze:
-            self.maze_width = len(self.maze[0])
-            self.maze_height = len(self.maze)
+        self.maze_width: int
+        self.maze_height: int
         self.pacgums: list[list[int]] = []
 
         self.menu_list = [("Start game", "start"),
@@ -35,17 +37,12 @@ class Game:
                 ("Main menu", "main_menu")]
         self.pause_menu_current = 0
 
-    def set_maze(self, maze: list[list[int]]) -> None:
-        self.maze = maze
-        if maze:
-            self.maze_width = len(maze[0])
-            self.maze_height = len(maze)
-
     def exit(self, error = ""):
         for image in self.display.images.values():
             self.display.mlx.mlx_destroy_image(self.display.mlx_ptr, image.img)
         self.display.mlx.mlx_loop_exit(self.display.mlx_ptr)
         # exit()
+
 
     # MENU SCREEN
 
@@ -54,6 +51,9 @@ class Game:
         if key == 65293:
             if self.menu_list[self.menu_current][1] == "exit":
                 self.exit()
+                return
+            elif self.menu_list[self.menu_current][1] == "start":
+                self.start()
                 return
         if key == 119 or key == 65362:
             self.menu_current -= 1
@@ -86,14 +86,35 @@ class Game:
                           self.display.screen_width // 2
                           - self.display.images["logo_big"].width // 2,
                           50)
+
+        for i in range(3):
+            for ghost in self.ghosts:
+                rand_x = random.randint(50, self.display.screen_width - 50)
+                rand_y = random.randint(50, self.display.screen_height - 100)
+                if self.display.screen_width // 2 - self.display.images["button"].width - 50 // 2 <= rand_x <= self.display.screen_width // 2:
+                    rand_x -= self.display.images["button"].width
+                elif self.display.screen_width // 2 <= rand_x <= self.display.screen_width // 2 + self.display.images["button"].width // 2:
+                    rand_x += self.display.images["button"].width
+                if rand_x > self.display.screen_width // 2:
+                    self.display.show(self.display.images[ghost.name + "_left"], rand_x, rand_y)
+                else:
+                    self.display.show(self.display.images[ghost.name + "_right"], rand_x, rand_y)
+
         self.show_menu()
         self.display.mlx.mlx_hook(self.display.win, 2, 1, self.menu_handle_key_press, self.menu_current)
+
 
     # PAUSE SCREEN
 
     def pause_menu_handle_key_press(self, key, current_hover) -> None:
         # print(f"PAUSE Pressed key {key}")
-        if key == 65293:
+        if key == 65307:  # ESC
+            self.resume()
+            return
+        if key == 65293:  # ENTER
+            if self.pause_menu_list[self.pause_menu_current][1] == "resume":
+                self.resume()
+                return
             if self.pause_menu_list[self.pause_menu_current][1] == "main_menu":
                 self.menu()
                 return
@@ -129,4 +150,151 @@ class Game:
         self.display.mlx.mlx_hook(self.display.win, 2, 1, self.pause_menu_handle_key_press, self.pause_menu_current)
 
 
+    # GENERATE LEVEL
+
+    def create_level(self, level_num) -> None:
+        maze_width = 25
+        maze_height = 20
+
+        mazegen = MazeGenerator((maze_width, maze_height), False, (0, 0), (1, 1), self.config.seed)
+        if not mazegen.maze:
+            return
+        self.maze = mazegen.maze
+        self.maze_width = len(mazegen.maze[0])
+        self.maze_height = len(mazegen.maze)
+
+        self.pacman.set_image("pacman_right")
+        self.pacman.set_start_position(maze_width // 2, maze_height // 2)
+
+        pacgums = pacgums_generate(mazegen.maze, self.config.pacgum)
+        self.pacgums = pacgums
+
+        for ghost in self.ghosts:
+            ghost.set_image(ghost.name + "_right")
+
+        self.ghosts[0].set_start_position(0, 0)
+        self.ghosts[1].set_start_position(maze_width - 1, 0)
+        self.ghosts[1].set_behavior(GhostBehavior.CORNERS)
+        self.ghosts[2].set_start_position(0, maze_height - 1)
+        self.ghosts[2].set_behavior(GhostBehavior.RANDOM)
+        self.ghosts[3].set_start_position(maze_width - 1, maze_height - 1)
+        print("LEVEL CREATED")
+
+
     # GAME SCREEN
+
+    def game_handle_key_press(self, key, pacman):
+        # print(f"Pressed key {key}")
+        if key == 65307:  # ESC
+            if self.status == GameStatus.RUN:
+                self.status = GameStatus.PAUSED
+                self.pause()
+            # else:
+            #     self.status = GameStatus.RUN
+            #     self.resume()
+            return
+        if key == 119 or key == 65362:
+            pacman.direction_next = Direction.TOP
+        elif key == 100 or key == 65363:
+            pacman.direction_next = Direction.RIGHT
+        elif key == 115 or key == 65364:
+            pacman.direction_next = Direction.BOTTOM
+        elif key == 97 or key == 65361:
+            pacman.direction_next = Direction.LEFT
+
+    def move_object(self, obj: PacMan | Ghost):
+        if self.status != GameStatus.RUN:
+            return
+        shift_x = self.display.corridor_width + self.display.wall_width + 5
+        shift_y = self.display.corridor_width + self.display.wall_width + 5
+        # Clear old
+        pos_x = shift_x + obj.x_px
+        pos_y = shift_y + obj.y_px
+        self.display.show(obj.mask, pos_x, pos_y)
+
+        if obj.direction == Direction.RIGHT:
+            obj.set_image(obj.name + "_right")
+            if obj.x_px < obj.next_x * (self.display.corridor_width + self.display.wall_width):
+                obj.x_px += obj.speed
+            if obj.x_px >= obj.next_x * (self.display.corridor_width + self.display.wall_width):
+                obj.move()
+        elif obj.direction == Direction.LEFT:
+            obj.set_image(obj.name + "_left")
+            if obj.x_px > obj.next_x * (self.display.corridor_width + self.display.wall_width):
+                obj.x_px -= obj.speed
+            if obj.x_px <= obj.next_x * (self.display.corridor_width + self.display.wall_width):
+                obj.move()
+        elif obj.direction == Direction.TOP:
+            if type(obj) == PacMan:
+                obj.set_image("pacman_top")
+            if obj.y_px > obj.next_y * (self.display.corridor_width + self.display.wall_width):
+                obj.y_px -= obj.speed
+            if obj.y_px <= obj.next_y * (self.display.corridor_width + self.display.wall_width):
+                obj.move()
+        elif obj.direction == Direction.BOTTOM:
+            if type(obj) == PacMan:
+                obj.set_image("pacman_bottom")
+            if obj.y_px < obj.next_y * (self.display.corridor_width + self.display.wall_width):
+                obj.y_px += obj.speed
+            if obj.y_px >= obj.next_y * (self.display.corridor_width + self.display.wall_width):
+                obj.move()
+
+        #Show pacgum
+        if type(obj) == Ghost:
+            if self.pacgums[obj.y][obj.x] == 1:
+                self.display.show_pacgum(obj.x, obj.y, "small")
+            elif self.pacgums[obj.y][obj.x] == 2:
+                self.display.show_pacgum(obj.x, obj.y, "big")
+
+        # Show new
+        pos_x = shift_x + obj.x_px
+        pos_y = shift_y + obj.y_px
+        self.display.show(obj.image, pos_x, pos_y)
+
+
+    def make_turn(self, nothing):
+        # print("playing...")
+        if self.status != GameStatus.RUN:
+            return
+        self.move_object(self.pacman)
+        for ghost in self.ghosts:
+            self.move_object(ghost)
+            if (self.pacman.x_px - self.pacman.image.width // 1.5 <= ghost.x_px <= self.pacman.x_px + self.pacman.image.width // 1.5
+                and self.pacman.y_px - self.pacman.image.height // 1.5 <= ghost.y_px <= self.pacman.y_px + self.pacman.image.height // 1.5):
+                print(f"!!!! CATCHED BY {ghost.name} at {ghost.x}, {ghost.y}")
+                self.status = GameStatus.DEAD
+                self.menu()
+        # time.sleep(0.5)
+
+    def resume(self) -> None:
+        self.display.clear_window()
+        self.display.show_filled_block(self.display.images["background1"], 0, 0, self.display.screen_width // self.display.images["background1"].width + 1, self.display.screen_height // self.display.images["background1"].height + 1)
+
+        self.display.show(self.display.images["logo_small"], 1350, 50)
+        self.display.show_maze()
+
+        self.status = GameStatus.RUN
+
+        self.display.mlx.mlx_hook(self.display.win, 2, 1, self.game_handle_key_press, self.pacman)
+        self.display.mlx.mlx_loop_hook(self.display.mlx_ptr, self.make_turn, None)
+
+
+    def start(self) -> None:
+        print("Let's start!")
+        self.create_level(self.level)
+        self.resume()
+        # self.display.clear_window()
+        # self.display.show_filled_block(self.display.images["background1"], 0, 0, self.display.screen_width // self.display.images["background1"].width + 1, self.display.screen_height // self.display.images["background1"].height + 1)
+
+        # # display.show_filled_block(display.images["emptiness"], 1300, 670, 15, 5, 4, 4)
+
+        # self.display.show(self.display.images["logo_small"], 1350, 50)
+
+        # # display.show_text("Test text.\n0123456789\n!?+-=.:,", 1200, 350)
+
+        # self.display.show_maze()
+
+        # self.status = GameStatus.RUN
+
+        # self.display.mlx.mlx_hook(self.display.win, 2, 1, self.game_handle_key_press, self.pacman)
+        # self.display.mlx.mlx_loop_hook(self.display.mlx_ptr, self.make_turn, None)
