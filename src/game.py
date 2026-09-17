@@ -220,6 +220,29 @@ class Game:
 
     # GAME SCREEN
 
+    def death(self):
+        print("LIVES:", self.stats.stats["lives"])
+        self.stats.increase_lives(-1)
+        if self.stats.stats["lives"] == 0:
+            self.game_over()
+            self.status = GameStatus.GAME_OVER
+            return
+        for ghost in self.ghosts:
+            ghost.speed = 10
+            ghost.set_behavior(GhostBehavior.TO_START)
+        self.pacman.death()
+
+    def edible_mode(self):
+        for ghost in self.ghosts:
+            ghost.status = GhostStatus.EDIBLE
+            ghost.set_image("ghost_dead_right")
+
+    def eat_ghost(self, ghost: Ghost):
+        # print("Gost eaten")
+        ghost.speed = 20
+        ghost.behavior = GhostBehavior.TO_START
+        self.stats.increase_score(self.config.points_per_ghost)
+
     def game_handle_key_press(self, key, pacman):
         # print(f"Pressed key {key}")
         if key == 65307:  # ESC
@@ -293,18 +316,6 @@ class Game:
         pos_y = shift_y + obj.y_px
         self.display.show(obj.image, pos_x, pos_y)
 
-    def death(self):
-        print("LIVES:", self.stats.stats["lives"])
-        self.stats.increase_lives(-1)
-        if self.stats.stats["lives"] == 0:
-            self.game_over()
-            self.status = GameStatus.GAME_OVER
-            return
-        for ghost in self.ghosts:
-            ghost.speed = 10
-            ghost.set_behavior(GhostBehavior.TO_START)
-            self.pacman.death()
-
 
     def make_turn(self, nothing):
         if self.status != GameStatus.RUN:
@@ -328,8 +339,11 @@ class Game:
                 self.move_object(ghost)
                 if (self.pacman.x_px - self.pacman.image.width // 1.5 <= ghost.x_px <= self.pacman.x_px + self.pacman.image.width // 1.5
                     and self.pacman.y_px - self.pacman.image.height // 1.5 <= ghost.y_px <= self.pacman.y_px + self.pacman.image.height // 1.5 and ghost.behavior != GhostBehavior.TO_START):
-                    print(f"!!!! CATCHED BY {ghost.name} at {ghost.x}, {ghost.y}")
-                    self.death()
+                    # print(f"!!!! CATCHED BY {ghost.name} at {ghost.x}, {ghost.y}")
+                    if ghost.status == GhostStatus.EDIBLE:
+                        self.eat_ghost(ghost)
+                    else:
+                        self.death()
 
     def resume(self) -> None:
         self.display.clear_window()

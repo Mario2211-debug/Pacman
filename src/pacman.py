@@ -65,6 +65,7 @@ class PacMan:
         if self.game.pacgums[self.y][self.x] == 2:
             self.game.pacgums[self.y][self.x] = 0
             self.game.stats.increase_score(self.game.config.points_per_super_pacgum)
+            self.game.edible_mode()
         elif self.game.pacgums[self.y][self.x] == 1:
             # self.game.stats.score += 1
             self.game.pacgums[self.y][self.x] = 0

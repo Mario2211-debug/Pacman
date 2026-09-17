@@ -46,6 +46,8 @@ class Ghost:
         self.game: Game
 
     def set_image(self, image_name) -> None:
+        if self.status == GhostStatus.EDIBLE:
+            image_name = "ghost_dead_right"
         if self.game.display.images:
             self.image = self.game.display.images[image_name]
             self.mask = self.game.display.images[image_name + "_mask"]
@@ -119,7 +121,7 @@ class Ghost:
         return self.get_random_cell()
 
     def move(self):
-        if self.status == GhostStatus.ACTIVE:
+        if self.status != GhostStatus.FREEZE:
             self.x, self.y = self.next_x, self.next_y
             self.x_px = self.x * self.game.display.cell_width
             self.y_px = self.y * self.game.display.cell_width
