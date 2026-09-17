@@ -14,10 +14,10 @@ class Stats:
         # self.score = 0
         # self.time = 0
         self.game: Game = game
-        self.windows = {"level": self.Window("Level", 1300, 200, "level", game),
-                        "score": self.Window("Score", 1300, 400, "score", game),
-                        "lives": self.Window("Lives", 1300, 600, "lives", game),
-                        "time": self.Window("Time", 1300, 800, "time", game)}
+        self.windows = {"level": self.Window("Level", 1400, 200, "level", game),
+                        "score": self.Window("Score", 1400, 400, "score", game),
+                        "lives": self.Window("Lives", 1400, 600, "lives", game),
+                        "time": self.Window("Time", 1400, 800, "time", game)}
 
     class Window:
         def __init__(self, text: str, x: int, y: int, stat: str, game: Game) -> None:
@@ -37,7 +37,7 @@ class Stats:
             #     self.game.display.show(self.game.display.images["pacman_right"], self.x, self.y + 75)
 
         def update_window(self) -> None:
-            self.game.display.show_filled_block(self.game.display.images["emptiness"], self.x, self.y + 70, 10, 2, 4, 4)
+            self.game.display.show_filled_block(self.game.display.images["emptiness"], self.x, self.y + 70, 13, 2, 4, 4)
             if self.stat != "lives":
                 self.game.display.show_text(str(self.game.stats.stats[self.stat]), self.x, self.y + 75)
             else:

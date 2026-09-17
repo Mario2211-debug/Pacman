@@ -244,7 +244,7 @@ class Game:
         self.stats.increase_score(self.config.points_per_ghost)
 
     def game_handle_key_press(self, key, pacman):
-        print(f"Pressed key {key}")
+        # print(f"Pressed key {key}")
         if key == 65307:  # ESC
             if self.status == GameStatus.RUN:
                 self.status = GameStatus.PAUSED
@@ -353,9 +353,10 @@ class Game:
 
     def resume(self) -> None:
         self.display.clear_window()
-        self.display.show_filled_block(self.display.images["background1"], 0, 0, self.display.screen_width // self.display.images["background1"].width + 1, self.display.screen_height // self.display.images["background1"].height + 1)
+        self.display.show_filled_block(self.display.images["background1"], 0, 0, 10, self.display.screen_height // self.display.images["background1"].height + 1)
+        self.display.show_filled_block(self.display.images["background2"], 1350, 0, 3, self.display.screen_height // self.display.images["background2"].height + 1)
 
-        self.display.show(self.display.images["logo_small"], 1350, 50)
+        self.display.show(self.display.images["logo_small"], 1450, 50)
         self.display.show_maze()
 
         self.stats.show_stats()

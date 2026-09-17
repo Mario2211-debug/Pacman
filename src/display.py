@@ -56,6 +56,7 @@ class Display:
                 self.load_image(file[0], join("img/chars/letters", file))
             for file in [f for f in listdir("img/chars/numbers") if isfile(join("img/chars/numbers", f)) and f.endswith(".png")]:
                 self.load_image(file[0], join("img/chars/numbers", file))
+
             self.load_image(":", "img/chars/colon.png")
             self.load_image(",", "img/chars/comma.png")
             self.load_image(".", "img/chars/dot.png")
