@@ -100,10 +100,20 @@ class Ghost:
             self.next_y = goal[1]
             return goal
 
-    def get_random_corner(self):
+    def get_random_corner(self) -> tuple:
         corners = [(0, 0), (self.game.maze_width - 1, 0), (0, self.game.maze_height - 1), (self.game.maze_width - 1, self.game.maze_height - 1)]
         corners.remove((self.x, self.y))
         return random.choice(corners)
+
+    def get_random_cell(self) -> tuple:
+        rand_x = random.randint(0, self.game.maze_width - 1)
+        rand_y = random.randint(0, self.game.maze_height - 1)
+        # print("Checking randm cell:", rand_x, rand_y, self.game.maze[rand_y][rand_x])
+        # for row in self.game.maze:
+        #     print(row)
+        if self.game.maze[rand_y][rand_x] !=  15:
+            return (rand_x, rand_y)
+        return self.get_random_cell()
 
     def move(self):
         if self.status == GhostStatus.ACTIVE:
@@ -118,10 +128,7 @@ class Ghost:
                     self.target = self.get_random_corner()
             elif self.behavior == Behavior.RANDOM:
                 if self.target == (self.x, self.y):
-                    rand_x = random.randint(0, self.game.maze_width - 1)
-                    rand_y = random.randint(0, self.game.maze_height - 1)
-                    if self.game.maze[rand_x][rand_y] != 15:
-                        self.target = (rand_x, rand_y)
+                    self.target = self.get_random_cell()
                     # print("self.target", self.target)
 
             move_to_x, move_to_y = self.find_next_position(self.target, ghosts_next_positions)
@@ -135,8 +142,9 @@ class Ghost:
                 self.direction = Direction.BOTTOM
             elif move_to_y - self.y == -1:
                 self.direction = Direction.TOP
-            else:
-                print("Ghost can't move")
+            # else:
+            #     print("Ghost", self.name, self.x, self.y, "can't move to", self.target)
+            #     print("Next position:", self.next_x, self.next_y)
 
             # print(f"Ghost {self.image} move to {move_to_x} {move_to_y}")
 
