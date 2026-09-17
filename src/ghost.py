@@ -65,8 +65,8 @@ class Ghost:
         self.y = y
         self.next_x = x
         self.next_y = y
-        self.x_px = x * (self.game.display.corridor_width + self.game.display.wall_width)
-        self.y_px = y  * (self.game.display.corridor_width + self.game.display.wall_width)
+        self.x_px = x * self.game.display.cell_width
+        self.y_px = y  * self.game.display.cell_width
         self.target = (x, y)
 
     def find_next_position(self, target: tuple, ghosts_positions: list[tuple[int]] = []) -> tuple[int]:

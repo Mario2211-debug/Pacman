@@ -47,10 +47,10 @@ class PacMan:
         self.y = y
         self.next_x = x
         self.next_y = y
-        self.x_px = x * (self.game.display.corridor_width + self.game.display.wall_width)
-        self.y_px = y  * (self.game.display.corridor_width + self.game.display.wall_width)
+        self.x_px = x * self.game.display.cell_width
+        self.y_px = y  * self.game.display.cell_width
 
-    def death(self):
+    def death(self) -> None:
         # Clear old
         pos_x = self.game.display.cell_width + 5 + self.x_px
         pos_y = self.game.display.cell_width + 5 + self.y_px
@@ -61,24 +61,13 @@ class PacMan:
         self.direction_next = None
         self.set_image("pacman_right")
 
-    def eat(self):
-        if self.game.pacgums[self.y][self.x] == 2:
-            self.game.pacgums[self.y][self.x] = 0
-            self.game.stats.increase_score(self.game.config.points_per_super_pacgum)
-            self.game.edible_mode()
-        elif self.game.pacgums[self.y][self.x] == 1:
-            # self.game.stats.score += 1
-            self.game.pacgums[self.y][self.x] = 0
-            self.game.stats.increase_score(self.game.config.points_per_pacgum)
-            # print(self.game.points)
-
-    def move(self):
+    def move(self) -> None:
         moves = [(0, -1, 1), (1, 0, 2),
                  (0, 1, 4), (-1, 0, 8)]
         self.x, self.y = self.next_x, self.next_y
-        self.x_px = self.x * (self.game.display.corridor_width + self.game.display.wall_width)
-        self.y_px = self.y * (self.game.display.corridor_width + self.game.display.wall_width)
-        self.eat()
+        self.x_px = self.x * self.game.display.cell_width
+        self.y_px = self.y * self.game.display.cell_width
+        self.game.eat_pacgum(self.x, self.y)
         # print(f"PacMan position: {self.x}, {self.y} ({self.points} points)")
         dx, dy, code = moves[self.direction_next.value]
         nx, ny = self.x + dx, self.y + dy

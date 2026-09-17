@@ -81,6 +81,27 @@ class Game:
         self.display.mlx.mlx_hook(self.display.win, 2, 1, self.game_over_handle_key_press, self.menu_current)
 
 
+    # LEVEL FINISHED SCREEN
+
+    def level_finished_handle_key_press(self, key, current_hover):
+        if key == 65307 or key == 65293:  # ESC or ENTER
+            self.next_level()
+            return
+
+    def level_finished(self):
+        self.display.show_filled_block(self.display.images["background2"], 0, 0,
+                                       self.display.screen_width // self.display.images["background2"].width + 1,
+                                       self.display.screen_height // self.display.images["background2"].height + 1)
+        self.display.show(self.display.images["logo_big"],
+                          self.display.screen_width // 2
+                          - self.display.images["logo_big"].width // 2,
+                          50)
+        self.display.show_text("Level finished", 960, 500, "center")
+        self.display.show_button("Next level", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
+
+        self.display.mlx.mlx_hook(self.display.win, 2, 1, self.level_finished_handle_key_press, self.menu_current)
+
+
     # MENU SCREEN
 
     def menu_handle_key_press(self, key, current_hover):
@@ -215,12 +236,12 @@ class Game:
         self.ghosts[1].set_start_position(maze_width - 1, 0)
         self.ghosts[2].set_start_position(0, maze_height - 1)
         self.ghosts[3].set_start_position(maze_width - 1, maze_height - 1)
-        print("LEVEL CREATED")
+        # print("LEVEL CREATED")
 
 
     # GAME SCREEN
 
-    def death(self):
+    def death(self) -> None:
         print("LIVES:", self.stats.stats["lives"])
         self.stats.increase_lives(-1)
         if self.stats.stats["lives"] == 0:
@@ -232,16 +253,35 @@ class Game:
             ghost.set_behavior(GhostBehavior.TO_START)
         self.pacman.death()
 
-    def edible_mode(self):
+    def edible_mode(self) -> None:
         for ghost in self.ghosts:
             ghost.status = GhostStatus.EDIBLE
             ghost.set_image("ghost_dead_right")
 
-    def eat_ghost(self, ghost: Ghost):
+    def eat_ghost(self, ghost: Ghost) -> None:
         # print("Gost eaten")
         ghost.speed = 20
         ghost.behavior = GhostBehavior.TO_START
         self.stats.increase_score(self.config.points_per_ghost)
+
+    def check_pacgums(self) -> None:
+        if sum(1 for row in self.pacgums for x in row if x != 0) > 0:
+            return
+        self.status = GameStatus.PAUSED
+        self.level_finished()
+
+    def eat_pacgum(self, x: int, y: int) -> None:
+        if self.pacgums[y][x] == 2:
+            self.pacgums[y][x] = 0
+            self.stats.increase_score(self.config.points_per_super_pacgum)
+            self.edible_mode()
+            self.check_pacgums()
+        elif self.pacgums[y][x] == 1:
+            # self.game.stats.score += 1
+            self.pacgums[y][x] = 0
+            self.stats.increase_score(self.config.points_per_pacgum)
+            self.check_pacgums()
+            # print(self.game.points)
 
     def game_handle_key_press(self, key, pacman):
         # print(f"Pressed key {key}")
@@ -371,9 +411,20 @@ class Game:
         self.display.mlx.mlx_loop_hook(self.display.mlx_ptr, self.make_turn, None)
 
 
+    def next_level(self) -> None:
+        print("New level")
+        self.stats.increase_level()
+        self.create_level(self.stats.stats["level"])
+        # self.stats.reset_stats()
+        self.pacman.speed = 3
+        self.pacman.direction = None
+        self.pacman.direction_next = None
+        self.pacman.set_image("pacman_right")
+        self.resume()
+
     def start(self) -> None:
         print("Let's start!")
-        self.create_level(self.stats.level)
+        self.create_level(self.stats.stats["level"])
         self.stats.reset_stats()
         self.pacman.speed = 3
         self.pacman.direction = None

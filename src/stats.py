@@ -51,15 +51,16 @@ class Stats:
             window.show_window()
 
     def reset_stats(self) -> None:
+        self.stats["level"] = 1
         self.stats["score"] = 0
         self.stats["lives"] = self.game.config.lives
         self.stats["time"] = self.game.config.level_max_time
 
-    def increase_score(self, num: int) -> None:
+    def increase_score(self, num: int = 1) -> None:
         self.stats["score"] += num
         self.windows["score"].update_window()
 
-    def increase_time(self, num: int) -> None:
+    def increase_time(self, num: int = 1) -> None:
         self.stats["time"] += num
         self.windows["time"].update_window()
 
@@ -68,3 +69,7 @@ class Stats:
         if self.stats["lives"] > 5:
             self.stats["lives"] = 5
         self.windows["lives"].update_window()
+
+    def increase_level(self, num: int = 1) -> None:
+        self.stats["level"] += num
+        # self.windows["level"].update_window()
