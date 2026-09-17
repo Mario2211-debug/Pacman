@@ -42,6 +42,7 @@ class Display:
 
         self.corridor_width = 36
         self.wall_width = 10
+        self.cell_width = self.corridor_width + self.wall_width
 
     def show(self, img: ImgData, x: int, y: int) -> None:
         self.mlx.mlx_put_image_to_window(self.mlx_ptr, self.win, img.img, x, y)

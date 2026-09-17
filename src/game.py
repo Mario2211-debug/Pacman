@@ -60,6 +60,18 @@ class Game:
         self.display.mlx.mlx_loop_exit(self.display.mlx_ptr)
         # exit()
 
+    # GAME OVER SCREEN
+
+    def game_over(self):
+        self.display.show_filled_block(self.display.images["background2"], 0, 0,
+                                       self.display.screen_width // self.display.images["background2"].width + 1,
+                                       self.display.screen_height // self.display.images["background2"].height + 1)
+        self.display.show(self.display.images["logo_big"],
+                          self.display.screen_width // 2
+                          - self.display.images["logo_big"].width // 2,
+                          50)
+        self.display.show_text("Game Over", 960, 500, "center")
+
 
     # MENU SCREEN
 
@@ -223,8 +235,8 @@ class Game:
     def move_object(self, obj: PacMan | Ghost):
         if self.status != GameStatus.RUN:
             return
-        shift_x = self.display.corridor_width + self.display.wall_width + 5
-        shift_y = self.display.corridor_width + self.display.wall_width + 5
+        shift_x = self.display.cell_width + 5
+        shift_y = self.display.cell_width + 5
         # Clear old
         pos_x = shift_x + obj.x_px
         pos_y = shift_y + obj.y_px
@@ -232,29 +244,29 @@ class Game:
 
         if obj.direction == Direction.RIGHT:
             obj.set_image(obj.name + "_right")
-            if obj.x_px < obj.next_x * (self.display.corridor_width + self.display.wall_width):
+            if obj.x_px < obj.next_x * self.display.cell_width:
                 obj.x_px += obj.speed
-            if obj.x_px >= obj.next_x * (self.display.corridor_width + self.display.wall_width):
+            if obj.x_px >= obj.next_x * self.display.cell_width:
                 obj.move()
         elif obj.direction == Direction.LEFT:
             obj.set_image(obj.name + "_left")
-            if obj.x_px > obj.next_x * (self.display.corridor_width + self.display.wall_width):
+            if obj.x_px > obj.next_x * self.display.cell_width:
                 obj.x_px -= obj.speed
-            if obj.x_px <= obj.next_x * (self.display.corridor_width + self.display.wall_width):
+            if obj.x_px <= obj.next_x * self.display.cell_width:
                 obj.move()
         elif obj.direction == Direction.TOP:
             if type(obj) == PacMan:
                 obj.set_image("pacman_top")
-            if obj.y_px > obj.next_y * (self.display.corridor_width + self.display.wall_width):
+            if obj.y_px > obj.next_y * self.display.cell_width:
                 obj.y_px -= obj.speed
-            if obj.y_px <= obj.next_y * (self.display.corridor_width + self.display.wall_width):
+            if obj.y_px <= obj.next_y * self.display.cell_width:
                 obj.move()
         elif obj.direction == Direction.BOTTOM:
             if type(obj) == PacMan:
                 obj.set_image("pacman_bottom")
-            if obj.y_px < obj.next_y * (self.display.corridor_width + self.display.wall_width):
+            if obj.y_px < obj.next_y * self.display.cell_width:
                 obj.y_px += obj.speed
-            if obj.y_px >= obj.next_y * (self.display.corridor_width + self.display.wall_width):
+            if obj.y_px >= obj.next_y * self.display.cell_width:
                 obj.move()
 
         #Show pacgum
@@ -271,20 +283,14 @@ class Game:
 
     def death(self):
         self.stats.increase_lives(-1)
+        if self.stats.stats["lives"] == 0:
+            self.game_over()
+            self.status = GameStatus.GAME_OVER
+            return
         for ghost in self.ghosts:
-            ghost.speed = 5
+            ghost.speed = 10
             ghost.set_behavior(GhostBehavior.TO_START)
-
-            shift_x = self.display.corridor_width + self.display.wall_width + 5
-            shift_y = self.display.corridor_width + self.display.wall_width + 5
-            # Clear old
-            pos_x = shift_x + self.pacman.x_px
-            pos_y = shift_y + self.pacman.y_px
-            self.display.show(self.pacman.mask, pos_x, pos_y)
-
             self.pacman.death()
-        # self.status = GameStatus.DEAD
-        # self.menu()
 
 
     def make_turn(self, nothing):

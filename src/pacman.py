@@ -51,6 +51,11 @@ class PacMan:
         self.y_px = y  * (self.game.display.corridor_width + self.game.display.wall_width)
 
     def death(self):
+        # Clear old
+        pos_x = self.game.display.cell_width + 5 + self.x_px
+        pos_y = self.game.display.cell_width + 5 + self.y_px
+        self.game.display.show(self.mask, pos_x, pos_y)
+
         self.set_start_position(self.start_x, self.start_y)
         self.direction = None
         self.direction_next = None

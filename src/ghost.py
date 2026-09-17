@@ -113,9 +113,6 @@ class Ghost:
     def get_random_cell(self) -> tuple:
         rand_x = random.randint(0, self.game.maze_width - 1)
         rand_y = random.randint(0, self.game.maze_height - 1)
-        # print("Checking randm cell:", rand_x, rand_y, self.game.maze[rand_y][rand_x])
-        # for row in self.game.maze:
-        #     print(row)
         if self.game.maze[rand_y][rand_x] !=  15:
             return (rand_x, rand_y)
         return self.get_random_cell()
@@ -123,6 +120,8 @@ class Ghost:
     def move(self):
         if self.status == GhostStatus.ACTIVE:
             self.x, self.y = self.next_x, self.next_y
+            self.x_px = self.x * self.game.display.cell_width
+            self.y_px = self.y * self.game.display.cell_width
             # print(f"Ghost {self.image} position: {self.x}, {self.y}")
             ghosts_next_positions = [(ghost.next_x, ghost.next_y) for ghost in self.game.ghosts if ghost is not self]
 
