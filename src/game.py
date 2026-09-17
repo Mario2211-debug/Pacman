@@ -62,6 +62,11 @@ class Game:
 
     # GAME OVER SCREEN
 
+    def game_over_handle_key_press(self, key, current_hover):
+        if key == 65307 or key == 65293:  # ESC or ENTER
+            self.menu()
+            return
+
     def game_over(self):
         self.display.show_filled_block(self.display.images["background2"], 0, 0,
                                        self.display.screen_width // self.display.images["background2"].width + 1,
@@ -71,13 +76,16 @@ class Game:
                           - self.display.images["logo_big"].width // 2,
                           50)
         self.display.show_text("Game Over", 960, 500, "center")
+        self.display.show_button("Main menu", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
+
+        self.display.mlx.mlx_hook(self.display.win, 2, 1, self.game_over_handle_key_press, self.menu_current)
 
 
     # MENU SCREEN
 
     def menu_handle_key_press(self, key, current_hover):
         # print(f"Pressed key {key}")
-        if key == 65293:
+        if key == 65293:  # ENTER
             if self.menu_list[self.menu_current][1] == "exit":
                 self.exit()
                 return
@@ -100,8 +108,8 @@ class Game:
         pos_y_start = self.display.images["logo_big"].height + 100
         for i in range(len(self.menu_list)):
             pos_y = pos_y_start + self.display.images["button"].height * i
-            self.display.show_button(pos_x, pos_y,
-                                     self.menu_list[i][0],
+            self.display.show_button(self.menu_list[i][0],
+                                     pos_x, pos_y,
                                      ("hover" if i == self.menu_current else "normal"))
 
     def menu(self) -> None:
@@ -163,8 +171,8 @@ class Game:
         pos_y_start = self.display.screen_height // 2 - self.display.images["button"].height
         for i in range(len(self.pause_menu_list)):
             pos_y = pos_y_start + self.display.images["button"].height * i
-            self.display.show_button(pos_x, pos_y,
-                                     self.pause_menu_list[i][0],
+            self.display.show_button(self.pause_menu_list[i][0],
+                                     pos_x, pos_y,
                                      ("hover" if i == self.pause_menu_current else "normal"))
 
     def pause(self) -> None:
@@ -201,6 +209,7 @@ class Game:
         for ghost in self.ghosts:
             ghost.set_image(ghost.name + "_right")
             ghost.set_behavior(ghost.behavior_standart)
+            ghost.speed = 2
 
         self.ghosts[0].set_start_position(0, 0)
         self.ghosts[1].set_start_position(maze_width - 1, 0)
@@ -282,6 +291,7 @@ class Game:
         self.display.show(obj.image, pos_x, pos_y)
 
     def death(self):
+        print("LIVES:", self.stats.stats["lives"])
         self.stats.increase_lives(-1)
         if self.stats.stats["lives"] == 0:
             self.game_over()
@@ -314,7 +324,7 @@ class Game:
             for ghost in self.ghosts:
                 self.move_object(ghost)
                 if (self.pacman.x_px - self.pacman.image.width // 1.5 <= ghost.x_px <= self.pacman.x_px + self.pacman.image.width // 1.5
-                    and self.pacman.y_px - self.pacman.image.height // 1.5 <= ghost.y_px <= self.pacman.y_px + self.pacman.image.height // 1.5):
+                    and self.pacman.y_px - self.pacman.image.height // 1.5 <= ghost.y_px <= self.pacman.y_px + self.pacman.image.height // 1.5 and ghost.behavior != GhostBehavior.TO_START):
                     print(f"!!!! CATCHED BY {ghost.name} at {ghost.x}, {ghost.y}")
                     self.death()
 

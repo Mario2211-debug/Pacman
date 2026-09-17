@@ -259,7 +259,7 @@ class Display:
                     pos_x += letter_img.width
 
 
-    def show_button(self, x: int, y: int, text: str, type: str = "normal"):
+    def show_button(self, text: str, x: int, y: int, type: str = "normal"):
         if type == "hover":
             self.show(self.images["button_hover"], x, y)
         else:
