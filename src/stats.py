@@ -44,26 +44,26 @@ class Stats:
                 for i in range(self.game.stats.stats["lives"]):
                     self.game.display.show(self.game.display.images["pacman_right"], self.x + (self.game.display.images["pacman_right"].width + 10) * i, self.y + 75)
 
-    def show_stats(self):
+    def show_stats(self) -> None:
         if not self.game.display:
             return
         for window in self.windows.values():
             window.show_window()
 
-    def reset_stats(self):
+    def reset_stats(self) -> None:
         self.stats["score"] = 0
         self.stats["lives"] = self.game.config.lives
         self.stats["time"] = self.game.config.level_max_time
 
-    def increase_score(self, num):
+    def increase_score(self, num: int) -> None:
         self.stats["score"] += num
         self.windows["score"].update_window()
 
-    def increase_time(self, num):
+    def increase_time(self, num: int) -> None:
         self.stats["time"] += num
         self.windows["time"].update_window()
 
-    def increase_lives(self, num):
+    def increase_lives(self, num: int = 1) -> None:
         self.stats["lives"] += num
         if self.stats["lives"] > 5:
             self.stats["lives"] = 5

@@ -98,35 +98,7 @@ class PacMan:
         # print("PacMan CAN'T move", self.direction, self.direction_next, self.x, self.y)
         # print(self.next_x, self.next_y)
 
-        # if direction == PacManDirection.TOP:
-        #     nx, ny = self.x, self.y - 1
-        #     if (0 <= nx < self._maze_width and 0 <= ny < self._maze_height
-        #         and (self._maze[self.y][self.x] & 1) == 0):
-        #         self.next_x, self.next_y = nx, ny
-        #         print("PacMan move TOP")
-        #         return
-        #     print("PacMan CAN'T move")
-        # elif direction == PacManDirection.RIGHT:
-        #     nx, ny = self.x + 1, self.y
-        #     if (0 <= nx < self._maze_width and 0 <= ny < self._maze_height
-        #         and (self._maze[self.y][self.x] & 2) == 0):
-        #         self.next_x, self.next_y = nx, ny
-        #         print("PacMan move RIGHT")
-        #         return
-        #     print("PacMan CAN'T move")
-        # elif direction == PacManDirection.BOTTOM:
-        #     nx, ny = self.x + 1, self.y
-        #     if (0 <= nx < self._maze_width and 0 <= ny < self._maze_height
-        #         and (self._maze[self.y][self.x] & 4) == 0):
-        #         self.next_x, self.next_y = nx, ny
-        #         print("PacMan move BOTTOM")
-        #         return
-        #     print("PacMan CAN'T move")
-        # elif direction == PacManDirection.LEFT:
-        #     nx, ny = self.x + 1, self.y
-        #     if (0 <= nx < self._maze_width and 0 <= ny < self._maze_height
-        #         and (self._maze[self.y][self.x] & 8) == 0):
-        #         self.next_x, self.next_y = nx, ny
-        #         print("PacMan move LEFT")
-        #         return
-        #     print("PacMan CAN'T move")
+    def increase_speed(self, num: int = 1) -> None:
+        self.speed += num
+        if self.speed > 10:
+            self.speed = 3

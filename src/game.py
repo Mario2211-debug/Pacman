@@ -244,24 +244,30 @@ class Game:
         self.stats.increase_score(self.config.points_per_ghost)
 
     def game_handle_key_press(self, key, pacman):
-        # print(f"Pressed key {key}")
+        print(f"Pressed key {key}")
         if key == 65307:  # ESC
             if self.status == GameStatus.RUN:
                 self.status = GameStatus.PAUSED
                 self.pause()
             return
-        if key == 108:  # L
-            self.stats.increase_lives(1)
-        if key == 102:  # F
+        elif key == 115:  # S
+            self.pacman.increase_speed()
+        elif key == 108:  # L
+            self.stats.increase_lives()
+        elif key == 102:  # F
             for ghost in self.ghosts:
                 ghost.make_freeze()
-        elif key == 119 or key == 65362:
+        # elif key == 119 or key == 65362:
+        elif key == 65362:
             pacman.direction_next = Direction.TOP
-        elif key == 100 or key == 65363:
+        # elif key == 100 or key == 65363:
+        elif key == 65363:
             pacman.direction_next = Direction.RIGHT
-        elif key == 115 or key == 65364:
+        # elif key == 115 or key == 65364:
+        elif key == 65364:
             pacman.direction_next = Direction.BOTTOM
-        elif key == 97 or key == 65361:
+        # elif key == 97 or key == 65361:
+        elif key == 65361:
             pacman.direction_next = Direction.LEFT
 
         if not pacman.direction:
@@ -368,6 +374,7 @@ class Game:
         print("Let's start!")
         self.create_level(self.stats.level)
         self.stats.reset_stats()
+        self.pacman.speed = 3
         self.pacman.direction = None
         self.pacman.direction_next = None
         self.pacman.set_image("pacman_right")
