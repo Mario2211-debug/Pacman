@@ -65,4 +65,6 @@ class Stats:
 
     def increase_lives(self, num):
         self.stats["lives"] += num
+        if self.stats["lives"] > 5:
+            self.stats["lives"] = 5
         self.windows["lives"].update_window()

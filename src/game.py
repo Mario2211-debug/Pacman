@@ -221,16 +221,15 @@ class Game:
     # GAME SCREEN
 
     def game_handle_key_press(self, key, pacman):
-        # print(f"Pressed key {key}")
+        print(f"Pressed key {key}")
         if key == 65307:  # ESC
             if self.status == GameStatus.RUN:
                 self.status = GameStatus.PAUSED
                 self.pause()
-            # else:
-            #     self.status = GameStatus.RUN
-            #     self.resume()
             return
-        if key == 119 or key == 65362:
+        if key == 108:  # L
+            self.stats.increase_lives(1)
+        elif key == 119 or key == 65362:
             pacman.direction_next = Direction.TOP
         elif key == 100 or key == 65363:
             pacman.direction_next = Direction.RIGHT
@@ -238,6 +237,7 @@ class Game:
             pacman.direction_next = Direction.BOTTOM
         elif key == 97 or key == 65361:
             pacman.direction_next = Direction.LEFT
+
         if not pacman.direction:
             pacman.direction = pacman.direction_next
 
