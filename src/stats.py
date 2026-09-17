@@ -8,7 +8,7 @@ class Stats:
         self.stats = {"level": 1,
                       "score": 0,
                       "lives": 0,
-                      "time": 0}
+                      "time": 90}
         # self.level = 1
         # self.lives = 0
         # self.score = 0
@@ -29,12 +29,20 @@ class Stats:
 
         def show_window(self) -> None:
             self.game.display.show_text(self.text, self.x, self.y)
-            self.game.display.show_filled_block(self.game.display.images["emptiness"], self.x, self.y + 70, 10, 2, 4, 4)
-            self.game.display.show_text(str(self.game.stats.stats[self.stat]), self.x, self.y + 75)
+            self.update_window()
+            # self.game.display.show_filled_block(self.game.display.images["emptiness"], self.x, self.y + 70, 10, 2, 4, 4)
+            # if self.stat != "lives":
+            #     self.game.display.show_text(str(self.game.stats.stats[self.stat]), self.x, self.y + 75)
+            # else:
+            #     self.game.display.show(self.game.display.images["pacman_right"], self.x, self.y + 75)
 
         def update_window(self) -> None:
             self.game.display.show_filled_block(self.game.display.images["emptiness"], self.x, self.y + 70, 10, 2, 4, 4)
-            self.game.display.show_text(str(self.game.stats.stats[self.stat]), self.x, self.y + 75)
+            if self.stat != "lives":
+                self.game.display.show_text(str(self.game.stats.stats[self.stat]), self.x, self.y + 75)
+            else:
+                for i in range(self.game.stats.stats["lives"]):
+                    self.game.display.show(self.game.display.images["pacman_right"], self.x + (self.game.display.images["pacman_right"].width + 10) * i, self.y + 75)
 
     def show_stats(self):
         if not self.game.display:
@@ -43,9 +51,14 @@ class Stats:
             window.show_window()
 
     def reset_stats(self):
-        for stat in self.stats.keys():
-            self.stats[stat] = 0
+        self.stats["score"] = 0
+        self.stats["lives"] = self.game.config.lives
+        self.stats["time"] = self.game.config.level_max_time
 
     def increase_score(self, num):
         self.stats["score"] += num
         self.windows["score"].update_window()
+
+    def increase_time(self, num):
+        self.stats["time"] += num
+        self.windows["time"].update_window()

@@ -1,5 +1,7 @@
 from enum import Enum
 import random
+
+import time
 # from typing import TYPE_CHECKING
 
 from .types import GameStatus
@@ -13,6 +15,11 @@ from .pacman import PacMan
 from .ghost import Ghost, Behavior as GhostBehavior
 from .config import Config
 from .pacgum import pacgums_generate
+
+
+TICK_RATE = 60
+TICK_TIME = 1.0 / TICK_RATE
+
 
 class Game:
     def __init__(self):
@@ -41,6 +48,10 @@ class Game:
         self.pause_menu_list = [("Resume", "resume"),
                 ("Main menu", "main_menu")]
         self.pause_menu_current = 0
+
+        self.time = int(time.perf_counter())
+        self.previous = time.perf_counter()
+        self.accumulator = 0.0
 
     def exit(self, error = ""):
         for image in self.display.images.values():
@@ -84,9 +95,9 @@ class Game:
         if not self.display:
             return
         # self.display.clear_window()
-        self.display.show_filled_block(self.display.images["background1"], 0, 0,
-                                       self.display.screen_width // self.display.images["background1"].width + 1,
-                                       self.display.screen_height // self.display.images["background1"].height + 1)
+        self.display.show_filled_block(self.display.images["background2"], 0, 0,
+                                       self.display.screen_width // self.display.images["background2"].width + 1,
+                                       self.display.screen_height // self.display.images["background2"].height + 1)
         self.display.show(self.display.images["logo_big"],
                           self.display.screen_width // 2
                           - self.display.images["logo_big"].width // 2,
@@ -258,18 +269,30 @@ class Game:
 
 
     def make_turn(self, nothing):
-        # print("playing...")
         if self.status != GameStatus.RUN:
             return
-        self.move_object(self.pacman)
-        for ghost in self.ghosts:
-            self.move_object(ghost)
-            if (self.pacman.x_px - self.pacman.image.width // 1.5 <= ghost.x_px <= self.pacman.x_px + self.pacman.image.width // 1.5
-                and self.pacman.y_px - self.pacman.image.height // 1.5 <= ghost.y_px <= self.pacman.y_px + self.pacman.image.height // 1.5):
-                print(f"!!!! CATCHED BY {ghost.name} at {ghost.x}, {ghost.y}")
-                self.status = GameStatus.DEAD
-                self.menu()
-        # time.sleep(0.5)
+
+        current = time.perf_counter()
+        frame_time = current - self.previous
+        if self.time < int(current):
+            self.stats.increase_time(-1)
+            self.time = int(current)
+        self.previous = current
+
+        self.accumulator += frame_time
+
+        while self.accumulator >= TICK_TIME:
+            self.accumulator -= TICK_TIME
+
+            # print("playing...")
+            self.move_object(self.pacman)
+            for ghost in self.ghosts:
+                self.move_object(ghost)
+                if (self.pacman.x_px - self.pacman.image.width // 1.5 <= ghost.x_px <= self.pacman.x_px + self.pacman.image.width // 1.5
+                    and self.pacman.y_px - self.pacman.image.height // 1.5 <= ghost.y_px <= self.pacman.y_px + self.pacman.image.height // 1.5):
+                    print(f"!!!! CATCHED BY {ghost.name} at {ghost.x}, {ghost.y}")
+                    self.status = GameStatus.DEAD
+                    self.menu()
 
     def resume(self) -> None:
         self.display.clear_window()
@@ -279,6 +302,10 @@ class Game:
         self.display.show_maze()
 
         self.stats.show_stats()
+
+        self.previous = time.perf_counter()
+        self.time = int(self.previous)
+        self.accumulator = 0.0
 
         self.status = GameStatus.RUN
 
