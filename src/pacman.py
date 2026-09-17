@@ -26,8 +26,8 @@ class PacMan:
         self.x_px = x
         self.y_px = y
         self.speed = 3
-        self.direction = Direction.RIGHT
-        self.direction_next = self.direction
+        self.direction = None
+        self.direction_next = None
         self.status = PacManStatus.NORMAL
         self.game: Game
 
@@ -49,6 +49,12 @@ class PacMan:
         self.next_y = y
         self.x_px = x * (self.game.display.corridor_width + self.game.display.wall_width)
         self.y_px = y  * (self.game.display.corridor_width + self.game.display.wall_width)
+
+    def death(self):
+        self.set_start_position(self.start_x, self.start_y)
+        self.direction = None
+        self.direction_next = None
+        self.set_image("pacman_right")
 
     def eat(self):
         if self.game.pacgums[self.y][self.x] == 2:

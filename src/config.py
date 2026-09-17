@@ -3,8 +3,8 @@ from pydantic import BaseModel, Field, ValidationInfo, model_validator
 from pydantic.functional_validators import WrapValidator
 from typing import Any, Annotated
 
-CONFIG_DEFAULT_WIDTH = 15
-CONFIG_DEFAULT_HEIGHT = 15
+CONFIG_DEFAULT_WIDTH = 25
+CONFIG_DEFAULT_HEIGHT = 20
 CONFIG_DEFAULTS = {
     "highscore_filename": "highscore.json",
     "lives": 3,

@@ -62,3 +62,7 @@ class Stats:
     def increase_time(self, num):
         self.stats["time"] += num
         self.windows["time"].update_window()
+
+    def increase_lives(self, num):
+        self.stats["lives"] += num
+        self.windows["lives"].update_window()

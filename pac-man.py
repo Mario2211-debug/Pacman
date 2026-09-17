@@ -9,8 +9,8 @@ from src.game import Game
 # from engine.engine import Engine
 # from engine.scenes.menu import MenuScene
 from src.config import Config, open_config_file
-from src.ghost import Ghost
-from src.pacman import PacMan
+from src.ghost import Ghost, Behavior as GhostBehavior
+# from src.pacman import PacMan
 from src.display import Display
 
 
@@ -44,14 +44,16 @@ if __name__ == "__main__":
         print(e)
         exit(1)
 
-    pacman = PacMan()
-    game.pacman = pacman
-    pacman.game = game
+    # pacman = PacMan()
+    # game.pacman = pacman
+    # pacman.game = game
 
     ghosts = [Ghost("ghost_red"),
               Ghost("ghost_blue"),
               Ghost("ghost_orange"),
               Ghost("ghost_pink")]
+    ghosts[1].set_behavior_standart(GhostBehavior.CORNERS)
+    ghosts[2].set_behavior_standart(GhostBehavior.RANDOM)
     game.ghosts = ghosts
     for ghost in ghosts:
         ghost.game = game
@@ -69,7 +71,7 @@ if __name__ == "__main__":
     display.mlx.mlx_hook(display.win, 33, 0, game.exit, display)
 
     game.menu()
-    # game.pause()
+    # game.defeat()
     # display.mlx.mlx_loop_hook(display.mlx_ptr, game.menu, game)
 
     # Main loop

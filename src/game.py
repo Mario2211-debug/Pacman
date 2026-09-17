@@ -29,7 +29,8 @@ class Game:
         self.stats.level = 1
         self.stats.points = 0
 
-        self.pacman: PacMan
+        self.pacman: PacMan = PacMan()
+        self.pacman.game = self
         self.ghosts: list[Ghost]
         self.display: Display
         self.status = GameStatus.PAUSED
@@ -169,8 +170,8 @@ class Game:
     # GENERATE LEVEL
 
     def create_level(self, level_num) -> None:
-        maze_width = 25
-        maze_height = 20
+        maze_width = self.config.level[level_num - 1]["width"]
+        maze_height = self.config.level[level_num - 1]["height"]
 
         mazegen = MazeGenerator((maze_width, maze_height), False, (0, 0), (1, 1), self.config.seed)
         if not mazegen.maze:
@@ -187,12 +188,11 @@ class Game:
 
         for ghost in self.ghosts:
             ghost.set_image(ghost.name + "_right")
+            ghost.set_behavior(ghost.behavior_standart)
 
         self.ghosts[0].set_start_position(0, 0)
         self.ghosts[1].set_start_position(maze_width - 1, 0)
-        self.ghosts[1].set_behavior(GhostBehavior.CORNERS)
         self.ghosts[2].set_start_position(0, maze_height - 1)
-        self.ghosts[2].set_behavior(GhostBehavior.RANDOM)
         self.ghosts[3].set_start_position(maze_width - 1, maze_height - 1)
         print("LEVEL CREATED")
 
@@ -217,6 +217,8 @@ class Game:
             pacman.direction_next = Direction.BOTTOM
         elif key == 97 or key == 65361:
             pacman.direction_next = Direction.LEFT
+        if not pacman.direction:
+            pacman.direction = pacman.direction_next
 
     def move_object(self, obj: PacMan | Ghost):
         if self.status != GameStatus.RUN:
@@ -267,6 +269,23 @@ class Game:
         pos_y = shift_y + obj.y_px
         self.display.show(obj.image, pos_x, pos_y)
 
+    def death(self):
+        self.stats.increase_lives(-1)
+        for ghost in self.ghosts:
+            ghost.speed = 5
+            ghost.set_behavior(GhostBehavior.TO_START)
+
+            shift_x = self.display.corridor_width + self.display.wall_width + 5
+            shift_y = self.display.corridor_width + self.display.wall_width + 5
+            # Clear old
+            pos_x = shift_x + self.pacman.x_px
+            pos_y = shift_y + self.pacman.y_px
+            self.display.show(self.pacman.mask, pos_x, pos_y)
+
+            self.pacman.death()
+        # self.status = GameStatus.DEAD
+        # self.menu()
+
 
     def make_turn(self, nothing):
         if self.status != GameStatus.RUN:
@@ -291,8 +310,7 @@ class Game:
                 if (self.pacman.x_px - self.pacman.image.width // 1.5 <= ghost.x_px <= self.pacman.x_px + self.pacman.image.width // 1.5
                     and self.pacman.y_px - self.pacman.image.height // 1.5 <= ghost.y_px <= self.pacman.y_px + self.pacman.image.height // 1.5):
                     print(f"!!!! CATCHED BY {ghost.name} at {ghost.x}, {ghost.y}")
-                    self.status = GameStatus.DEAD
-                    self.menu()
+                    self.death()
 
     def resume(self) -> None:
         self.display.clear_window()
@@ -317,6 +335,9 @@ class Game:
         print("Let's start!")
         self.create_level(self.stats.level)
         self.stats.reset_stats()
+        self.pacman.direction = None
+        self.pacman.direction_next = None
+        self.pacman.set_image("pacman_right")
         self.resume()
         # self.display.clear_window()
         # self.display.show_filled_block(self.display.images["background1"], 0, 0, self.display.screen_width // self.display.images["background1"].width + 1, self.display.screen_height // self.display.images["background1"].height + 1)

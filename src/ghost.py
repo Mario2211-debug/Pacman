@@ -19,6 +19,7 @@ class Behavior(Enum):
   PLAYER = 1
   CORNERS = 2
   RANDOM = 3
+  TO_START = 4
 
 
 class Ghost:
@@ -35,6 +36,7 @@ class Ghost:
         self.x_px = x
         self.y_px = y
         self.speed = 2
+        self.behavior_standart = Behavior.PLAYER
         self.behavior = Behavior.PLAYER
         self.target: tuple
         self.direction = Direction.RIGHT
@@ -46,6 +48,9 @@ class Ghost:
         if self.game.display.images:
             self.image = self.game.display.images[image_name]
             self.mask = self.game.display.images[image_name + "_mask"]
+
+    def set_behavior_standart(self, behavior: Behavior):
+        self.behavior_standart = behavior
 
     def set_behavior(self, behavior: Behavior):
         self.behavior = behavior
@@ -129,6 +134,12 @@ class Ghost:
             elif self.behavior == Behavior.RANDOM:
                 if self.target == (self.x, self.y):
                     self.target = self.get_random_cell()
+            elif self.behavior == Behavior.TO_START:
+                if (self.x, self.y) != (self.start_x, self.start_y):
+                    self.target = (self.start_x, self.start_y)
+                else:
+                    self.set_behavior(self.behavior_standart)
+                    self.speed = 2
                     # print("self.target", self.target)
 
             move_to_x, move_to_y = self.find_next_position(self.target, ghosts_next_positions)
