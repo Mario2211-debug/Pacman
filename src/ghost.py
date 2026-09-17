@@ -2,7 +2,7 @@ import random
 from collections import deque
 from enum import Enum
 
-from .types import Direction, GameStatus
+from .types import Direction
 from .display import ImgData
 
 from typing import TYPE_CHECKING
@@ -14,6 +14,7 @@ class GhostStatus(Enum):
   ACTIVE = 1
   EDIBLE = 2
   DEATH = 3
+  FREEZE = 4
 
 class Behavior(Enum):
   PLAYER = 1
@@ -157,4 +158,10 @@ class Ghost:
             #     print("Next position:", self.next_x, self.next_y)
 
             # print(f"Ghost {self.image} move to {move_to_x} {move_to_y}")
+
+    def make_freeze(self):
+        if self.status == GhostStatus.FREEZE:
+            self.status = GhostStatus.ACTIVE
+        else:
+            self.status = GhostStatus.FREEZE
 

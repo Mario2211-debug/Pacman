@@ -12,7 +12,7 @@ from .types import Direction, GameStatus
 # if TYPE_CHECKING:
 from .stats import Stats
 from .pacman import PacMan
-from .ghost import Ghost, Behavior as GhostBehavior
+from .ghost import Ghost, Behavior as GhostBehavior, GhostStatus
 from .config import Config
 from .pacgum import pacgums_generate
 
@@ -221,7 +221,7 @@ class Game:
     # GAME SCREEN
 
     def game_handle_key_press(self, key, pacman):
-        print(f"Pressed key {key}")
+        # print(f"Pressed key {key}")
         if key == 65307:  # ESC
             if self.status == GameStatus.RUN:
                 self.status = GameStatus.PAUSED
@@ -229,6 +229,9 @@ class Game:
             return
         if key == 108:  # L
             self.stats.increase_lives(1)
+        if key == 102:  # F
+            for ghost in self.ghosts:
+                ghost.make_freeze()
         elif key == 119 or key == 65362:
             pacman.direction_next = Direction.TOP
         elif key == 100 or key == 65363:
