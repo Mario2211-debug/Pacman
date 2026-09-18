@@ -228,7 +228,7 @@ class Display:
 
     def create_maze_matrix(self):
         # self.create_matrix("maze_matrix", self.game.maze_width * self.cell_width * 2, self.game.maze_height * self.cell_width * 2)
-        self.create_matrix("maze_matrix", int(self.screen_width * 1.2), int(self.screen_height * 1.2))
+        self.create_matrix("maze_matrix", int(self.screen_width * 1.3), int(self.screen_height * 1.3))
         self.add_to_matrix("maze_matrix", "background_left", 0, 0)
         self.add_to_matrix("maze_matrix", "background_right", 1350, 0)
         self.add_to_matrix("maze_matrix", "logo_small", 1450, 50)

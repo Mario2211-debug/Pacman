@@ -14,7 +14,7 @@ class GhostStatus(Enum):
   ACTIVE = 1
   EDIBLE = 2
   DEATH = 3
-  FREEZE = 4
+#   FREEZE = 4
 
 class Behavior(Enum):
   PLAYER = 1
@@ -141,13 +141,13 @@ class Ghost:
         rand_y = random.randint(0, self.game.maze_height - 1)
         if (self.game.maze[rand_y][rand_x] !=  15 and
             (rand_x, rand_y) not in ghosts_targets and
-            self.game.pacman.x - self.game.maze_width // 2 < rand_x < self.game.pacman.x + self.game.maze_width // 2 and
-            self.game.pacman.y - self.game.maze_height // 2 < rand_x < self.game.pacman.y + self.game.maze_height // 2):
+            self.game.pacman.x - self.game.maze_width // 4 < rand_x < self.game.pacman.x + self.game.maze_width // 4 and
+            self.game.pacman.y - self.game.maze_height // 4 < rand_x < self.game.pacman.y + self.game.maze_height // 4):
             return (rand_x, rand_y)
         return self.get_random_cell_far_from_pacman()
 
     def move(self):
-        if self.status != GhostStatus.FREEZE:
+        if self.freeze is False:
             self.x, self.y = self.next_x, self.next_y
             self.x_px = self.x * self.game.display.cell_width
             self.y_px = self.y * self.game.display.cell_width
@@ -196,10 +196,14 @@ class Ghost:
             # print(f"Ghost {self.image} move to {move_to_x} {move_to_y}")
 
     def make_freeze(self):
-        if self.status == GhostStatus.FREEZE:
-            self.status = GhostStatus.ACTIVE
+        if self.freeze == True:
+            self.freeze = False
         else:
-            self.status = GhostStatus.FREEZE
+            self.freeze = True
+        # if self.status == GhostStatus.FREEZE:
+        #     self.status = GhostStatus.ACTIVE
+        # else:
+        #     self.status = GhostStatus.FREEZE
 
     def death(self):
         self.speed = 20

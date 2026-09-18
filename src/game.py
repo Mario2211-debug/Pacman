@@ -90,9 +90,7 @@ class Game:
             return
 
     def level_finished(self):
-        # self.display.show_filled_block(self.display.images["background2"], 0, 0,
-        #                                self.display.screen_width // self.display.images["background2"].width + 1,
-        #                                self.display.screen_height // self.display.images["background2"].height + 1)
+        self.status = GameStatus.PAUSED
         self.display.show(self.display.images["big_background"], 0, 0)
         self.display.show(self.display.images["logo_big"],
                           self.display.screen_width // 2
@@ -263,11 +261,14 @@ class Game:
         for ghost in self.ghosts:
             ghost.status = GhostStatus.EDIBLE
             ghost.set_behavior(GhostBehavior.SCARED)
-            ghost.target = ghost.get_random_cell_far_from_pacman()
+            if not ghost.freeze:
+                ghost.target = ghost.get_random_cell_far_from_pacman()
             ghost.set_image(ghost.name + "_right")
             print(ghost.name, "Scared in position", ghost.x, ghost.y)
 
     def eat_ghost(self, ghost: Ghost) -> None:
+        if ghost.status != GhostStatus.EDIBLE:
+            return
         ghost.death()
         self.stats.increase_score(self.config.points_per_ghost)
 
@@ -291,7 +292,7 @@ class Game:
             # print(self.game.points)
 
     def game_handle_key_press(self, key, pacman):
-        # print(f"Pressed key {key}")
+        print(f"Pressed key {key}")
         if key == 65307:  # ESC
             if self.status == GameStatus.RUN:
                 self.status = GameStatus.PAUSED
@@ -304,6 +305,8 @@ class Game:
         elif key == 102:  # F
             for ghost in self.ghosts:
                 ghost.make_freeze()
+        elif key == 110:  # N
+            self.level_finished()
         # elif key == 119 or key == 65362:
         elif key == 65362:
             pacman.direction_next = Direction.TOP
@@ -372,7 +375,7 @@ class Game:
         self.display.add_to_matrix("maze_matrix", obj.image.name, pos_x, pos_y)
 
 
-    def make_turn(self, nothing):
+    def playing(self, nothing):
         if self.status != GameStatus.RUN:
             return
 
@@ -423,7 +426,7 @@ class Game:
         self.status = GameStatus.RUN
 
         self.display.mlx.mlx_hook(self.display.win, 2, 1, self.game_handle_key_press, self.pacman)
-        self.display.mlx.mlx_loop_hook(self.display.mlx_ptr, self.make_turn, None)
+        self.display.mlx.mlx_loop_hook(self.display.mlx_ptr, self.playing, None)
 
 
     def next_level(self) -> None:
@@ -449,18 +452,3 @@ class Game:
         self.pacman.set_image("pacman_right")
         for ghost in self.ghosts:
             ghost.reborn()
-        # self.display.clear_window()
-        # self.display.show_filled_block(self.display.images["background1"], 0, 0, self.display.screen_width // self.display.images["background1"].width + 1, self.display.screen_height // self.display.images["background1"].height + 1)
-
-        # # display.show_filled_block(display.images["emptiness"], 1300, 670, 15, 5, 4, 4)
-
-        # self.display.show(self.display.images["logo_small"], 1350, 50)
-
-        # # display.show_text("Test text.\n0123456789\n!?+-=.:,", 1200, 350)
-
-        # self.display.show_maze()
-
-        # self.status = GameStatus.RUN
-
-        # self.display.mlx.mlx_hook(self.display.win, 2, 1, self.game_handle_key_press, self.pacman)
-        # self.display.mlx.mlx_loop_hook(self.display.mlx_ptr, self.make_turn, None)
