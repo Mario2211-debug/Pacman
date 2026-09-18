@@ -249,19 +249,19 @@ class Game:
             self.status = GameStatus.GAME_OVER
             return
         for ghost in self.ghosts:
-            ghost.speed = 10
+            ghost.speed = 15
             ghost.set_behavior(GhostBehavior.TO_START)
         self.pacman.death()
 
     def edible_mode(self) -> None:
         for ghost in self.ghosts:
             ghost.status = GhostStatus.EDIBLE
-            ghost.set_image("ghost_dead_right")
+            ghost.set_behavior(GhostBehavior.SCARED)
+            # ghost.target = ghost.get_random_cell_far_from_pacman()
+            ghost.set_image(ghost.name + "_right")
 
     def eat_ghost(self, ghost: Ghost) -> None:
-        # print("Gost eaten")
-        ghost.speed = 20
-        ghost.behavior = GhostBehavior.TO_START
+        ghost.death()
         self.stats.increase_score(self.config.points_per_ghost)
 
     def check_pacgums(self) -> None:
@@ -384,8 +384,9 @@ class Game:
             for ghost in self.ghosts:
                 self.move_object(ghost)
                 if (self.pacman.x_px - self.pacman.image.width // 1.5 <= ghost.x_px <= self.pacman.x_px + self.pacman.image.width // 1.5
-                    and self.pacman.y_px - self.pacman.image.height // 1.5 <= ghost.y_px <= self.pacman.y_px + self.pacman.image.height // 1.5 and ghost.behavior != GhostBehavior.TO_START):
-                    # print(f"!!!! CATCHED BY {ghost.name} at {ghost.x}, {ghost.y}")
+                    and self.pacman.y_px - self.pacman.image.height // 1.5 <= ghost.y_px <= self.pacman.y_px + self.pacman.image.height // 1.5 and ghost.status != GhostStatus.DEATH):
+                    print(f"!!!! CATCHED BY {ghost.name} at {ghost.x}, {ghost.y}")
+                    print("GhostStatus:", ghost.status)
                     if ghost.status == GhostStatus.EDIBLE:
                         self.eat_ghost(ghost)
                     else:
@@ -430,6 +431,8 @@ class Game:
         self.pacman.direction = None
         self.pacman.direction_next = None
         self.pacman.set_image("pacman_right")
+        for ghost in self.ghosts:
+            ghost.reborn()
         self.resume()
         # self.display.clear_window()
         # self.display.show_filled_block(self.display.images["background1"], 0, 0, self.display.screen_width // self.display.images["background1"].width + 1, self.display.screen_height // self.display.images["background1"].height + 1)

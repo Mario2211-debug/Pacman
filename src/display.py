@@ -91,16 +91,11 @@ class Display:
 
             for file in [f for f in listdir("img/ghosts") if isfile(join("img/ghosts", f)) and f.endswith(".png")]:
                 name = file.rstrip(".png")
-                self.load_image("ghost_" + name + "_right", join("img/ghosts", file))
-                self.create_mask("ghost_" + name + "_right", "ghost_" + name + "_right_mask")
-                self.create_mirror("ghost_" + name + "_right", "ghost_" + name + "_left")
-                self.create_mask("ghost_" + name + "_left", "ghost_" + name + "_left_mask")
+                self.load_image(name + "_right", join("img/ghosts", file))
+                self.create_mask(name + "_right", name + "_right_mask")
+                self.create_mirror(name + "_right", name + "_left")
+                self.create_mask(name + "_left", name + "_left_mask")
 
-            # self.load_image("ghost_red", "img/ghosts/red.png")
-            # self.load_image("ghost_blue", "img/ghosts/blue.png")
-            # self.load_image("ghost_orange", "img/ghosts/orange.png")
-            # self.load_image("ghost_pink", "img/ghosts/pink.png")
-            # self.load_image("ghost_dead", "img/ghosts/dead.png")
         except Exception as e:
             raise(e)
 
