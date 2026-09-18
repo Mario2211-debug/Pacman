@@ -28,7 +28,7 @@ class Stats:
             self.game: Game = game
 
         def show_window(self) -> None:
-            self.game.display.show_text(self.text, self.x, self.y)
+            self.game.display.show_text(self.text, self.x, self.y, "left", "maze_matrix")
             self.update_window()
             # self.game.display.show_filled_block(self.game.display.images["emptiness"], self.x, self.y + 70, 10, 2, 4, 4)
             # if self.stat != "lives":
@@ -38,11 +38,13 @@ class Stats:
 
         def update_window(self) -> None:
             self.game.display.show_filled_block(self.game.display.images["emptiness"], self.x, self.y + 70, 13, 2, 4, 4)
+            # self.game.display.show(self.game.display.images["stat_window"], self.x, self.y + 70)
             if self.stat != "lives":
-                self.game.display.show_text(str(self.game.stats.stats[self.stat]), self.x, self.y + 75)
+                self.game.display.show_text(str(self.game.stats.stats[self.stat]), self.x, self.y + 75, "left", "maze_matrix")
             else:
                 for i in range(self.game.stats.stats["lives"]):
-                    self.game.display.show(self.game.display.images["pacman_right"], self.x + (self.game.display.images["pacman_right"].width + 10) * i, self.y + 75)
+                    # self.game.display.show(self.game.display.images["pacman_right"], self.x + (self.game.display.images["pacman_right"].width + 10) * i, self.y + 75)
+                    self.game.display.add_to_matrix("maze_matrix", "pacman_right", self.x + (self.game.display.images["pacman_right"].width + 10) * i, self.y + 75)
 
     def show_stats(self) -> None:
         if not self.game.display:

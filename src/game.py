@@ -107,7 +107,7 @@ class Game:
     # MENU SCREEN
 
     def menu_handle_key_press(self, key, current_hover):
-        print(f"Pressed key {key}")
+        # print(f"Pressed key {key}")
         if key == 65293 or key == 65421:  # ENTER
             if self.menu_list[self.menu_current][1] == "exit":
                 self.exit()
@@ -240,6 +240,8 @@ class Game:
         self.ghosts[1].set_start_position(maze_width - 1, 0)
         self.ghosts[2].set_start_position(0, maze_height - 1)
         self.ghosts[3].set_start_position(maze_width - 1, maze_height - 1)
+
+        self.display.create_maze_matrix()
         # print("LEVEL CREATED")
 
 
@@ -263,6 +265,7 @@ class Game:
             ghost.set_behavior(GhostBehavior.SCARED)
             ghost.target = ghost.get_random_cell_far_from_pacman()
             ghost.set_image(ghost.name + "_right")
+            print(ghost.name, "Scared in position", ghost.x, ghost.y)
 
     def eat_ghost(self, ghost: Ghost) -> None:
         ghost.death()
@@ -325,7 +328,8 @@ class Game:
         # Clear old
         pos_x = shift_x + obj.x_px
         pos_y = shift_y + obj.y_px
-        self.display.show(obj.mask, pos_x, pos_y)
+        # self.display.show(obj.mask, pos_x, pos_y)
+        self.display.add_to_matrix("maze_matrix", obj.mask.name, pos_x, pos_y)
 
         if obj.direction == Direction.RIGHT:
             obj.set_image(obj.name + "_right")
@@ -364,7 +368,8 @@ class Game:
         # Show new
         pos_x = shift_x + obj.x_px
         pos_y = shift_y + obj.y_px
-        self.display.show(obj.image, pos_x, pos_y)
+        # self.display.show(obj.image, pos_x, pos_y)
+        self.display.add_to_matrix("maze_matrix", obj.image.name, pos_x, pos_y)
 
 
     def make_turn(self, nothing):
@@ -383,6 +388,8 @@ class Game:
         while self.accumulator >= TICK_TIME:
             self.accumulator -= TICK_TIME
 
+            self.display.show(self.display.images["maze_matrix"], 0, 0)
+
             # print("playing...")
             self.move_object(self.pacman)
             for ghost in self.ghosts:
@@ -393,18 +400,19 @@ class Game:
                     print("GhostStatus:", ghost.status)
                     if ghost.status == GhostStatus.EDIBLE:
                         self.eat_ghost(ghost)
-                    else:
+                    elif ghost.behavior != GhostBehavior.TO_START:
                         self.death()
 
     def resume(self) -> None:
-        self.display.clear_window()
+        # self.display.clear_window()
         # self.display.show_filled_block(self.display.images["background1"], 0, 0, 10, self.display.screen_height // self.display.images["background1"].height + 1)
-        self.display.show(self.display.images["background_left"], 0, 0)
-        self.display.show(self.display.images["background_right"], 1350, 0)
+        # self.display.show(self.display.images["background_left"], 0, 0)
+        # self.display.show(self.display.images["background_right"], 1350, 0)
         # self.display.show_filled_block(self.display.images["background2"], 1350, 0, 3, self.display.screen_height // self.display.images["background2"].height + 1)
 
-        self.display.show(self.display.images["logo_small"], 1450, 50)
-        self.display.show_maze()
+        # self.display.show_maze()
+        self.display.show(self.display.images["maze_matrix"], 0, 0)
+        # self.display.show(self.display.images["logo_small"], 1450, 50)
 
         self.stats.show_stats()
 
@@ -434,13 +442,13 @@ class Game:
         print("Let's start!")
         self.create_level(self.stats.stats["level"])
         self.stats.reset_stats()
+        self.resume()
         self.pacman.speed = 3
         self.pacman.direction = None
         self.pacman.direction_next = None
         self.pacman.set_image("pacman_right")
         for ghost in self.ghosts:
             ghost.reborn()
-        self.resume()
         # self.display.clear_window()
         # self.display.show_filled_block(self.display.images["background1"], 0, 0, self.display.screen_width // self.display.images["background1"].width + 1, self.display.screen_height // self.display.images["background1"].height + 1)
 

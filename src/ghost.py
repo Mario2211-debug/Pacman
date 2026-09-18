@@ -136,9 +136,11 @@ class Ghost:
         return random.choice(corners)
 
     def get_random_cell_far_from_pacman(self) -> tuple:
+        ghosts_targets = [ghost.target for ghost in self.game.ghosts if ghost is not self]
         rand_x = random.randint(0, self.game.maze_width - 1)
         rand_y = random.randint(0, self.game.maze_height - 1)
         if (self.game.maze[rand_y][rand_x] !=  15 and
+            (rand_x, rand_y) not in ghosts_targets and
             self.game.pacman.x - self.game.maze_width // 2 < rand_x < self.game.pacman.x + self.game.maze_width // 2 and
             self.game.pacman.y - self.game.maze_height // 2 < rand_x < self.game.pacman.y + self.game.maze_height // 2):
             return (rand_x, rand_y)
@@ -205,9 +207,11 @@ class Ghost:
         self.set_behavior(Behavior.DEATH)
         self.target = self.get_random_corner_far_from_pacman()
         self.set_image(self.name + "_right")
+        print(self.name, "Death in position", self.x, self.y)
 
     def reborn(self):
         self.speed = 2
         self.status = GhostStatus.ACTIVE
         self.set_behavior(self.behavior_standart)
         self.set_image(self.name + "_right")
+        print(self.name, "Reborn in position", self.x, self.y)

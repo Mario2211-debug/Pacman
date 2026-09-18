@@ -2,6 +2,7 @@ import sys
 # import random
 import time
 from enum import Enum
+import traceback
 
 # from mazegenerator import MazeGenerator
 # from src.types import Direction, GameStatus
@@ -43,6 +44,7 @@ if __name__ == "__main__":
     except Exception as e:
         print(e)
         exit(1)
+        traceback.print_exc()
 
     # pacman = PacMan()
     # game.pacman = pacman
@@ -72,7 +74,15 @@ if __name__ == "__main__":
 
     game.menu()
 
+    # display.create_matrix("maze_matrix", 1000, 1000)
+    # display.add_to_matrix("maze_matrix", "logo_big", 100, 100)
+    # display.add_to_matrix("maze_matrix", "ghost_blue_right", 100, 100)
+    # display.add_to_matrix("maze_matrix", "ghost_red_right", 150, 150)
+    # display.show(display.images["maze_matrix"], 0, 0)
+
+
     # game.game_over()
+
     # display.mlx.mlx_loop_hook(display.mlx_ptr, game.menu, game)
 
     # Main loop
