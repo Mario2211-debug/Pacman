@@ -71,11 +71,11 @@ class Game:
         self.display.show_filled_block(self.display.images["background2"], 0, 0,
                                        self.display.screen_width // self.display.images["background2"].width + 1,
                                        self.display.screen_height // self.display.images["background2"].height + 1)
-        self.display.show(self.display.images["logo_big"],
+        self.display.show(self.display.images["game_over"],
                           self.display.screen_width // 2
-                          - self.display.images["logo_big"].width // 2,
-                          50)
-        self.display.show_text("Game Over", 960, 500, "center")
+                          - self.display.images["game_over"].width // 2,
+                          350)
+        # self.display.show_text("Game Over", 960, 500, "center")
         self.display.show_button("Main menu", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
 
         self.display.mlx.mlx_hook(self.display.win, 2, 1, self.game_over_handle_key_press, self.menu_current)

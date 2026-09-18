@@ -118,6 +118,10 @@ class Config(BaseModel):
                 print(f'\033[91mValue "width" for level {i + 1} is too small.')
                 print(f'Using default: {CONFIG_DEFAULT_WIDTH}.\033[0m')
                 self.level[i]["width"] = CONFIG_DEFAULT_WIDTH
+            elif self.level[i].get("width") > 25:
+                print(f'\033[91mValue "width" for level {i + 1} is too big.')
+                print(f'Using default: {CONFIG_DEFAULT_WIDTH}.\033[0m')
+                self.level[i]["width"] = CONFIG_DEFAULT_WIDTH
 
             if self.level[i].get("height") is None:
                 print(f'\033[91mMissed value "height" for level {i + 1}')
@@ -125,6 +129,10 @@ class Config(BaseModel):
                 self.level[i]["height"] = CONFIG_DEFAULT_HEIGHT
             elif self.level[i].get("height") < 5:
                 print(f'\033[91mValue "height" for level {i + 1} is too small.')
+                print(f'Using default: {CONFIG_DEFAULT_HEIGHT}.\033[0m')
+                self.level[i]["height"] = CONFIG_DEFAULT_HEIGHT
+            elif self.level[i].get("height") > 20:
+                print(f'\033[91mValue "height" for level {i + 1} is too big.')
                 print(f'Using default: {CONFIG_DEFAULT_HEIGHT}.\033[0m')
                 self.level[i]["height"] = CONFIG_DEFAULT_HEIGHT
 

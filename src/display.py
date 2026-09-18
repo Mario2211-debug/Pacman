@@ -1,5 +1,6 @@
 from os import listdir
 from os.path import isfile, join
+# from time import sleep
 
 from mlx import Mlx
 from typing import TYPE_CHECKING
@@ -68,6 +69,8 @@ class Display:
 
             self.load_image("logo_small", "img/logo_400.png")
             self.load_image("logo_big", "img/logo_800.png")
+            self.load_image("game_over", "img/game_over_800.png")
+            self.load_image("victory", "img/victory_800.png")
             self.load_image("background1", "img/walls_128.png")
             self.load_image("background2", "img/walls_256.png")
             self.load_image("emptiness", "img/emptiness.png")
@@ -188,9 +191,12 @@ class Display:
         self.images.update({name: new_img})
 
     def show_filled_block(self, img: ImgData, x: int, y: int, num_x: int, num_y: int, shift_x: int = 0, shift_y: int = 0) -> None:
+        img_width = img.width - shift_x
+        img_height = img.height - shift_x
         for i in range(num_x):
+            pos_x = x + img_width * i
             for j in range(num_y):
-                self.show(img, x + (img.width - shift_x) * i, y + (img.height - shift_y) * j)
+                self.show(img, pos_x, y + img_height * j)
 
     def show_pacgum(self, x: int, y: int, type: str) -> None:
         pos_x = (x + 1) * (self.corridor_width + self.wall_width)
