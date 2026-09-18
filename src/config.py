@@ -3,14 +3,14 @@ from pydantic import BaseModel, Field, ValidationInfo, model_validator
 from pydantic.functional_validators import WrapValidator
 from typing import Any, Annotated
 
-CONFIG_DEFAULT_WIDTH = 15
-CONFIG_DEFAULT_HEIGHT = 15
+CONFIG_DEFAULT_WIDTH = 25
+CONFIG_DEFAULT_HEIGHT = 20
 CONFIG_DEFAULTS = {
     "highscore_filename": "highscore.json",
     "lives": 3,
     "pacgum": 42,
     "points_per_pacgum": 10,
-    "points_per_super_pacgum": 50,
+    "points_per_super_pacgum": 250,
     "points_per_ghost": 200,
     "seed": 42,
     "level_max_time": 90,
@@ -118,6 +118,10 @@ class Config(BaseModel):
                 print(f'\033[91mValue "width" for level {i + 1} is too small.')
                 print(f'Using default: {CONFIG_DEFAULT_WIDTH}.\033[0m')
                 self.level[i]["width"] = CONFIG_DEFAULT_WIDTH
+            elif self.level[i].get("width") > 25:
+                print(f'\033[91mValue "width" for level {i + 1} is too big.')
+                print(f'Using default: {CONFIG_DEFAULT_WIDTH}.\033[0m')
+                self.level[i]["width"] = CONFIG_DEFAULT_WIDTH
 
             if self.level[i].get("height") is None:
                 print(f'\033[91mMissed value "height" for level {i + 1}')
@@ -125,6 +129,10 @@ class Config(BaseModel):
                 self.level[i]["height"] = CONFIG_DEFAULT_HEIGHT
             elif self.level[i].get("height") < 5:
                 print(f'\033[91mValue "height" for level {i + 1} is too small.')
+                print(f'Using default: {CONFIG_DEFAULT_HEIGHT}.\033[0m')
+                self.level[i]["height"] = CONFIG_DEFAULT_HEIGHT
+            elif self.level[i].get("height") > 20:
+                print(f'\033[91mValue "height" for level {i + 1} is too big.')
                 print(f'Using default: {CONFIG_DEFAULT_HEIGHT}.\033[0m')
                 self.level[i]["height"] = CONFIG_DEFAULT_HEIGHT
 
