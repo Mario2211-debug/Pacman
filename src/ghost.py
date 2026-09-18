@@ -14,7 +14,7 @@ class GhostStatus(Enum):
   ACTIVE = 1
   EDIBLE = 2
   DEATH = 3
-  FREEZE = 4
+#   FREEZE = 4
 
 class Behavior(Enum):
   PLAYER = 1
@@ -87,7 +87,7 @@ class Ghost:
                 break
             for dx, dy, code in moves:
                 nx, ny = x + dx, y + dy
-                if (nx, ny) in ghosts_next_positions:
+                if (nx, ny) in ghosts_next_positions and self.status != GhostStatus.DEATH:
                     continue
                 if self.behavior == Behavior.SCARED and nx == self.game.pacman.x and ny == self.game.pacman.y:
                     continue
@@ -130,22 +130,25 @@ class Ghost:
 
     def get_random_corner_far_from_pacman(self) -> tuple:
         corners = [(0, 0), (self.game.maze_width - 1, 0), (0, self.game.maze_height - 1), (self.game.maze_width - 1, self.game.maze_height - 1)]
-        # print("pacman near corner:", ((self.game.pacman.x // (self.game.maze_width // 2)) * (self.game.maze_width - 1), (self.game.pacman.y // (self.game.maze_height // 2)) * (self.game.maze_height - 1)))
-        corners.remove(((self.game.pacman.x // (self.game.maze_width // 2)) * (self.game.maze_width - 1),
-                        (self.game.pacman.y // (self.game.maze_height // 2)) * (self.game.maze_height - 1)))
+        pacman_quarter_x = min(1, (self.game.pacman.x // (self.game.maze_width // 2)))
+        pacman_quarter_y = min(1, (self.game.pacman.y // (self.game.maze_height // 2)))
+        # print("pacman near corner:", (pacman_quarter_x * (self.game.maze_width- 1), pacman_quarter_y * (self.game.maze_height - 1)))
+        corners.remove((pacman_quarter_x * (self.game.maze_width- 1), pacman_quarter_y * (self.game.maze_height- 1)))
         return random.choice(corners)
 
     def get_random_cell_far_from_pacman(self) -> tuple:
+        ghosts_targets = [ghost.target for ghost in self.game.ghosts if ghost is not self]
         rand_x = random.randint(0, self.game.maze_width - 1)
         rand_y = random.randint(0, self.game.maze_height - 1)
         if (self.game.maze[rand_y][rand_x] !=  15 and
-            self.game.pacman.x - self.game.maze_width // 2 < rand_x < self.game.pacman.x + self.game.maze_width // 2 and
-            self.game.pacman.y - self.game.maze_height // 2 < rand_x < self.game.pacman.y + self.game.maze_height // 2):
+            (rand_x, rand_y) not in ghosts_targets and
+            self.game.pacman.x - self.game.maze_width // 4 < rand_x < self.game.pacman.x + self.game.maze_width // 4 and
+            self.game.pacman.y - self.game.maze_height // 4 < rand_x < self.game.pacman.y + self.game.maze_height // 4):
             return (rand_x, rand_y)
         return self.get_random_cell_far_from_pacman()
 
     def move(self):
-        if self.status != GhostStatus.FREEZE:
+        if self.freeze is False:
             self.x, self.y = self.next_x, self.next_y
             self.x_px = self.x * self.game.display.cell_width
             self.y_px = self.y * self.game.display.cell_width
@@ -160,8 +163,11 @@ class Ghost:
                 if self.target == (self.x, self.y):
                     self.target = self.get_random_cell()
             elif self.behavior == Behavior.SCARED:
+                if self.target == (self.x, self.y):
+                    self.target = self.get_random_cell_far_from_pacman()
+                    # self.target = self.get_random_corner_far_from_pacman()
                 # if self.target == (self.x, self.y):
-                self.target = self.get_random_cell_far_from_pacman()
+                # self.target = self.get_random_cell_far_from_pacman()
                 # print(self.name, self.x, self.y, "Scared and run to:", self.target)
             elif self.behavior == Behavior.DEATH:
                 if self.target == (self.x, self.y):
@@ -191,10 +197,14 @@ class Ghost:
             # print(f"Ghost {self.image} move to {move_to_x} {move_to_y}")
 
     def make_freeze(self):
-        if self.status == GhostStatus.FREEZE:
-            self.status = GhostStatus.ACTIVE
+        if self.freeze == True:
+            self.freeze = False
         else:
-            self.status = GhostStatus.FREEZE
+            self.freeze = True
+        # if self.status == GhostStatus.FREEZE:
+        #     self.status = GhostStatus.ACTIVE
+        # else:
+        #     self.status = GhostStatus.FREEZE
 
     def death(self):
         self.speed = 20
@@ -202,9 +212,11 @@ class Ghost:
         self.set_behavior(Behavior.DEATH)
         self.target = self.get_random_corner_far_from_pacman()
         self.set_image(self.name + "_right")
+        print(self.name, "Death in position", self.x, self.y)
 
     def reborn(self):
         self.speed = 2
         self.status = GhostStatus.ACTIVE
         self.set_behavior(self.behavior_standart)
         self.set_image(self.name + "_right")
+        print(self.name, "Reborn in position", self.x, self.y)
