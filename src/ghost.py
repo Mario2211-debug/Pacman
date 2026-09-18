@@ -87,7 +87,7 @@ class Ghost:
                 break
             for dx, dy, code in moves:
                 nx, ny = x + dx, y + dy
-                if (nx, ny) in ghosts_next_positions:
+                if (nx, ny) in ghosts_next_positions and self.status != GhostStatus.DEATH:
                     continue
                 if self.behavior == Behavior.SCARED and nx == self.game.pacman.x and ny == self.game.pacman.y:
                     continue
@@ -129,9 +129,10 @@ class Ghost:
 
     def get_random_corner_far_from_pacman(self) -> tuple:
         corners = [(0, 0), (self.game.maze_width - 1, 0), (0, self.game.maze_height - 1), (self.game.maze_width - 1, self.game.maze_height - 1)]
-        # print("pacman near corner:", ((self.game.pacman.x // (self.game.maze_width // 2)) * (self.game.maze_width - 1), (self.game.pacman.y // (self.game.maze_height // 2)) * (self.game.maze_height - 1)))
-        corners.remove(((self.game.pacman.x // (self.game.maze_width // 2)) * (self.game.maze_width - 1),
-                        (self.game.pacman.y // (self.game.maze_height // 2)) * (self.game.maze_height - 1)))
+        pacman_quarter_x = min(1, (self.game.pacman.x // (self.game.maze_width // 2)))
+        pacman_quarter_y = min(1, (self.game.pacman.y // (self.game.maze_height // 2)))
+        # print("pacman near corner:", (pacman_quarter_x * (self.game.maze_width- 1), pacman_quarter_y * (self.game.maze_height - 1)))
+        corners.remove((pacman_quarter_x * (self.game.maze_width- 1), pacman_quarter_y * (self.game.maze_height- 1)))
         return random.choice(corners)
 
     def get_random_cell_far_from_pacman(self) -> tuple:
@@ -159,8 +160,11 @@ class Ghost:
                 if self.target == (self.x, self.y):
                     self.target = self.get_random_cell()
             elif self.behavior == Behavior.SCARED:
+                if self.target == (self.x, self.y):
+                    self.target = self.get_random_cell_far_from_pacman()
+                    # self.target = self.get_random_corner_far_from_pacman()
                 # if self.target == (self.x, self.y):
-                self.target = self.get_random_cell_far_from_pacman()
+                # self.target = self.get_random_cell_far_from_pacman()
                 # print(self.name, self.x, self.y, "Scared and run to:", self.target)
             elif self.behavior == Behavior.DEATH:
                 if self.target == (self.x, self.y):

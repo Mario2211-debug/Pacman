@@ -63,14 +63,15 @@ class Game:
     # GAME OVER SCREEN
 
     def game_over_handle_key_press(self, key, current_hover):
-        if key == 65307 or key == 65293:  # ESC or ENTER
+        if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
             self.menu()
             return
 
     def game_over(self):
-        self.display.show_filled_block(self.display.images["background2"], 0, 0,
-                                       self.display.screen_width // self.display.images["background2"].width + 1,
-                                       self.display.screen_height // self.display.images["background2"].height + 1)
+        # self.display.show_filled_block(self.display.images["background2"], 0, 0,
+        #                                self.display.screen_width // self.display.images["background2"].width + 1,
+        #                                self.display.screen_height // self.display.images["background2"].height + 1)
+        self.display.show(self.display.images["big_background"], 0, 0)
         self.display.show(self.display.images["game_over"],
                           self.display.screen_width // 2
                           - self.display.images["game_over"].width // 2,
@@ -84,14 +85,15 @@ class Game:
     # LEVEL FINISHED SCREEN
 
     def level_finished_handle_key_press(self, key, current_hover):
-        if key == 65307 or key == 65293:  # ESC or ENTER
+        if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
             self.next_level()
             return
 
     def level_finished(self):
-        self.display.show_filled_block(self.display.images["background2"], 0, 0,
-                                       self.display.screen_width // self.display.images["background2"].width + 1,
-                                       self.display.screen_height // self.display.images["background2"].height + 1)
+        # self.display.show_filled_block(self.display.images["background2"], 0, 0,
+        #                                self.display.screen_width // self.display.images["background2"].width + 1,
+        #                                self.display.screen_height // self.display.images["background2"].height + 1)
+        self.display.show(self.display.images["big_background"], 0, 0)
         self.display.show(self.display.images["logo_big"],
                           self.display.screen_width // 2
                           - self.display.images["logo_big"].width // 2,
@@ -105,8 +107,8 @@ class Game:
     # MENU SCREEN
 
     def menu_handle_key_press(self, key, current_hover):
-        # print(f"Pressed key {key}")
-        if key == 65293:  # ENTER
+        print(f"Pressed key {key}")
+        if key == 65293 or key == 65421:  # ENTER
             if self.menu_list[self.menu_current][1] == "exit":
                 self.exit()
                 return
@@ -137,9 +139,10 @@ class Game:
         if not self.display:
             return
         # self.display.clear_window()
-        self.display.show_filled_block(self.display.images["background2"], 0, 0,
-                                       self.display.screen_width // self.display.images["background2"].width + 1,
-                                       self.display.screen_height // self.display.images["background2"].height + 1)
+        # self.display.show_filled_block(self.display.images["background2"], 0, 0,
+        #                                self.display.screen_width // self.display.images["background2"].width + 1,
+        #                                self.display.screen_height // self.display.images["background2"].height + 1)
+        self.display.show(self.display.images["big_background"], 0, 0)
         self.display.show(self.display.images["logo_big"],
                           self.display.screen_width // 2
                           - self.display.images["logo_big"].width // 2,
@@ -169,7 +172,7 @@ class Game:
         if key == 65307:  # ESC
             self.resume()
             return
-        if key == 65293:  # ENTER
+        if key == 65293 or key == 65421:  # ENTER
             if self.pause_menu_list[self.pause_menu_current][1] == "resume":
                 self.resume()
                 return
@@ -200,10 +203,11 @@ class Game:
         if not self.display:
             return
         if not self.display.images.get("pause_background"):
-            self.display.create_rectangle("pause_background", 256, 256, 0xAA000000)
-        self.display.show_filled_block(self.display.images["pause_background"], 0, 0,
-                                       self.display.screen_width // self.display.images["pause_background"].width + 1,
-                                       self.display.screen_height // self.display.images["pause_background"].height + 1)
+            self.display.create_rectangle("pause_background", self.display.screen_width, self.display.screen_height, 0xAA000000)
+        self.display.show(self.display.images["pause_background"], 0, 0)
+        # self.display.show_filled_block(self.display.images["pause_background"], 0, 0,
+        #                                self.display.screen_width // self.display.images["pause_background"].width + 1,
+        #                                self.display.screen_height // self.display.images["pause_background"].height + 1)
         self.show_pause_menu()
         self.display.mlx.mlx_hook(self.display.win, 2, 1, self.pause_menu_handle_key_press, self.pause_menu_current)
 
@@ -257,7 +261,7 @@ class Game:
         for ghost in self.ghosts:
             ghost.status = GhostStatus.EDIBLE
             ghost.set_behavior(GhostBehavior.SCARED)
-            # ghost.target = ghost.get_random_cell_far_from_pacman()
+            ghost.target = ghost.get_random_cell_far_from_pacman()
             ghost.set_image(ghost.name + "_right")
 
     def eat_ghost(self, ghost: Ghost) -> None:
@@ -394,8 +398,10 @@ class Game:
 
     def resume(self) -> None:
         self.display.clear_window()
-        self.display.show_filled_block(self.display.images["background1"], 0, 0, 10, self.display.screen_height // self.display.images["background1"].height + 1)
-        self.display.show_filled_block(self.display.images["background2"], 1350, 0, 3, self.display.screen_height // self.display.images["background2"].height + 1)
+        # self.display.show_filled_block(self.display.images["background1"], 0, 0, 10, self.display.screen_height // self.display.images["background1"].height + 1)
+        self.display.show(self.display.images["background_left"], 0, 0)
+        self.display.show(self.display.images["background_right"], 1350, 0)
+        # self.display.show_filled_block(self.display.images["background2"], 1350, 0, 3, self.display.screen_height // self.display.images["background2"].height + 1)
 
         self.display.show(self.display.images["logo_small"], 1450, 50)
         self.display.show_maze()
@@ -424,6 +430,7 @@ class Game:
         self.resume()
 
     def start(self) -> None:
+        self.display.clear_window()
         print("Let's start!")
         self.create_level(self.stats.stats["level"])
         self.stats.reset_stats()

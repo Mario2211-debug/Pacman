@@ -1,6 +1,6 @@
 import sys
 # import random
-# import time
+import time
 from enum import Enum
 
 # from mazegenerator import MazeGenerator
@@ -71,6 +71,7 @@ if __name__ == "__main__":
     display.mlx.mlx_hook(display.win, 33, 0, game.exit, display)
 
     game.menu()
+
     # game.game_over()
     # display.mlx.mlx_loop_hook(display.mlx_ptr, game.menu, game)
 

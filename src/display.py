@@ -77,6 +77,10 @@ class Display:
             self.load_image("button", "img/button.png")
             self.load_image("button_hover", "img/button_hover.png")
 
+            self.create_background("background2", "big_background", self.screen_width // self.images["background2"].width + 1, self.screen_height // self.images["background2"].height + 1)
+            self.create_background("background1", "background_left", 10, self.screen_height // self.images["background1"].height + 1)
+            self.create_background("background2", "background_right", 3, self.screen_height // self.images["background2"].height + 1)
+
             self.load_image("pacman_right", "img/pacman_24.png")
             self.create_mask("pacman_right", "pacman_right_mask")
             self.create_mirror("pacman_right", "pacman_left")
@@ -170,20 +174,41 @@ class Display:
         new_img.name = name_new
         self.images.update({name_new: new_img})
 
-    def create_rectangle(self, name: str, width: int, height: int, color) -> None:
+    def create_rectangle(self, name_new: str, width: int, height: int, color) -> None:
         new_img = ImgData()
         new_img.width = width
         new_img.height = height
         new_img.img = self.mlx.mlx_new_image(self.mlx_ptr, new_img.width, new_img.height)
         if not new_img.img:
-            raise Exception(f"Can't create image {name}")
+            raise Exception(f"Can't create image {name_new}")
         new_img.data, new_img.bpp, new_img.sl, new_img.iformat = \
             self.mlx.mlx_get_data_addr(new_img.img)
         # Fill image with color
         for i in range(0, new_img.sl * new_img.height, 4):
             new_img.data[i:i + 4] = color.to_bytes(4, 'little')
-        new_img.name = name
-        self.images.update({name: new_img})
+        new_img.name = name_new
+        self.images.update({name_new: new_img})
+
+    def create_background(self, source: str, name_new: str, num_x: int, num_y: int) -> None:
+        new_img = ImgData()
+        new_img.width = self.images[source].height * num_x
+        new_img.height = self.images[source].width * num_y
+        new_img.img = self.mlx.mlx_new_image(self.mlx_ptr, new_img.width, new_img.height)
+        if not new_img.img:
+            raise Exception(f"Can't create image {name_new}")
+        new_img.data, new_img.bpp, new_img.sl, new_img.iformat = \
+            self.mlx.mlx_get_data_addr(new_img.img)
+        for i in range(0, new_img.sl * new_img.height, 4):
+            new_img.data[i:i + 4] = (0x00000000).to_bytes(4, 'little')
+        for pos_x in range(num_x):
+            for pos_y in range(num_y):
+                for y in range(0, self.images[source].height):
+                    for x in range(0, self.images[source].sl, 4):
+                        pos = x + (y * self.images[source].sl)
+                        pos_new = pos_x * self.images[source].sl + x +  ((pos_y * self.images[source].height + y) * new_img.sl)
+                        new_img.data[pos_new:pos_new + 4] = self.images[source].data[pos:pos + 4]
+        new_img.name = name_new
+        self.images.update({name_new: new_img})
 
     def show_filled_block(self, img: ImgData, x: int, y: int, num_x: int, num_y: int, shift_x: int = 0, shift_y: int = 0) -> None:
         img_width = img.width - shift_x
