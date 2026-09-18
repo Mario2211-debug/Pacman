@@ -21,6 +21,8 @@ class Behavior(Enum):
   CORNERS = 2
   RANDOM = 3
   TO_START = 4
+  SCARED = 5
+  DEATH = 6
 
 
 class Ghost:
@@ -46,8 +48,10 @@ class Ghost:
         self.game: Game
 
     def set_image(self, image_name) -> None:
-        if self.status == GhostStatus.EDIBLE:
+        if self.status == GhostStatus.DEATH:
             image_name = "ghost_dead_right"
+        if self.status == GhostStatus.EDIBLE:
+            image_name = "scared_" + image_name
         if self.game.display.images:
             self.image = self.game.display.images[image_name]
             self.mask = self.game.display.images[image_name + "_mask"]
@@ -69,20 +73,23 @@ class Ghost:
         self.y_px = y  * self.game.display.cell_width
         self.target = (x, y)
 
-    def find_next_position(self, target: tuple, ghosts_positions: list[tuple[int]] = []) -> tuple[int]:
+    def find_next_position(self, target: tuple) -> tuple[int]:
         moves = [(0, -1, 1), (1, 0, 2),
                  (0, 1, 4), (-1, 0, 8)]
         start = (self.x, self.y)
         goal = target
         prev: dict = {start: None}
         queue = deque([start])
+        ghosts_next_positions = [(ghost.next_x, ghost.next_y) for ghost in self.game.ghosts if ghost is not self and ghost.status != GhostStatus.DEATH]
         while queue:
             x, y = queue.popleft()
             if (x, y) == goal:
                 break
             for dx, dy, code in moves:
                 nx, ny = x + dx, y + dy
-                if (nx, ny) in ghosts_positions:
+                if (nx, ny) in ghosts_next_positions:
+                    continue
+                if self.behavior == Behavior.SCARED and nx == self.game.pacman.x and ny == self.game.pacman.y:
                     continue
                 if (0 <= nx < self.game.maze_width and 0 <= ny < self.game.maze_height
                         and (self.game.maze[y][x] & code) == 0
@@ -120,13 +127,28 @@ class Ghost:
             return (rand_x, rand_y)
         return self.get_random_cell()
 
+    def get_random_corner_far_from_pacman(self) -> tuple:
+        corners = [(0, 0), (self.game.maze_width - 1, 0), (0, self.game.maze_height - 1), (self.game.maze_width - 1, self.game.maze_height - 1)]
+        # print("pacman near corner:", ((self.game.pacman.x // (self.game.maze_width // 2)) * (self.game.maze_width - 1), (self.game.pacman.y // (self.game.maze_height // 2)) * (self.game.maze_height - 1)))
+        corners.remove(((self.game.pacman.x // (self.game.maze_width // 2)) * (self.game.maze_width - 1),
+                        (self.game.pacman.y // (self.game.maze_height // 2)) * (self.game.maze_height - 1)))
+        return random.choice(corners)
+
+    def get_random_cell_far_from_pacman(self) -> tuple:
+        rand_x = random.randint(0, self.game.maze_width - 1)
+        rand_y = random.randint(0, self.game.maze_height - 1)
+        if (self.game.maze[rand_y][rand_x] !=  15 and
+            self.game.pacman.x - self.game.maze_width // 2 < rand_x < self.game.pacman.x + self.game.maze_width // 2 and
+            self.game.pacman.y - self.game.maze_height // 2 < rand_x < self.game.pacman.y + self.game.maze_height // 2):
+            return (rand_x, rand_y)
+        return self.get_random_cell_far_from_pacman()
+
     def move(self):
         if self.status != GhostStatus.FREEZE:
             self.x, self.y = self.next_x, self.next_y
             self.x_px = self.x * self.game.display.cell_width
             self.y_px = self.y * self.game.display.cell_width
             # print(f"Ghost {self.image} position: {self.x}, {self.y}")
-            ghosts_next_positions = [(ghost.next_x, ghost.next_y) for ghost in self.game.ghosts if ghost is not self]
 
             if self.behavior == Behavior.PLAYER:
                 self.target = (self.game.pacman.next_x, self.game.pacman.next_y)
@@ -136,15 +158,21 @@ class Ghost:
             elif self.behavior == Behavior.RANDOM:
                 if self.target == (self.x, self.y):
                     self.target = self.get_random_cell()
+            elif self.behavior == Behavior.SCARED:
+                # if self.target == (self.x, self.y):
+                self.target = self.get_random_cell_far_from_pacman()
+                # print(self.name, self.x, self.y, "Scared and run to:", self.target)
+            elif self.behavior == Behavior.DEATH:
+                if self.target == (self.x, self.y):
+                    self.reborn()
             elif self.behavior == Behavior.TO_START:
                 if (self.x, self.y) != (self.start_x, self.start_y):
                     self.target = (self.start_x, self.start_y)
                 else:
-                    self.set_behavior(self.behavior_standart)
-                    self.speed = 2
+                    self.reborn()
                     # print("self.target", self.target)
 
-            move_to_x, move_to_y = self.find_next_position(self.target, ghosts_next_positions)
+            move_to_x, move_to_y = self.find_next_position(self.target)
             self.next_x, self.next_y = move_to_x, move_to_y
 
             if move_to_x - self.x == 1:
@@ -167,3 +195,15 @@ class Ghost:
         else:
             self.status = GhostStatus.FREEZE
 
+    def death(self):
+        self.speed = 20
+        self.status = GhostStatus.DEATH
+        self.set_behavior(Behavior.DEATH)
+        self.target = self.get_random_corner_far_from_pacman()
+        self.set_image(self.name + "_right")
+
+    def reborn(self):
+        self.speed = 2
+        self.status = GhostStatus.ACTIVE
+        self.set_behavior(self.behavior_standart)
+        self.set_image(self.name + "_right")
