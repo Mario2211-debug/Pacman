@@ -9,4 +9,4 @@ class Direction(Enum):
 class GameStatus(Enum):
   RUN = 1
   PAUSED = 2
-  DEAD = 3
+  GAME_OVER = 3
