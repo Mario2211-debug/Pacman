@@ -7,12 +7,12 @@ import time
 from .types import GameStatus
 from .display import Display
 from mazegenerator import MazeGenerator
-from .types import Direction, GameStatus
+from .types import Direction, GameStatus, GhostStatus, GhostBehavior
 
 # if TYPE_CHECKING:
 from .stats import Stats
-from .pacman import PacMan
-from .ghost import Ghost, Behavior as GhostBehavior, GhostStatus
+from .pacman import PacMan, PacManStatus
+from .ghost import Ghost
 from .config import Config
 from .pacgum import pacgums_generate
 
@@ -236,7 +236,7 @@ class Game:
 
         for ghost in self.ghosts:
             ghost.set_image("right")
-            ghost.set_behavior(ghost.behavior_standart)
+            ghost.set_behavior(ghost.behavior_default)
             ghost.speed = 2
 
         self.ghosts[0].set_start_position(0, 0)
@@ -312,6 +312,8 @@ class Game:
                 ghost.make_freeze()
         elif key == 110:  # N
             self.level_finished()
+        elif key == 105:  # I
+            self.pacman.invisible()
         # elif key == 119 or key == 65362:
         elif key == 65362:
             pacman.direction_next = Direction.TOP
@@ -402,7 +404,8 @@ class Game:
             self.move_object(self.pacman)
             for ghost in self.ghosts:
                 self.move_object(ghost)
-                if (self.pacman.x_px - self.pacman.image.width // 1.5 <= ghost.x_px <= self.pacman.x_px + self.pacman.image.width // 1.5
+                if (self.pacman.status == PacManStatus.NORMAL and
+                    self.pacman.x_px - self.pacman.image.width // 1.5 <= ghost.x_px <= self.pacman.x_px + self.pacman.image.width // 1.5
                     and self.pacman.y_px - self.pacman.image.height // 1.5 <= ghost.y_px <= self.pacman.y_px + self.pacman.image.height // 1.5 and ghost.status != GhostStatus.DEATH):
                     print(f"!!!! CATCHED BY {ghost.name} at {ghost.x}, {ghost.y}")
                     print("GhostStatus:", ghost.status)

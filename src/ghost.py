@@ -1,29 +1,13 @@
 import random
 from collections import deque
-from enum import Enum
 
-from .types import Direction
+from .types import Direction, GhostStatus, GhostBehavior
 from .display import ImgData
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .game import Game
-
-class GhostStatus(Enum):
-  ACTIVE = 1
-  EDIBLE = 2
-  DEATH = 3
-#   FREEZE = 4
-
-class Behavior(Enum):
-  PLAYER = 1
-  CORNERS = 2
-  RANDOM = 3
-  TO_START = 4
-  SCARED = 5
-  DEATH = 6
-
 
 class Ghost:
     def __init__(self, name: str, x: int = 0, y: int = 0) -> None:
@@ -39,8 +23,8 @@ class Ghost:
         self.x_px = x
         self.y_px = y
         self.speed = 2
-        self.behavior_standart = Behavior.PLAYER
-        self.behavior = Behavior.PLAYER
+        self.behavior_default = GhostBehavior.PLAYER
+        self.behavior = GhostBehavior.PLAYER
         self.target: tuple
         self.direction = Direction.RIGHT
         self.status = GhostStatus.ACTIVE
@@ -52,17 +36,16 @@ class Ghost:
             image_name = "ghost_dead_right"
         elif self.status == GhostStatus.EDIBLE:
             image_name = "scared_" + self.name + "_" + image_direction
-            print(image_name)
         else:
             image_name = self.name + "_" + image_direction
         if self.game.display.images.get(image_name):
             self.image = self.game.display.images[image_name]
             self.mask = self.game.display.images[image_name + "_mask"]
 
-    def set_behavior_standart(self, behavior: Behavior):
-        self.behavior_standart = behavior
+    def set_behavior_default(self, behavior: GhostBehavior):
+        self.behavior_default = behavior
 
-    def set_behavior(self, behavior: Behavior):
+    def set_behavior(self, behavior: GhostBehavior):
         self.behavior = behavior
 
     def set_start_position(self, x: int, y: int) -> None:
@@ -92,7 +75,7 @@ class Ghost:
                 nx, ny = x + dx, y + dy
                 if (nx, ny) in ghosts_next_positions and self.status != GhostStatus.DEATH:
                     continue
-                if self.behavior == Behavior.SCARED and nx == self.game.pacman.x and ny == self.game.pacman.y:
+                if self.behavior == GhostBehavior.SCARED and nx == self.game.pacman.x and ny == self.game.pacman.y:
                     continue
                 if (0 <= nx < self.game.maze_width and 0 <= ny < self.game.maze_height
                         and (self.game.maze[y][x] & code) == 0
@@ -120,7 +103,8 @@ class Ghost:
 
     def get_random_corner(self) -> tuple:
         corners = [(0, 0), (self.game.maze_width - 1, 0), (0, self.game.maze_height - 1), (self.game.maze_width - 1, self.game.maze_height - 1)]
-        corners.remove((self.x, self.y))
+        if (self.x, self.y) in corners:
+            corners.remove((self.x, self.y))
         return random.choice(corners)
 
     def get_random_cell(self) -> tuple:
@@ -134,8 +118,11 @@ class Ghost:
         corners = [(0, 0), (self.game.maze_width - 1, 0), (0, self.game.maze_height - 1), (self.game.maze_width - 1, self.game.maze_height - 1)]
         pacman_quarter_x = min(1, (self.game.pacman.x // (self.game.maze_width // 2)))
         pacman_quarter_y = min(1, (self.game.pacman.y // (self.game.maze_height // 2)))
+        corner_x = pacman_quarter_x * (self.game.maze_width- 1)
+        corner_y = pacman_quarter_y * (self.game.maze_height- 1)
         # print("pacman near corner:", (pacman_quarter_x * (self.game.maze_width- 1), pacman_quarter_y * (self.game.maze_height - 1)))
-        corners.remove((pacman_quarter_x * (self.game.maze_width- 1), pacman_quarter_y * (self.game.maze_height- 1)))
+        if (corner_x, corner_y) in corners:
+            corners.remove((corner_x, corner_y))
         return random.choice(corners)
 
     def get_random_cell_far_from_pacman(self) -> tuple:
@@ -157,25 +144,25 @@ class Ghost:
             self.y_px = self.y * self.game.display.cell_width
             # print(f"Ghost {self.image} position: {self.x}, {self.y}")
 
-            if self.behavior == Behavior.PLAYER:
+            if self.behavior == GhostBehavior.PLAYER:
                 self.target = (self.game.pacman.next_x, self.game.pacman.next_y)
-            elif self.behavior == Behavior.CORNERS:
+            elif self.behavior == GhostBehavior.CORNERS:
                 if self.target == (self.x, self.y):
                     self.target = self.get_random_corner()
-            elif self.behavior == Behavior.RANDOM:
+            elif self.behavior == GhostBehavior.RANDOM:
                 if self.target == (self.x, self.y):
                     self.target = self.get_random_cell()
-            elif self.behavior == Behavior.SCARED:
+            elif self.behavior == GhostBehavior.SCARED:
                 if self.target == (self.x, self.y):
                     self.target = self.get_random_cell_far_from_pacman()
                     # self.target = self.get_random_corner_far_from_pacman()
                 # if self.target == (self.x, self.y):
                 # self.target = self.get_random_cell_far_from_pacman()
                 # print(self.name, self.x, self.y, "Scared and run to:", self.target)
-            elif self.behavior == Behavior.DEATH:
+            elif self.behavior == GhostBehavior.DEATH:
                 if self.target == (self.x, self.y):
                     self.reborn()
-            elif self.behavior == Behavior.TO_START:
+            elif self.behavior == GhostBehavior.TO_START:
                 if (self.x, self.y) != (self.start_x, self.start_y):
                     self.target = (self.start_x, self.start_y)
                 else:
@@ -212,7 +199,7 @@ class Ghost:
     def death(self):
         self.speed = 20
         self.status = GhostStatus.DEATH
-        self.set_behavior(Behavior.DEATH)
+        self.set_behavior(GhostBehavior.DEATH)
         self.target = self.get_random_corner_far_from_pacman()
         self.set_image("right")
         print(self.name, "Death in position", self.x, self.y)
@@ -220,6 +207,6 @@ class Ghost:
     def reborn(self):
         self.speed = 2
         self.status = GhostStatus.ACTIVE
-        self.set_behavior(self.behavior_standart)
+        self.set_behavior(self.behavior_default)
         self.set_image("right")
         print(self.name, "Reborn in position", self.x, self.y)

@@ -5,6 +5,8 @@ from os.path import isfile, join
 from mlx import Mlx
 from typing import TYPE_CHECKING
 
+from .types import PacManStatus
+
 if TYPE_CHECKING:
     from .game import Game
 
@@ -228,15 +230,22 @@ class Display:
             self.mlx.mlx_destroy_image(self.mlx_ptr, self.images.get(name_new).img)
         self.create_rectangle(name_new, width, height, 0xFF000000)
 
-    def add_to_bitmap(self, matrix: str, source: str, pos_x: int, pos_y: int) -> None:
+    def add_to_bitmap(self, bitmap: str, source: str, pos_x: int, pos_y: int) -> None:
         for y in range(0, self.images[source].height):
             for x in range(0, self.images[source].sl, 4):
                 pos = x + (y * self.images[source].sl)
                 if self.images[source].data[pos + 3] < 50:
                     continue
-                pos_new = pos_x * 4 + x + ((pos_y + y) * self.images[matrix].sl)
+                pos_new = pos_x * 4 + x + ((pos_y + y) * self.images[bitmap].sl)
                 # print(pos, "=>", pos_new)
-                self.images[matrix].data[pos_new:pos_new + 4] = self.images[source].data[pos:pos + 4]
+                self.images[bitmap].data[pos_new:pos_new + 4] = self.images[source].data[pos:pos + 4]
+                if source.startswith("pacman") and self.game.pacman.status == PacManStatus.INVISIBLE and not source.endswith("mask"):
+                    # print("Invisible pacman")
+                    self.images[bitmap].data[pos_new + 3] = 16
+                    # self.images[bitmap].data[pos_new + 2] = 128
+
+        if source.startswith("pacman"):
+            print(source)
 
     def create_maze_bitmap(self):
         self.create_bitmap("maze_screen", int(self.screen_width * 1.3), int(self.screen_height * 1.3))
