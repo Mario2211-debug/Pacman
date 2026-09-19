@@ -137,6 +137,9 @@ class Game:
             elif self.menu_list[self.menu_current][1] == "start":
                 self.start()
                 return
+            elif self.menu_list[self.menu_current][1] == "instructions":
+                self.instructions()
+                return
         if key == 119 or key == 65362:
             self.menu_current -= 1
             if self.menu_current < 0:
@@ -481,3 +484,29 @@ class Game:
         for ghost in self.ghosts:
             ghost.reborn()
         self.resume()
+
+
+    #INSTRUCTIONS SCREEN
+
+    def game_over_handle_key_press(self, key, current_hover):
+        if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
+            self.menu()
+            return
+
+    def instructions(self) -> None:
+        if not self.display.images.get("instructions_screen"):
+            self.display.create_bitmap("instructions_screen",
+                                    self.display.screen_width,
+                                    self.display.screen_height)
+
+            self.display.add_to_bitmap("instructions_screen", "big_background", 0, 0)
+            self.display.add_to_bitmap("instructions_screen", "logo_big",
+                            self.display.screen_width // 2
+                            - self.display.images["logo_big"].width // 2,
+                            50)
+            self.display.show_filled_block(self.display.images["emptiness"], 500, 350, 25, 16, 4, 4, "instructions_screen")
+            self.display.show_text("Use arrows to play.\nPress ESC to pause.\nSecret cheats:\nL - add extra live\nS - increase player speed\nF - freeze enemies\nI - invincibility\nN - Skip level", 520, 370, "left", "instructions_screen")
+
+        self.display.show(self.display.images["instructions_screen"], 0, 0)
+
+        self.display.mlx.mlx_hook(self.display.win, 2, 1, self.game_over_handle_key_press, self.menu_current)

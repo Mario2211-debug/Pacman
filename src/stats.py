@@ -32,7 +32,7 @@ class Stats:
             self.update_window()
 
         def update_window(self) -> None:
-            self.game.display.show_filled_block(self.game.display.images["emptiness"], self.x, self.y + 50, 13, 2, 4, 4)
+            self.game.display.show_filled_block(self.game.display.images["emptiness"], self.x, self.y + 50, 13, 2, 4, 4, "maze_screen")
             # self.game.display.show(self.game.display.images["stat_window"], self.x, self.y + 70)
             if self.stat != "lives":
                 self.game.display.show_text(str(self.game.stats.stats[self.stat]), self.x, self.y + 75, "left", "maze_screen")
