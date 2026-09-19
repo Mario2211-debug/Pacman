@@ -19,6 +19,7 @@ from .pacgum import pacgums_generate
 
 TICK_RATE = 60
 TICK_TIME = 1.0 / TICK_RATE
+EDIBLE_TIME = 10
 
 
 class Game:
@@ -52,6 +53,7 @@ class Game:
 
         self.time = int(time.perf_counter())
         self.previous = self.time
+        self.edible_time = 0
         self.accumulator = 0.0
 
     def exit(self, error = ""):
@@ -283,14 +285,32 @@ class Game:
             ghost.set_behavior(GhostBehavior.TO_START)
         self.pacman.death()
 
-    def edible_mode(self) -> None:
-        for ghost in self.ghosts:
-            ghost.status = GhostStatus.EDIBLE
-            ghost.set_behavior(GhostBehavior.SCARED)
-            if not ghost.freeze:
-                ghost.target = ghost.get_random_cell_far_from_pacman()
-            ghost.set_image("right")
-            print(ghost.name, "Scared in position", ghost.x, ghost.y)
+    def edible_mode(self, on: bool = True) -> None:
+        if on:
+            self.edible_time += EDIBLE_TIME
+            for ghost in self.ghosts:
+                ghost.status = GhostStatus.EDIBLE
+                ghost.set_behavior(GhostBehavior.SCARED)
+                if not ghost.freeze:
+                    ghost.target = ghost.get_random_cell_far_from_pacman()
+
+                pos_x = self.display.cell_width + 5 + ghost.x_px
+                pos_y = self.display.cell_width + 5 + ghost.y_px
+                self.display.add_to_bitmap("maze_screen", ghost.mask.name, pos_x, pos_y)
+                ghost.set_image("right")
+                # print(ghost.name, "Scared in position", ghost.x, ghost.y)
+        else:
+            for ghost in self.ghosts:
+                if ghost.status != GhostStatus.DEATH:
+                    ghost.status = GhostStatus.ACTIVE
+                    ghost.set_behavior(ghost.behavior_default)
+                # if not ghost.freeze:
+                #     ghost.target = ghost.get_random_cell_far_from_pacman()
+                pos_x = self.display.cell_width + 5 + ghost.x_px
+                pos_y = self.display.cell_width + 5 + ghost.y_px
+                self.display.add_to_bitmap("maze_screen", ghost.mask.name, pos_x, pos_y)
+                ghost.set_image("right")
+
 
     def eat_ghost(self, ghost: Ghost) -> None:
         if ghost.status != GhostStatus.EDIBLE:
@@ -414,6 +434,10 @@ class Game:
             if self.stats.stats["time"] <= 0:
                 self.time_out()
                 return
+            if self.edible_time >= 1:
+                self.edible_time -= 1
+                if self.edible_time == 0:
+                    self.edible_mode(False)
             self.time = int(current)
         self.previous = current
 
