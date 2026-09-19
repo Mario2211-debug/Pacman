@@ -2,8 +2,7 @@ from os import listdir
 from os.path import isfile, join
 # from time import sleep
 
-from os import listdir
-from os.path import isfile, join
+from enum import Enum
 
 from mlx import Mlx
 from typing import TYPE_CHECKING
@@ -12,6 +11,12 @@ from .types import PacManStatus
 
 if TYPE_CHECKING:
     from .game import Game
+
+
+class ImgType(Enum):
+  REGULAR = 0
+  MASK = 1
+  PACMAN = 2
 
 class ImgData:
     """Structure for image data"""
@@ -24,6 +29,7 @@ class ImgData:
         self.bpp = 0  # bits per pixel
         self.iformat = 0
         self.name = None
+        self.type = ImgType.REGULAR
 
 class Display:
     """Structure for main vars"""
@@ -51,6 +57,7 @@ class Display:
         self.cell_width = self.corridor_width + self.wall_width
 
     def show(self, img: ImgData, x: int, y: int) -> None:
+        # print("SHOW ", img.name)
         self.mlx.mlx_put_image_to_window(self.mlx_ptr, self.win, img.img, x, y)
 
     def clear_window(self) -> None:
@@ -98,6 +105,10 @@ class Display:
                 self.create_mask("pacman_" + name + "_bottom", "pacman_" + name + "_bottom_mask")
                 self.create_rotate90("pacman_" + name + "_left", "pacman_" + name + "_top")
                 self.create_mask("pacman_" + name + "_top", "pacman_" + name + "_top_mask")
+                self.images["pacman_" + name + "_right"].type = ImgType.PACMAN
+                self.images["pacman_" + name + "_left"].type = ImgType.PACMAN
+                self.images["pacman_" + name + "_bottom"].type = ImgType.PACMAN
+                self.images["pacman_" + name + "_top"].type = ImgType.PACMAN
 
             # self.load_image("pacman_right", "img/pacman/3.png")
             # self.create_mask("pacman_right", "pacman_right_mask")
@@ -146,6 +157,7 @@ class Display:
                 color = 0x00000000
             new_img.data[i:i + 4] = color.to_bytes(4, 'little')
         new_img.name = name_new
+        new_img.type = ImgType.MASK
         self.images.update({name_new: new_img})
 
     def create_mirror(self, source: str, name_new: str) -> ImgData:
@@ -243,13 +255,9 @@ class Display:
                 pos_new = pos_x * 4 + x + ((pos_y + y) * self.images[bitmap].sl)
                 # print(pos, "=>", pos_new)
                 self.images[bitmap].data[pos_new:pos_new + 4] = self.images[source].data[pos:pos + 4]
-                if source.startswith("pacman") and self.game.pacman.status == PacManStatus.INVISIBLE and not source.endswith("mask"):
+                if self.game.pacman.status == PacManStatus.INVISIBLE and self.images[source].type == ImgType.PACMAN:
                     # print("Invisible pacman")
                     self.images[bitmap].data[pos_new + 3] = 16
-                    # self.images[bitmap].data[pos_new + 2] = 128
-
-        if source.startswith("pacman"):
-            print(source)
 
     def create_maze_bitmap(self):
         self.create_bitmap("maze_screen", int(self.screen_width * 1.3), int(self.screen_height * 1.3))
