@@ -250,7 +250,7 @@ class Display:
         for y in range(0, self.images[source].height):
             for x in range(0, self.images[source].sl, 4):
                 pos = x + (y * self.images[source].sl)
-                if self.images[source].data[pos + 3] < 50:
+                if self.images[source].data[pos + 3] < 200:
                     continue
                 if pos_x * 4 + x >= self.images[bitmap].sl:
                     continue
@@ -266,7 +266,8 @@ class Display:
     def create_maze_bitmap(self):
         self.create_bitmap("maze_screen", self.screen_width, self.screen_height)
         self.add_to_bitmap("maze_screen", "background_left", 0, 0)
-        self.add_to_bitmap("maze_screen", "background_right", 1350, 0)
+        self.add_to_bitmap("maze_screen", "background_right", 1330, 0)
+        self.show_filled_block(self.images["emptiness"], 1250, 0, 3, 30, 4, 4, "maze_screen")
         self.add_to_bitmap("maze_screen", "logo_small", 1450, 50)
         pos_y = 0
         for y in range(self.game.maze_height):
@@ -316,42 +317,35 @@ class Display:
             self.add_to_bitmap("maze_screen", ".", pos_x + 5, pos_y + self.wall_width + 5)
         elif type == "big":
             self.add_to_bitmap("maze_screen", "+", pos_x, pos_y + self.wall_width)
-        # pos_x = (x + 1) * (self.corridor_width + self.wall_width)
-        # pos_y = y * (self.corridor_width + self.wall_width) + self.corridor_width
-        # # pos_y = (y + 1) * (self.corridor_width) + y * self.wall_width
-        # if type == "small":
-        #     self.show(self.images["."], pos_x + 5, pos_y + self.wall_width + 5)
-        # elif type == "big":
-        #     self.show(self.images["+"], pos_x, pos_y + self.wall_width)
 
-    def show_maze(self):
-        pos_y = 0
-        for y in range(self.game.maze_height):
-            pos_y += self.corridor_width
-            pos_x = 0
-            for x in range(self.game.maze_width):
-                pos_x += self.corridor_width
-                if self.game.maze[y][x] == 15:
-                    pos_x += self.wall_width
-                    self.show(self.images["block_42_img"], pos_x, pos_y + self.wall_width)
-                    continue
+    # def show_maze(self):
+    #     pos_y = 0
+    #     for y in range(self.game.maze_height):
+    #         pos_y += self.corridor_width
+    #         pos_x = 0
+    #         for x in range(self.game.maze_width):
+    #             pos_x += self.corridor_width
+    #             if self.game.maze[y][x] == 15:
+    #                 pos_x += self.wall_width
+    #                 self.show(self.images["block_42_img"], pos_x, pos_y + self.wall_width)
+    #                 continue
 
-                if not self.game.maze[y][x] & 8:
-                    # print(x, y, "don't has left wall")
-                    self.show(self.images["emptiness"], pos_x, pos_y + self.wall_width)
-                pos_x += self.wall_width
-                if not self.game.maze[y][x] & 1:
-                    # print(x, y, "don't has top wall")
-                    self.show(self.images["emptiness"], pos_x, pos_y)
+    #             if not self.game.maze[y][x] & 8:
+    #                 # print(x, y, "don't has left wall")
+    #                 self.show(self.images["emptiness"], pos_x, pos_y + self.wall_width)
+    #             pos_x += self.wall_width
+    #             if not self.game.maze[y][x] & 1:
+    #                 # print(x, y, "don't has top wall")
+    #                 self.show(self.images["emptiness"], pos_x, pos_y)
 
-                self.show(self.images["emptiness"], pos_x, pos_y + self.wall_width)
+    #             self.show(self.images["emptiness"], pos_x, pos_y + self.wall_width)
 
-                if self.game.pacgums[y][x] == 1:
-                    self.show_pacgum(x, y, "small")
-                elif self.game.pacgums[y][x] == 2:
-                    self.show_pacgum(x, y, "big")
+    #             if self.game.pacgums[y][x] == 1:
+    #                 self.show_pacgum(x, y, "small")
+    #             elif self.game.pacgums[y][x] == 2:
+    #                 self.show_pacgum(x, y, "big")
 
-            pos_y += self.wall_width
+    #         pos_y += self.wall_width
 
     def show_text(self, text: str, x: int, y: int, align: str = "left", bitmap: str | None = None) -> None:
         if align == "center":

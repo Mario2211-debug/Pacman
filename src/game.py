@@ -465,7 +465,7 @@ class Game:
         print("New level")
         self.stats.increase_level()
         self.create_level(self.stats.stats["level"])
-        # self.stats.reset_stats()
+        self.stats.reset_time()
         self.pacman.speed = 3
         self.pacman.direction = None
         self.pacman.direction_next = None

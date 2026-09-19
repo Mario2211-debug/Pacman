@@ -92,7 +92,7 @@ class Config(BaseModel):
                     Field(ge=0, default=None, validate_default=True),
                     WrapValidator(validate_config_fields)]
     level_max_time: Annotated[int,
-                              Field(ge=10, default=None, validate_default=True),
+                              Field(ge=10, le=999999999999999, default=None, validate_default=True),
                               WrapValidator(validate_config_fields)]
 
     @model_validator(mode='after')
