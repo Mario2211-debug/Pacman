@@ -101,16 +101,38 @@ class Game:
         self.display.show_button("Main menu", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
 
         self.display.mlx.mlx_hook(self.display.win, 2, 1, self.game_over_handle_key_press, self.menu_current)
+        self.display.mlx.mlx_hook(self.display.win, 2, 1, self.game_over_handle_key_press, self.menu_current)
 
 
     # LEVEL FINISHED SCREEN
 
-    def level_finished_handle_key_press(self, key, current_hover):
+    def victory_handle_key_press(self, key, current_hover):
+        if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
+            self.menu()
+            return
+
+    def victory(self):
+        self.status = GameStatus.PAUSED
+        self.display.show(self.display.images["big_background"], 0, 0)
+
+        self.display.show(self.display.images["victory"],
+                          self.display.screen_width // 2
+                          - self.display.images["victory"].width // 2,
+                          350)
+        self.display.show_text("victory!", 960, 500, "center")
+        # self.display.show_button("Next level", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
+
+        self.display.mlx.mlx_hook(self.display.win, 2, 1, self.victory_handle_key_press, self.menu_current)
+
+
+    # LEVEL FINISHED SCREEN
+
+    def level_completed_handle_key_press(self, key, current_hover):
         if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
             self.next_level()
             return
 
-    def level_finished(self):
+    def level_completed(self):
         self.status = GameStatus.PAUSED
         self.display.show(self.display.images["big_background"], 0, 0)
         # self.display.show(self.display.images["logo_big"],
@@ -125,19 +147,22 @@ class Game:
         # self.display.show_text("Level finished", 960, 500, "center")
         self.display.show_button("Next level", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
 
-        self.display.mlx.mlx_hook(self.display.win, 2, 1, self.level_finished_handle_key_press, self.menu_current)
+        self.display.mlx.mlx_hook(self.display.win, 2, 1, self.level_completed_handle_key_press, self.menu_current)
 
 
     # MENU SCREEN
 
     def menu_handle_key_press(self, key, current_hover):
-        # print(f"Pressed key {key}")
+        print(f"Pressed key {key}")
         if key == 65293 or key == 65421:  # ENTER
             if self.menu_list[self.menu_current][1] == "exit":
                 self.exit()
                 return
             elif self.menu_list[self.menu_current][1] == "start":
                 self.start()
+                return
+            elif self.menu_list[self.menu_current][1] == "highscores":
+                self.highscores()
                 return
             elif self.menu_list[self.menu_current][1] == "instructions":
                 self.instructions()
@@ -322,7 +347,7 @@ class Game:
         if sum(1 for row in self.pacgums for x in row if x != 0) > 0:
             return
         self.status = GameStatus.PAUSED
-        self.level_finished()
+        self.level_completed()
 
     def eat_pacgum(self, x: int, y: int) -> None:
         if self.pacgums[y][x] == 2:
@@ -352,7 +377,7 @@ class Game:
             for ghost in self.ghosts:
                 ghost.make_freeze()
         elif key == 110:  # N
-            self.level_finished()
+            self.level_completed()
         elif key == 105:  # I
             self.pacman.invisible()
         # elif key == 119 or key == 65362:
@@ -488,6 +513,9 @@ class Game:
     def next_level(self) -> None:
         print("New level")
         self.stats.increase_level()
+        if self.stats.stats["level"] > len(self.config.level):
+            self.victory()
+            return
         self.create_level(self.stats.stats["level"])
         self.stats.reset_time()
         self.pacman.speed = 3
@@ -508,6 +536,33 @@ class Game:
         for ghost in self.ghosts:
             ghost.reborn()
         self.resume()
+
+
+
+    #HIGHSCORES SCREEN
+
+    def highscores_over_handle_key_press(self, key, current_hover):
+        if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
+            self.menu()
+            return
+
+    def highscores(self) -> None:
+        if not self.display.images.get("highscores_screen"):
+            self.display.create_bitmap("highscores_screen",
+                                    self.display.screen_width,
+                                    self.display.screen_height)
+
+            self.display.add_to_bitmap("highscores_screen", "big_background", 0, 0)
+            self.display.add_to_bitmap("highscores_screen", "logo_big",
+                            self.display.screen_width // 2
+                            - self.display.images["logo_big"].width // 2,
+                            50)
+            self.display.show_filled_block(self.display.images["emptiness"], 500, 350, 25, 16, 4, 4, "highscores_screen")
+
+        self.display.show(self.display.images["highscores_screen"], 0, 0)
+
+        self.display.mlx.mlx_hook(self.display.win, 2, 1, self.highscores_over_handle_key_press, self.menu_current)
+
 
 
     #INSTRUCTIONS SCREEN
