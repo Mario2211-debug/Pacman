@@ -425,15 +425,14 @@ class Game:
             self.move_object(self.pacman)
             for ghost in self.ghosts:
                 self.move_object(ghost)
-                if (self.pacman.status == PacManStatus.NORMAL and
-                    self.pacman.x_px - self.pacman.image.width // 1.5 <= ghost.x_px <= self.pacman.x_px + self.pacman.image.width // 1.5
+                if (self.pacman.x_px - self.pacman.image.width // 1.5 <= ghost.x_px <= self.pacman.x_px + self.pacman.image.width // 1.5
                     and self.pacman.y_px - self.pacman.image.height // 1.5 <= ghost.y_px <= self.pacman.y_px + self.pacman.image.height // 1.5 and ghost.status != GhostStatus.DEATH):
-                    print(f"!!!! CATCHED BY {ghost.name} at {ghost.x}, {ghost.y}")
-                    print("GhostStatus:", ghost.status)
-                    print("GhostBehavior:", ghost.behavior)
+                    # print(f"!!!! CATCHED BY {ghost.name} at {ghost.x}, {ghost.y}")
+                    # print("GhostStatus:", ghost.status)
+                    # print("GhostBehavior:", ghost.behavior)
                     if ghost.status == GhostStatus.EDIBLE:
                         self.eat_ghost(ghost)
-                    elif ghost.behavior != GhostBehavior.TO_START:
+                    elif ghost.behavior != GhostBehavior.TO_START and self.pacman.status != PacManStatus.INVISIBLE:
                         self.death()
 
     def resume(self) -> None:
