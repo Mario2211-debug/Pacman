@@ -85,14 +85,26 @@ class Display:
             self.create_background("background2", "background_right", 3, self.screen_height // self.images["background2"].height + 1)
             # self.create_background("emptiness", "stat_window", 13, 2)
 
-            self.load_image("pacman_right", "img/pacman_24.png")
-            self.create_mask("pacman_right", "pacman_right_mask")
-            self.create_mirror("pacman_right", "pacman_left")
-            self.create_mask("pacman_left", "pacman_left_mask")
-            self.create_rotate90("pacman_right", "pacman_bottom")
-            self.create_mask("pacman_bottom", "pacman_bottom_mask")
-            self.create_rotate90("pacman_left", "pacman_top")
-            self.create_mask("pacman_top", "pacman_top_mask")
+
+            for file in [f for f in listdir("img/pacman") if isfile(join("img/pacman", f)) and f.endswith(".png")]:
+                name = file.rstrip(".png")
+                self.load_image("pacman_" + name + "_right", join("img/pacman", file))
+                self.create_mask("pacman_" + name + "_right", "pacman_" + name + "_right_mask")
+                self.create_mirror("pacman_" + name + "_right", "pacman_" + name + "_left")
+                self.create_mask("pacman_" + name + "_left", "pacman_" + name + "_left_mask")
+                self.create_rotate90("pacman_" + name + "_right", "pacman_" + name + "_bottom")
+                self.create_mask("pacman_" + name + "_bottom", "pacman_" + name + "_bottom_mask")
+                self.create_rotate90("pacman_" + name + "_left", "pacman_" + name + "_top")
+                self.create_mask("pacman_" + name + "_top", "pacman_" + name + "_top_mask")
+
+            # self.load_image("pacman_right", "img/pacman/3.png")
+            # self.create_mask("pacman_right", "pacman_right_mask")
+            # self.create_mirror("pacman_right", "pacman_left")
+            # self.create_mask("pacman_left", "pacman_left_mask")
+            # self.create_rotate90("pacman_right", "pacman_bottom")
+            # self.create_mask("pacman_bottom", "pacman_bottom_mask")
+            # self.create_rotate90("pacman_left", "pacman_top")
+            # self.create_mask("pacman_top", "pacman_top_mask")
 
             for file in [f for f in listdir("img/ghosts") if isfile(join("img/ghosts", f)) and f.endswith(".png")]:
                 name = file.rstrip(".png")
@@ -215,12 +227,12 @@ class Display:
         new_img.name = name_new
         self.images.update({name_new: new_img})
 
-    def create_matrix(self, name_new: str, width, height) -> None:
+    def create_bitmap(self, name_new: str, width, height) -> None:
         if self.images.get(name_new):
             self.mlx.mlx_destroy_image(self.mlx_ptr, self.images.get(name_new).img)
         self.create_rectangle(name_new, width, height, 0xFF000000)
 
-    def add_to_matrix(self, matrix: str, source: str, pos_x: int, pos_y: int) -> None:
+    def add_to_bitmap(self, matrix: str, source: str, pos_x: int, pos_y: int) -> None:
         for y in range(0, self.images[source].height):
             for x in range(0, self.images[source].sl, 4):
                 pos = x + (y * self.images[source].sl)
@@ -230,12 +242,11 @@ class Display:
                 # print(pos, "=>", pos_new)
                 self.images[matrix].data[pos_new:pos_new + 4] = self.images[source].data[pos:pos + 4]
 
-    def create_maze_matrix(self):
-        # self.create_matrix("maze_matrix", self.game.maze_width * self.cell_width * 2, self.game.maze_height * self.cell_width * 2)
-        self.create_matrix("maze_matrix", int(self.screen_width * 1.3), int(self.screen_height * 1.3))
-        self.add_to_matrix("maze_matrix", "background_left", 0, 0)
-        self.add_to_matrix("maze_matrix", "background_right", 1350, 0)
-        self.add_to_matrix("maze_matrix", "logo_small", 1450, 50)
+    def create_maze_bitmap(self):
+        self.create_bitmap("maze_screen", int(self.screen_width * 1.3), int(self.screen_height * 1.3))
+        self.add_to_bitmap("maze_screen", "background_left", 0, 0)
+        self.add_to_bitmap("maze_screen", "background_right", 1350, 0)
+        self.add_to_bitmap("maze_screen", "logo_small", 1450, 50)
         pos_y = 0
         for y in range(self.game.maze_height):
             pos_y += self.corridor_width
@@ -244,19 +255,18 @@ class Display:
                 pos_x += self.corridor_width
                 if self.game.maze[y][x] == 15:
                     pos_x += self.wall_width
-                    # self.add_to_matrix("maze_matrix", "block_42_img", pos_x, pos_y + self.wall_width)
+                    # self.add_to_bitmap("maze_screen", "block_42_img", pos_x, pos_y + self.wall_width)
                     continue
 
                 if not self.game.maze[y][x] & 8:
                     # print(x, y, "don't has left wall")
-                    self.add_to_matrix("maze_matrix", "emptiness", pos_x, pos_y + self.wall_width)
+                    self.add_to_bitmap("maze_screen", "emptiness", pos_x, pos_y + self.wall_width)
                 pos_x += self.wall_width
                 if not self.game.maze[y][x] & 1:
                     # print(x, y, "don't has top wall")
-                    # print("add_to_matrix:", self.images["maze_matrix"].width, self.images["maze_matrix"].height, pos_x, pos_y)
-                    self.add_to_matrix("maze_matrix", "emptiness", pos_x, pos_y)
+                    self.add_to_bitmap("maze_screen", "emptiness", pos_x, pos_y)
 
-                self.add_to_matrix("maze_matrix", "emptiness", pos_x, pos_y + self.wall_width)
+                self.add_to_bitmap("maze_screen", "emptiness", pos_x, pos_y + self.wall_width)
 
                 if self.game.pacgums[y][x] == 1:
                     self.show_pacgum(x, y, "small")
@@ -273,16 +283,16 @@ class Display:
             pos_x = x + img_width * i
             for j in range(num_y):
                 # self.show(img, pos_x, y + img_height * j)
-                self.add_to_matrix("maze_matrix", img.name, pos_x, y + img_height * j)
+                self.add_to_bitmap("maze_screen", img.name, pos_x, y + img_height * j)
 
     def show_pacgum(self, x: int, y: int, type: str) -> None:
         pos_x = (x + 1) * (self.corridor_width + self.wall_width)
         pos_y = y * (self.corridor_width + self.wall_width) + self.corridor_width
         # pos_y = (y + 1) * (self.corridor_width) + y * self.wall_width
         if type == "small":
-            self.add_to_matrix("maze_matrix", ".", pos_x + 5, pos_y + self.wall_width + 5)
+            self.add_to_bitmap("maze_screen", ".", pos_x + 5, pos_y + self.wall_width + 5)
         elif type == "big":
-            self.add_to_matrix("maze_matrix", "+", pos_x, pos_y + self.wall_width)
+            self.add_to_bitmap("maze_screen", "+", pos_x, pos_y + self.wall_width)
         # pos_x = (x + 1) * (self.corridor_width + self.wall_width)
         # pos_y = y * (self.corridor_width + self.wall_width) + self.corridor_width
         # # pos_y = (y + 1) * (self.corridor_width) + y * self.wall_width
@@ -320,7 +330,7 @@ class Display:
 
             pos_y += self.wall_width
 
-    def show_text(self, text: str, x: int, y: int, align: str = "left", matrix: str | None = None) -> None:
+    def show_text(self, text: str, x: int, y: int, align: str = "left", bitmap: str | None = None) -> None:
         if align == "center":
             max_height = 0
             text_width =  0
@@ -346,10 +356,10 @@ class Display:
             else:
                 letter_img = self.images.get(letter)
                 if letter_img:
-                    if not matrix:
+                    if not bitmap:
                         self.show(letter_img, pos_x, pos_y)
                     else:
-                        self.add_to_matrix(matrix, letter_img.name, pos_x, pos_y)
+                        self.add_to_bitmap(bitmap, letter_img.name, pos_x, pos_y)
                     pos_x += letter_img.width
 
 

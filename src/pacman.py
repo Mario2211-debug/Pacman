@@ -17,6 +17,8 @@ class PacMan:
         self.name = name
         self.image: ImgData
         self.mask: ImgData
+        self.image_sprite: int = 1
+        self.image_sprite_direction: int = 1
         self.start_x = x
         self.start_y = y
         self.x = x
@@ -31,10 +33,24 @@ class PacMan:
         self.status = PacManStatus.NORMAL
         self.game: Game
 
-    def set_image(self, image_name):
-        if self.game.display.images:
-            self.image = self.game.display.images[image_name]
-            self.mask = self.game.display.images[image_name + "_mask"]
+    def set_image(self, image_direction: str) -> None:
+        image_name = self.name + "_" + str(self.image_sprite) + "_" + image_direction
+        if not self.game.display.images.get(image_name):
+            return
+
+        self.image = self.game.display.images[image_name]
+        self.mask = self.game.display.images[image_name + "_mask"]
+
+        if self.image_sprite_direction:
+            self.image_sprite += 1
+            if self.image_sprite > 4:
+                self.image_sprite = 4
+                self.image_sprite_direction = 0
+        else:
+            self.image_sprite -= 1
+            if self.image_sprite < 1:
+                self.image_sprite = 1
+                self.image_sprite_direction = 1
 
     def set_start_position(self, x: int, y: int) -> None:
         if self.game.maze[y][x] == 15:
@@ -55,12 +71,12 @@ class PacMan:
         pos_x = self.game.display.cell_width + 5 + self.x_px
         pos_y = self.game.display.cell_width + 5 + self.y_px
         # self.game.display.show(self.mask, pos_x, pos_y)
-        self.game.display.add_to_matrix("maze_matrix", self.mask.name, pos_x, pos_y)
+        self.game.display.add_to_bitmap("maze_screen", self.mask.name, pos_x, pos_y)
 
         self.set_start_position(self.start_x, self.start_y)
         self.direction = None
         self.direction_next = None
-        self.set_image("pacman_right")
+        self.set_image("right")
 
     def move(self) -> None:
         moves = [(0, -1, 1), (1, 0, 2),

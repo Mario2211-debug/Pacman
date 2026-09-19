@@ -62,7 +62,7 @@ if __name__ == "__main__":
     game.ghosts = ghosts
     for ghost in ghosts:
         ghost.game = game
-        ghost.set_image(ghost.name + "_right")
+        ghost.set_image("right")
 
 
 
@@ -76,12 +76,6 @@ if __name__ == "__main__":
     display.mlx.mlx_hook(display.win, 33, 0, game.exit, display)
 
     game.menu()
-
-    # display.create_matrix("maze_matrix", 1000, 1000)
-    # display.add_to_matrix("maze_matrix", "logo_big", 100, 100)
-    # display.add_to_matrix("maze_matrix", "ghost_blue_right", 100, 100)
-    # display.add_to_matrix("maze_matrix", "ghost_red_right", 150, 150)
-    # display.show(display.images["maze_matrix"], 0, 0)
 
 
     # game.game_over()
