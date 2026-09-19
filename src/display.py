@@ -251,6 +251,8 @@ class Display:
                 pos = x + (y * self.images[source].sl)
                 if self.images[source].data[pos + 3] < 50:
                     continue
+                if pos_x * 4 + x >= self.images[bitmap].sl:
+                    continue
                 pos_new = pos_x * 4 + x + ((pos_y + y) * self.images[bitmap].sl)
                 if pos_new >= self.images[bitmap].sl * self.images[bitmap].height:
                     return
@@ -294,14 +296,16 @@ class Display:
             pos_y += self.wall_width
 
 
-    def show_filled_block(self, img: ImgData, x: int, y: int, num_x: int, num_y: int, shift_x: int = 0, shift_y: int = 0) -> None:
+    def show_filled_block(self, img: ImgData, x: int, y: int, num_x: int, num_y: int, shift_x: int = 0, shift_y: int = 0, bitmap: str | None = None) -> None:
         img_width = img.width - shift_x
         img_height = img.height - shift_x
         for i in range(num_x):
             pos_x = x + img_width * i
             for j in range(num_y):
-                # self.show(img, pos_x, y + img_height * j)
-                self.add_to_bitmap("maze_screen", img.name, pos_x, y + img_height * j)
+                if not bitmap:
+                    self.show(img, pos_x, y + img_height * j)
+                else:
+                    self.add_to_bitmap(bitmap, img.name, pos_x, y + img_height * j)
 
     def show_pacgum(self, x: int, y: int, type: str) -> None:
         pos_x = (x + 1) * (self.corridor_width + self.wall_width)
