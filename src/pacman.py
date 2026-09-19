@@ -1,16 +1,11 @@
 from enum import Enum
 
 from .display import ImgData
-from .types import Direction
+from .types import PacManStatus, GhostBehavior
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .game import Game
-
-class PacManStatus(Enum):
-  NORMAL = 1
-  INVISIBLE = 2
-  FAST = 3
 
 class PacMan:
     def __init__(self, name: str = "pacman", x: int = 0, y: int = 0) -> None:
@@ -111,3 +106,15 @@ class PacMan:
         self.speed += num
         if self.speed > 10:
             self.speed = 3
+
+    def invisible(self) -> None:
+        if self.status == PacManStatus.NORMAL:
+            print("INVISIBLE")
+            self.status = PacManStatus.INVISIBLE
+            for ghost in self.game.ghosts:
+                ghost.set_behavior(GhostBehavior.RANDOM)
+        else:
+            print("VISIBLE")
+            self.status = PacManStatus.NORMAL
+            for ghost in self.game.ghosts:
+                ghost.set_behavior(ghost.behavior_default)

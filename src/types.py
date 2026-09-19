@@ -10,3 +10,21 @@ class GameStatus(Enum):
   RUN = 1
   PAUSED = 2
   GAME_OVER = 3
+
+class PacManStatus(Enum):
+  NORMAL = 1
+  INVISIBLE = 2
+
+class GhostStatus(Enum):
+  ACTIVE = 1
+  EDIBLE = 2
+  DEATH = 3
+#   FREEZE = 4
+
+class GhostBehavior(Enum):
+  PLAYER = 1
+  CORNERS = 2
+  RANDOM = 3
+  TO_START = 4
+  SCARED = 5
+  DEATH = 6
