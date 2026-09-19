@@ -109,11 +109,11 @@ class PacMan:
             print("INVISIBLE")
             self.status = PacManStatus.INVISIBLE
             for ghost in self.game.ghosts:
-                if ghost.status != GhostStatus.DEATH:
+                if ghost.status != GhostStatus.DEATH and ghost.behavior != GhostBehavior.TO_START:
                     ghost.set_behavior(GhostBehavior.RANDOM)
         else:
             print("VISIBLE")
             self.status = PacManStatus.NORMAL
             for ghost in self.game.ghosts:
-                if ghost.status == GhostStatus.ACTIVE:
+                if ghost.status == GhostStatus.ACTIVE and ghost.behavior != GhostBehavior.TO_START:
                     ghost.set_behavior(ghost.behavior_default)
