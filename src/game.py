@@ -92,11 +92,16 @@ class Game:
     def level_finished(self):
         self.status = GameStatus.PAUSED
         self.display.show(self.display.images["big_background"], 0, 0)
-        self.display.show(self.display.images["logo_big"],
+        # self.display.show(self.display.images["logo_big"],
+        #                   self.display.screen_width // 2
+        #                   - self.display.images["logo_big"].width // 2,
+        #                   50)
+
+        self.display.show(self.display.images["victory"],
                           self.display.screen_width // 2
-                          - self.display.images["logo_big"].width // 2,
-                          50)
-        self.display.show_text("Level finished", 960, 500, "center")
+                          - self.display.images["victory"].width // 2,
+                          350)
+        # self.display.show_text("Level finished", 960, 500, "center")
         self.display.show_button("Next level", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
 
         self.display.mlx.mlx_hook(self.display.win, 2, 1, self.level_finished_handle_key_press, self.menu_current)
@@ -223,14 +228,14 @@ class Game:
         self.maze_width = len(mazegen.maze[0])
         self.maze_height = len(mazegen.maze)
 
-        self.pacman.set_image("pacman_right")
+        self.pacman.set_image("right")
         self.pacman.set_start_position(maze_width // 2, maze_height // 2)
 
         pacgums = pacgums_generate(mazegen.maze, self.config.pacgum)
         self.pacgums = pacgums
 
         for ghost in self.ghosts:
-            ghost.set_image(ghost.name + "_right")
+            ghost.set_image("right")
             ghost.set_behavior(ghost.behavior_standart)
             ghost.speed = 2
 
@@ -239,7 +244,7 @@ class Game:
         self.ghosts[2].set_start_position(0, maze_height - 1)
         self.ghosts[3].set_start_position(maze_width - 1, maze_height - 1)
 
-        self.display.create_maze_matrix()
+        self.display.create_maze_bitmap()
         # print("LEVEL CREATED")
 
 
@@ -263,7 +268,7 @@ class Game:
             ghost.set_behavior(GhostBehavior.SCARED)
             if not ghost.freeze:
                 ghost.target = ghost.get_random_cell_far_from_pacman()
-            ghost.set_image(ghost.name + "_right")
+            ghost.set_image("right")
             print(ghost.name, "Scared in position", ghost.x, ghost.y)
 
     def eat_ghost(self, ghost: Ghost) -> None:
@@ -292,7 +297,7 @@ class Game:
             # print(self.game.points)
 
     def game_handle_key_press(self, key, pacman):
-        print(f"Pressed key {key}")
+        # print(f"Pressed key {key}")
         if key == 65307:  # ESC
             if self.status == GameStatus.RUN:
                 self.status = GameStatus.PAUSED
@@ -332,30 +337,30 @@ class Game:
         pos_x = shift_x + obj.x_px
         pos_y = shift_y + obj.y_px
         # self.display.show(obj.mask, pos_x, pos_y)
-        self.display.add_to_matrix("maze_matrix", obj.mask.name, pos_x, pos_y)
+        self.display.add_to_bitmap("maze_screen", obj.mask.name, pos_x, pos_y)
 
         if obj.direction == Direction.RIGHT:
-            obj.set_image(obj.name + "_right")
+            obj.set_image("right")
             if obj.x_px < obj.next_x * self.display.cell_width:
                 obj.x_px += obj.speed
             if obj.x_px >= obj.next_x * self.display.cell_width:
                 obj.move()
         elif obj.direction == Direction.LEFT:
-            obj.set_image(obj.name + "_left")
+            obj.set_image("left")
             if obj.x_px > obj.next_x * self.display.cell_width:
                 obj.x_px -= obj.speed
             if obj.x_px <= obj.next_x * self.display.cell_width:
                 obj.move()
         elif obj.direction == Direction.TOP:
             if type(obj) == PacMan:
-                obj.set_image("pacman_top")
+                obj.set_image("top")
             if obj.y_px > obj.next_y * self.display.cell_width:
                 obj.y_px -= obj.speed
             if obj.y_px <= obj.next_y * self.display.cell_width:
                 obj.move()
         elif obj.direction == Direction.BOTTOM:
             if type(obj) == PacMan:
-                obj.set_image("pacman_bottom")
+                obj.set_image("bottom")
             if obj.y_px < obj.next_y * self.display.cell_width:
                 obj.y_px += obj.speed
             if obj.y_px >= obj.next_y * self.display.cell_width:
@@ -372,7 +377,7 @@ class Game:
         pos_x = shift_x + obj.x_px
         pos_y = shift_y + obj.y_px
         # self.display.show(obj.image, pos_x, pos_y)
-        self.display.add_to_matrix("maze_matrix", obj.image.name, pos_x, pos_y)
+        self.display.add_to_bitmap("maze_screen", obj.image.name, pos_x, pos_y)
 
 
     def playing(self, nothing):
@@ -391,7 +396,7 @@ class Game:
         while self.accumulator >= TICK_TIME:
             self.accumulator -= TICK_TIME
 
-            self.display.show(self.display.images["maze_matrix"], 0, 0)
+            self.display.show(self.display.images["maze_screen"], 0, 0)
 
             # print("playing...")
             self.move_object(self.pacman)
@@ -401,6 +406,7 @@ class Game:
                     and self.pacman.y_px - self.pacman.image.height // 1.5 <= ghost.y_px <= self.pacman.y_px + self.pacman.image.height // 1.5 and ghost.status != GhostStatus.DEATH):
                     print(f"!!!! CATCHED BY {ghost.name} at {ghost.x}, {ghost.y}")
                     print("GhostStatus:", ghost.status)
+                    print("GhostBehavior:", ghost.behavior)
                     if ghost.status == GhostStatus.EDIBLE:
                         self.eat_ghost(ghost)
                     elif ghost.behavior != GhostBehavior.TO_START:
@@ -414,7 +420,7 @@ class Game:
         # self.display.show_filled_block(self.display.images["background2"], 1350, 0, 3, self.display.screen_height // self.display.images["background2"].height + 1)
 
         # self.display.show_maze()
-        self.display.show(self.display.images["maze_matrix"], 0, 0)
+        self.display.show(self.display.images["maze_screen"], 0, 0)
         # self.display.show(self.display.images["logo_small"], 1450, 50)
 
         self.stats.show_stats()
@@ -437,18 +443,18 @@ class Game:
         self.pacman.speed = 3
         self.pacman.direction = None
         self.pacman.direction_next = None
-        self.pacman.set_image("pacman_right")
+        self.pacman.set_image("right")
         self.resume()
 
     def start(self) -> None:
         self.display.clear_window()
         print("Let's start!")
-        self.create_level(self.stats.stats["level"])
         self.stats.reset_stats()
-        self.resume()
+        self.create_level(self.stats.stats["level"])
         self.pacman.speed = 3
         self.pacman.direction = None
         self.pacman.direction_next = None
-        self.pacman.set_image("pacman_right")
+        self.pacman.set_image("right")
         for ghost in self.ghosts:
             ghost.reborn()
+        self.resume()
