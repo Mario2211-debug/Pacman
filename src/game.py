@@ -289,6 +289,10 @@ class Game:
             ghost.set_behavior(GhostBehavior.SCARED)
             if not ghost.freeze:
                 ghost.target = ghost.get_random_cell_far_from_pacman()
+
+            pos_x = self.display.cell_width + 5 + ghost.x_px
+            pos_y = self.display.cell_width + 5 + ghost.y_px
+            self.display.add_to_bitmap("maze_screen", ghost.mask.name, pos_x, pos_y)
             ghost.set_image("right")
             print(ghost.name, "Scared in position", ghost.x, ghost.y)
 
