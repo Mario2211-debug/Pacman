@@ -51,7 +51,7 @@ class Game:
         self.pause_menu_current = 0
 
         self.time = int(time.perf_counter())
-        self.previous = time.perf_counter()
+        self.previous = self.time
         self.accumulator = 0.0
 
     def exit(self, error = ""):
@@ -59,6 +59,26 @@ class Game:
             self.display.mlx.mlx_destroy_image(self.display.mlx_ptr, image.img)
         self.display.mlx.mlx_loop_exit(self.display.mlx_ptr)
         # exit()
+
+    # TIME IS OUT SCREEN
+
+    def time_out_handle_key_press(self, key, current_hover):
+        if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
+            self.menu()
+            return
+
+    def time_out(self):
+        self.display.clear_window()
+        self.status = GameStatus.GAME_OVER
+        self.display.show(self.display.images["big_background"], 0, 0)
+        self.display.show(self.display.images["game_over"],
+                          self.display.screen_width // 2
+                          - self.display.images["game_over"].width // 2,
+                          350)
+        self.display.show_text("Time is out", 960, 150, "center")
+        self.display.show_button("Main menu", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
+
+        self.display.mlx.mlx_hook(self.display.win, 2, 1, self.time_out_handle_key_press, self.menu_current)
 
     # GAME OVER SCREEN
 
@@ -68,9 +88,8 @@ class Game:
             return
 
     def game_over(self):
-        # self.display.show_filled_block(self.display.images["background2"], 0, 0,
-        #                                self.display.screen_width // self.display.images["background2"].width + 1,
-        #                                self.display.screen_height // self.display.images["background2"].height + 1)
+        self.display.clear_window()
+        self.status = GameStatus.GAME_OVER
         self.display.show(self.display.images["big_background"], 0, 0)
         self.display.show(self.display.images["game_over"],
                           self.display.screen_width // 2
@@ -255,7 +274,6 @@ class Game:
         self.stats.increase_lives(-1)
         if self.stats.stats["lives"] == 0:
             self.game_over()
-            self.status = GameStatus.GAME_OVER
             return
         for ghost in self.ghosts:
             ghost.speed = 15
@@ -390,6 +408,9 @@ class Game:
         frame_time = current - self.previous
         if self.time < int(current):
             self.stats.increase_time(-1)
+            if self.stats.stats["time"] <= 0:
+                self.time_out()
+                return
             self.time = int(current)
         self.previous = current
 
