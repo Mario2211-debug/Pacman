@@ -1,7 +1,7 @@
 from enum import Enum
 
 from .display import ImgData
-from .types import PacManStatus, GhostBehavior
+from .types import PacManStatus, GhostStatus, GhostBehavior
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -112,9 +112,11 @@ class PacMan:
             print("INVISIBLE")
             self.status = PacManStatus.INVISIBLE
             for ghost in self.game.ghosts:
-                ghost.set_behavior(GhostBehavior.RANDOM)
+                if ghost.status != GhostStatus.DEATH:
+                    ghost.set_behavior(GhostBehavior.RANDOM)
         else:
             print("VISIBLE")
             self.status = PacManStatus.NORMAL
             for ghost in self.game.ghosts:
-                ghost.set_behavior(ghost.behavior_default)
+                if ghost.status == GhostStatus.ACTIVE:
+                    ghost.set_behavior(ghost.behavior_default)

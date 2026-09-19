@@ -1,7 +1,7 @@
 import random
 from collections import deque
 
-from .types import Direction, GhostStatus, GhostBehavior
+from .types import Direction, GhostStatus, GhostBehavior, PacManStatus
 from .display import ImgData
 
 from typing import TYPE_CHECKING
@@ -162,6 +162,7 @@ class Ghost:
                 # print(self.name, self.x, self.y, "Scared and run to:", self.target)
             elif self.behavior == GhostBehavior.DEATH:
                 if self.target == (self.x, self.y):
+                    print("Death found target")
                     self.reborn()
             elif self.behavior == GhostBehavior.TO_START:
                 if (self.x, self.y) != (self.start_x, self.start_y):
@@ -206,8 +207,11 @@ class Ghost:
         print(self.name, "Death in position", self.x, self.y)
 
     def reborn(self):
+        print(self.name, "Reborn in position", self.x, self.y)
         self.speed = 2
         self.status = GhostStatus.ACTIVE
-        self.set_behavior(self.behavior_default)
+        if self.game.pacman.status != PacManStatus.INVISIBLE:
+            self.set_behavior(self.behavior_default)
+        else:
+            self.set_behavior(GhostBehavior.RANDOM)
         self.set_image("right")
-        print(self.name, "Reborn in position", self.x, self.y)
