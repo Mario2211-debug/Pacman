@@ -188,15 +188,14 @@ class Ghost:
 
             # print(f"Ghost {self.image} move to {move_to_x} {move_to_y}")
 
-    def make_freeze(self):
-        if self.freeze == True:
+    def make_freeze(self, flag: bool = True):
+        if flag is False:
             self.freeze = False
         else:
-            self.freeze = True
-        # if self.status == GhostStatus.FREEZE:
-        #     self.status = GhostStatus.ACTIVE
-        # else:
-        #     self.status = GhostStatus.FREEZE
+            if self.freeze == True:
+                self.freeze = False
+            else:
+                self.freeze = True
 
     def death(self):
         self.speed = 20
