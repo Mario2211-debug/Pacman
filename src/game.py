@@ -8,6 +8,7 @@ from .types import GameStatus
 from .display import Display
 from mazegenerator import MazeGenerator
 from .types import Direction, GameStatus, GhostStatus, GhostBehavior
+from .highscores import open_highscores_file, clear_highscores_file
 
 # if TYPE_CHECKING:
 from .stats import Stats
@@ -50,6 +51,10 @@ class Game:
         self.pause_menu_list = [("Resume", "resume"),
                 ("Main menu", "main_menu")]
         self.pause_menu_current = 0
+
+        self.highscores_menu_list = [("Main menu", "main_menu"),
+                                     ("Clear", "clear")]
+        self.highscores_menu_current = 0
 
         self.time = int(time.perf_counter())
         self.previous = self.time
@@ -153,7 +158,7 @@ class Game:
     # MENU SCREEN
 
     def menu_handle_key_press(self, key, current_hover):
-        print(f"Pressed key {key}")
+        # print(f"Pressed key {key}")
         if key == 65293 or key == 65421:  # ENTER
             if self.menu_list[self.menu_current][1] == "exit":
                 self.exit()
@@ -167,12 +172,12 @@ class Game:
             elif self.menu_list[self.menu_current][1] == "instructions":
                 self.instructions()
                 return
-        if key == 119 or key == 65362:
+        if key == 65362:
             self.menu_current -= 1
             if self.menu_current < 0:
                 self.menu_current = len(self.menu_list) - 1
             self.show_menu()
-        elif key == 115 or key == 65364:
+        elif key == 65364:
             self.menu_current += 1
             if self.menu_current >= len(self.menu_list):
                 self.menu_current = 0
@@ -182,7 +187,7 @@ class Game:
         pos_x = self.display.screen_width // 2 - self.display.images["button"].width // 2
         pos_y_start = self.display.images["logo_big"].height + 100
         for i in range(len(self.menu_list)):
-            pos_y = pos_y_start + self.display.images["button"].height * i
+            pos_y = pos_y_start + (self.display.images["button"].height + 10) * i
             self.display.show_button(self.menu_list[i][0],
                                      pos_x, pos_y,
                                      ("hover" if i == self.menu_current else "normal"))
@@ -231,12 +236,12 @@ class Game:
             if self.pause_menu_list[self.pause_menu_current][1] == "main_menu":
                 self.menu()
                 return
-        if key == 119 or key == 65362:
+        if key == 65362:
             self.pause_menu_current -= 1
             if self.pause_menu_current < 0:
                 self.pause_menu_current = len(self.pause_menu_list) - 1
             self.show_pause_menu()
-        elif key == 115 or key == 65364:
+        elif key == 65364:
             self.pause_menu_current += 1
             if self.pause_menu_current >= len(self.pause_menu_list):
                 self.pause_menu_current = 0
@@ -244,9 +249,9 @@ class Game:
 
     def show_pause_menu(self) -> None:
         pos_x = self.display.screen_width // 2 - self.display.images["button"].width // 2
-        pos_y_start = self.display.screen_height // 2 - self.display.images["button"].height
+        pos_y_start = self.display.screen_height // 2 - (self.display.images["button"].height + 20)
         for i in range(len(self.pause_menu_list)):
-            pos_y = pos_y_start + self.display.images["button"].height * i
+            pos_y = pos_y_start + (self.display.images["button"].height + 20) * i
             self.display.show_button(self.pause_menu_list[i][0],
                                      pos_x, pos_y,
                                      ("hover" if i == self.pause_menu_current else "normal"))
@@ -541,10 +546,49 @@ class Game:
 
     #HIGHSCORES SCREEN
 
-    def highscores_over_handle_key_press(self, key, current_hover):
-        if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
+    def highscores_over_handle_key_press(self, key, current_hover) -> None:
+        # print(f"PAUSE Pressed key {key}")
+        if key == 65307:  # ESC
             self.menu()
             return
+        if key == 65293 or key == 65421:  # ENTER
+            if self.highscores_menu_list[self.highscores_menu_current][1] == "clear":
+                # print("clear highscores")
+                clear_highscores_file(self.config.highscore_filename)
+                if self.display.images.get("highscores_screen"):
+                    self.display.mlx.mlx_destroy_image(self.display.mlx_ptr, self.display.images["highscores_screen"].img)
+                    self.display.images.pop("highscores_screen")
+                self.highscores()
+                return
+            if self.highscores_menu_list[self.highscores_menu_current][1] == "main_menu":
+                self.menu()
+                return
+        if key == 65362 or key == 65361:
+            self.highscores_menu_current -= 1
+            if self.highscores_menu_current < 0:
+                self.highscores_menu_current = len(self.highscores_menu_list) - 1
+            self.highscores()
+        elif key == 65364 or key == 65363:
+            self.highscores_menu_current += 1
+            if self.highscores_menu_current >= len(self.highscores_menu_list):
+                self.highscores_menu_current = 0
+            self.highscores()
+
+    # def highscores_over_handle_key_press(self, key, current_hover):
+    #     if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
+    #         self.menu()
+    #         return
+
+    def show_highscores_menu(self) -> None:
+        pos_x_start = self.display.screen_width // 2 - (self.display.images["button"].width + 20)
+        # pos_y = self.display.screen_height // 2 - (self.display.images["button"].height + 20)
+        pos_y = self.display.screen_height - self.display.images["button"].height - 100
+        for i in range(len(self.highscores_menu_list)):
+            pos_x = pos_x_start + (self.display.images["button"].width + 20) * i
+            self.display.show_button(self.highscores_menu_list[i][0],
+                                     pos_x, pos_y,
+                                     ("hover" if i == self.highscores_menu_current else "normal"),
+                                     "highscores_screen")
 
     def highscores(self) -> None:
         if not self.display.images.get("highscores_screen"):
@@ -553,12 +597,16 @@ class Game:
                                     self.display.screen_height)
 
             self.display.add_to_bitmap("highscores_screen", "big_background", 0, 0)
-            self.display.add_to_bitmap("highscores_screen", "logo_big",
-                            self.display.screen_width // 2
-                            - self.display.images["logo_big"].width // 2,
-                            50)
-            self.display.show_filled_block(self.display.images["emptiness"], 500, 350, 25, 16, 4, 4, "highscores_screen")
 
+            self.display.show_filled_block(self.display.images["emptiness"], 400, 50, 31, 20, 4, 4, "highscores_screen")
+
+            highscores_json = open_highscores_file(self.config.highscore_filename)
+            if highscores_json:
+                highscores_str = "".join(record["name"] + " - " + str(record["score"]) + "\n" for record in sorted(highscores_json, key=lambda record: record['score'], reverse=True)[0:10])
+                self.display.show_text(highscores_str, 420, 80, "left", "highscores_screen")
+
+
+        self.show_highscores_menu()
         self.display.show(self.display.images["highscores_screen"], 0, 0)
 
         self.display.mlx.mlx_hook(self.display.win, 2, 1, self.highscores_over_handle_key_press, self.menu_current)

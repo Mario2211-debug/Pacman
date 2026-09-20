@@ -380,12 +380,22 @@ class Display:
                     pos_x += letter_img.width
 
 
-    def show_button(self, text: str, x: int, y: int, type: str = "normal"):
-        if type == "hover":
-            self.show(self.images["button_hover"], x, y)
+    def show_button(self, text: str, x: int, y: int, type: str = "normal", bitmap: str | None = None):
+        if not bitmap:
+            if type == "hover":
+                self.show(self.images["button_hover"], x, y)
+            else:
+                self.show(self.images["button"], x, y)
+            self.show_text(text,
+                        x + self.images["button"].width // 2,
+                        y + self.images["button"].height // 2,
+                        "center")
         else:
-            self.show(self.images["button"], x, y)
-        self.show_text(text,
-                       x + self.images["button"].width // 2,
-                       y + self.images["button"].height // 2,
-                       "center")
+            if type == "hover":
+                self.add_to_bitmap(bitmap, "button_hover", x, y)
+            else:
+                self.add_to_bitmap(bitmap, "button", x, y)
+            self.show_text(text,
+                        x + self.images["button"].width // 2,
+                        y + self.images["button"].height // 2,
+                        "center", bitmap)
