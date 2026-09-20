@@ -74,7 +74,7 @@ if __name__ == "__main__":
     display.mlx.mlx_hook(display.win, 33, 0, game.exit, display)
 
     game.menu()
-    # game.instructions()
+    # game.highscores()
 
 
     # game.game_over()
