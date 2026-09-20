@@ -6,9 +6,9 @@ if TYPE_CHECKING:
 class Stats:
     def __init__(self, game: Game) -> None:
         self.stats = {"level": 1,
-                      "score": 0,
+                      "score": 100,
                       "lives": 0,
-                      "time": 90}
+                      "time": game.config.level_max_time}
         # self.level = 1
         # self.lives = 0
         # self.score = 0

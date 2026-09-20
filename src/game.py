@@ -24,8 +24,8 @@ EDIBLE_TIME = 10
 
 
 class Game:
-    def __init__(self):
-        self.config: Config
+    def __init__(self, config: Config):
+        self.config: Config = config
 
         self.stats: Stats = Stats(self)
         self.stats.level = 1
@@ -56,10 +56,15 @@ class Game:
                                      ("Clear", "clear")]
         self.highscores_menu_current = 0
 
+        self.victory_menu_list = [("Save", "Save"),
+                                  ("Cancel", "cancel")]
+        self.victory_menu_current = 0
+
         self.time = int(time.perf_counter())
         self.previous = self.time
         self.edible_time = 0
         self.accumulator = 0.0
+        self.player_name: str = ""
 
     def exit(self, error = ""):
         for image in self.display.images.values():
@@ -109,12 +114,55 @@ class Game:
         self.display.mlx.mlx_hook(self.display.win, 2, 1, self.game_over_handle_key_press, self.menu_current)
 
 
-    # LEVEL FINISHED SCREEN
+    # VICTORY SCREEN
 
-    def victory_handle_key_press(self, key, current_hover):
-        if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
+    def victory_handle_key_press(self, key, current_hover) -> None:
+        # print(f"PAUSE Pressed key {key}")
+        if key == 65307 and self.stats.stats["score"] == 0:  # ESC
             self.menu()
             return
+        if key == 65293 or key == 65421:  # ENTER
+            if self.victory_menu_list[self.victory_menu_current][1] == "save":
+                print("save score")
+                return
+            if self.victory_menu_list[self.victory_menu_current][1] == "cancel":
+                self.menu()
+                return
+        if key == 65362 or key == 65361:
+            self.victory_menu_current -= 1
+            if self.victory_menu_current < 0:
+                self.victory_menu_current = len(self.victory_menu_list) - 1
+            self.show_victory_menu()
+        elif key == 65364 or key == 65363:
+            self.victory_menu_current += 1
+            if self.victory_menu_current >= len(self.victory_menu_list):
+                self.victory_menu_current = 0
+            self.show_victory_menu()
+        elif key == 65288:  # Backspace
+            if len(self.player_name):
+                self.player_name = self.player_name[0: -1]
+                self.show_score_input()
+        else:
+            if (len(self.player_name) < 25 and
+                self.display.images.get(chr(key))
+                or (chr(key) == " " and self.player_name[-1] != " ")):
+                self.player_name += chr(key)
+                self.show_score_input()
+
+    def show_victory_menu(self) -> None:
+        pos_x_start = self.display.screen_width // 2 - (self.display.images["button"].width + 20)
+        # pos_y = self.display.screen_height // 2 - (self.display.images["button"].height + 20)
+        pos_y = self.display.screen_height - self.display.images["button"].height - 100
+        for i in range(len(self.victory_menu_list)):
+            pos_x = pos_x_start + (self.display.images["button"].width + 20) * i
+            self.display.show_button(self.victory_menu_list[i][0],
+                                     pos_x, pos_y,
+                                     ("hover" if i == self.victory_menu_current else "normal"))
+
+    def show_score_input(self) -> None:
+        self.display.show_filled_block(self.display.images["emptiness"], 500, 640, 25, 2, 4, 4)
+        if self.player_name:
+            self.display.show_text(self.player_name, 520, 660)
 
     def victory(self):
         self.status = GameStatus.PAUSED
@@ -123,9 +171,12 @@ class Game:
         self.display.show(self.display.images["victory"],
                           self.display.screen_width // 2
                           - self.display.images["victory"].width // 2,
-                          350)
-        self.display.show_text("victory!", 960, 500, "center")
-        # self.display.show_button("Next level", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
+                          150)
+        if self.stats.stats["score"] != 0:
+            self.display.show_text("Your score: " + str(self.stats.stats["score"]) + "\nEnter your name:", 500, 500)
+
+        self.show_score_input()
+        self.show_victory_menu()
 
         self.display.mlx.mlx_hook(self.display.win, 2, 1, self.victory_handle_key_press, self.menu_current)
 
@@ -573,11 +624,6 @@ class Game:
             if self.highscores_menu_current >= len(self.highscores_menu_list):
                 self.highscores_menu_current = 0
             self.highscores()
-
-    # def highscores_over_handle_key_press(self, key, current_hover):
-    #     if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
-    #         self.menu()
-    #         return
 
     def show_highscores_menu(self) -> None:
         pos_x_start = self.display.screen_width // 2 - (self.display.images["button"].width + 20)
