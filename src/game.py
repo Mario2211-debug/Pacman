@@ -8,7 +8,7 @@ from .types import GameStatus
 from .display import Display
 from mazegenerator import MazeGenerator
 from .types import Direction, GameStatus, GhostStatus, GhostBehavior
-from .highscores import open_highscores_file, clear_highscores_file
+from .highscores import open_highscores_file, clear_highscores_file, save_to_highscores_file
 
 # if TYPE_CHECKING:
 from .stats import Stats
@@ -56,7 +56,7 @@ class Game:
                                      ("Clear", "clear")]
         self.highscores_menu_current = 0
 
-        self.victory_menu_list = [("Save", "Save"),
+        self.victory_menu_list = [("Save score", "save"),
                                   ("Cancel", "cancel")]
         self.victory_menu_current = 0
 
@@ -121,14 +121,21 @@ class Game:
         if key == 65307 and self.stats.stats["score"] == 0:  # ESC
             self.menu()
             return
-        if key == 65293 or key == 65421:  # ENTER
+        elif key == 65293 or key == 65421:  # ENTER
             if self.victory_menu_list[self.victory_menu_current][1] == "save":
-                print("save score")
+                if self.player_name:
+                    save_to_highscores_file(self.config.highscore_filename,
+                                            {"name": self.player_name,
+                                             "score": self.stats.stats["score"]})
+                    if self.display.images.get("highscores_screen"):
+                        self.display.mlx.mlx_destroy_image(self.display.mlx_ptr, self.display.images["highscores_screen"].img)
+                        self.display.images.pop("highscores_screen")
+                    self.menu()
                 return
             if self.victory_menu_list[self.victory_menu_current][1] == "cancel":
                 self.menu()
                 return
-        if key == 65362 or key == 65361:
+        elif key == 65362 or key == 65361:
             self.victory_menu_current -= 1
             if self.victory_menu_current < 0:
                 self.victory_menu_current = len(self.victory_menu_list) - 1
@@ -174,8 +181,7 @@ class Game:
                           150)
         if self.stats.stats["score"] != 0:
             self.display.show_text("Your score: " + str(self.stats.stats["score"]) + "\nEnter your name:", 500, 500)
-
-        self.show_score_input()
+            self.show_score_input()
         self.show_victory_menu()
 
         self.display.mlx.mlx_hook(self.display.win, 2, 1, self.victory_handle_key_press, self.menu_current)
@@ -341,7 +347,10 @@ class Game:
 
         for ghost in self.ghosts:
             ghost.set_image("right")
-            ghost.set_behavior(ghost.behavior_default)
+            if self.pacman.status != PacManStatus.INVISIBLE:
+                ghost.set_behavior(ghost.behavior_default)
+            else:
+                ghost.set_behavior(GhostBehavior.RANDOM)
             ghost.speed = 2
 
         self.ghosts[0].set_start_position(0, 0)
@@ -584,12 +593,14 @@ class Game:
         self.display.clear_window()
         print("Let's start!")
         self.stats.reset_stats()
-        self.create_level(self.stats.stats["level"])
+        self.pacman.status = PacManStatus.NORMAL
         self.pacman.speed = 3
         self.pacman.direction = None
         self.pacman.direction_next = None
         self.pacman.set_image("right")
+        self.create_level(self.stats.stats["level"])
         for ghost in self.ghosts:
+            ghost.make_freeze(False)
             ghost.reborn()
         self.resume()
 
