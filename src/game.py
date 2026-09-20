@@ -56,9 +56,9 @@ class Game:
                                      ("Clear", "clear")]
         self.highscores_menu_current = 0
 
-        self.victory_menu_list = [("Save score", "save"),
+        self.score_menu_list = [("Save score", "save"),
                                   ("Cancel", "cancel")]
-        self.victory_menu_current = 0
+        self.score_menu_current = 0
 
         self.time = int(time.perf_counter())
         self.previous = self.time
@@ -92,37 +92,49 @@ class Game:
 
         self.display.mlx.mlx_hook(self.display.win, 2, 1, self.time_out_handle_key_press, self.menu_current)
 
+
     # GAME OVER SCREEN
 
-    def game_over_handle_key_press(self, key, current_hover):
-        if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
-            self.menu()
-            return
+    # def game_over_handle_key_press(self, key, current_hover):
+    #     if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
+    #         self.menu()
+    #         return
 
     def game_over(self):
+        print("GAME OVER")
         self.display.clear_window()
         self.status = GameStatus.GAME_OVER
         self.display.show(self.display.images["big_background"], 0, 0)
         self.display.show(self.display.images["game_over"],
                           self.display.screen_width // 2
                           - self.display.images["game_over"].width // 2,
-                          350)
-        # self.display.show_text("Game Over", 960, 500, "center")
-        self.display.show_button("Main menu", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
+                          150)
 
-        self.display.mlx.mlx_hook(self.display.win, 2, 1, self.game_over_handle_key_press, self.menu_current)
-        self.display.mlx.mlx_hook(self.display.win, 2, 1, self.game_over_handle_key_press, self.menu_current)
+        if self.stats.stats["score"] != 0:
+            self.display.show_text("Your score: " + str(self.stats.stats["score"]) + "\nEnter your name:", 500, 500)
+            self.show_score_input()
+            self.show_score_menu()
+            self.display.mlx.mlx_hook(self.display.win, 2, 1, self.score_menu_handle_key_press, self.menu_current)
+        else:
+            self.display.show_text("Your score: 0", 960, 550, "center")
+            self.display.show_button("Main menu", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
+            self.display.mlx.mlx_hook(self.display.win, 2, 1, self.no_score_menu_handle_key_press, self.menu_current)
+
+        # self.display.show_text("Game Over", 960, 500, "center")
+        # self.display.show_button("Main menu", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
+
+        # self.display.mlx.mlx_hook(self.display.win, 2, 1, self.game_over_handle_key_press, self.menu_current)
 
 
     # VICTORY SCREEN
 
-    def victory_handle_key_press(self, key, current_hover) -> None:
+    def score_menu_handle_key_press(self, key, current_hover) -> None:
         # print(f"PAUSE Pressed key {key}")
         if key == 65307 and self.stats.stats["score"] == 0:  # ESC
             self.menu()
             return
         elif key == 65293 or key == 65421:  # ENTER
-            if self.victory_menu_list[self.victory_menu_current][1] == "save":
+            if self.score_menu_list[self.score_menu_current][1] == "save":
                 if self.player_name:
                     save_to_highscores_file(self.config.highscore_filename,
                                             {"name": self.player_name,
@@ -132,19 +144,19 @@ class Game:
                         self.display.images.pop("highscores_screen")
                     self.menu()
                 return
-            if self.victory_menu_list[self.victory_menu_current][1] == "cancel":
+            if self.score_menu_list[self.score_menu_current][1] == "cancel":
                 self.menu()
                 return
         elif key == 65362 or key == 65361:
-            self.victory_menu_current -= 1
-            if self.victory_menu_current < 0:
-                self.victory_menu_current = len(self.victory_menu_list) - 1
-            self.show_victory_menu()
+            self.score_menu_current -= 1
+            if self.score_menu_current < 0:
+                self.score_menu_current = len(self.score_menu_list) - 1
+            self.show_score_menu()
         elif key == 65364 or key == 65363:
-            self.victory_menu_current += 1
-            if self.victory_menu_current >= len(self.victory_menu_list):
-                self.victory_menu_current = 0
-            self.show_victory_menu()
+            self.score_menu_current += 1
+            if self.score_menu_current >= len(self.score_menu_list):
+                self.score_menu_current = 0
+            self.show_score_menu()
         elif key == 65288:  # Backspace
             if len(self.player_name):
                 self.player_name = self.player_name[0: -1]
@@ -156,35 +168,46 @@ class Game:
                 self.player_name += chr(key)
                 self.show_score_input()
 
-    def show_victory_menu(self) -> None:
+    def show_score_menu(self) -> None:
         pos_x_start = self.display.screen_width // 2 - (self.display.images["button"].width + 20)
-        # pos_y = self.display.screen_height // 2 - (self.display.images["button"].height + 20)
         pos_y = self.display.screen_height - self.display.images["button"].height - 100
-        for i in range(len(self.victory_menu_list)):
+        for i in range(len(self.score_menu_list)):
             pos_x = pos_x_start + (self.display.images["button"].width + 20) * i
-            self.display.show_button(self.victory_menu_list[i][0],
+            self.display.show_button(self.score_menu_list[i][0],
                                      pos_x, pos_y,
-                                     ("hover" if i == self.victory_menu_current else "normal"))
+                                     ("hover" if i == self.score_menu_current else "normal"))
 
     def show_score_input(self) -> None:
         self.display.show_filled_block(self.display.images["emptiness"], 500, 640, 25, 2, 4, 4)
         if self.player_name:
             self.display.show_text(self.player_name, 520, 660)
 
+
+    def no_score_menu_handle_key_press(self, key, current_hover):
+        if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
+            self.menu()
+            return
+
     def victory(self):
-        self.status = GameStatus.PAUSED
+        self.status = GameStatus.VICTORY
         self.display.show(self.display.images["big_background"], 0, 0)
 
         self.display.show(self.display.images["victory"],
                           self.display.screen_width // 2
                           - self.display.images["victory"].width // 2,
                           150)
+
         if self.stats.stats["score"] != 0:
             self.display.show_text("Your score: " + str(self.stats.stats["score"]) + "\nEnter your name:", 500, 500)
             self.show_score_input()
-        self.show_victory_menu()
+            self.show_score_menu()
+            self.display.mlx.mlx_hook(self.display.win, 2, 1, self.score_menu_handle_key_press, self.menu_current)
+        else:
+            self.display.show_text("Your score: 0", 960, 550, "center")
+            self.display.show_button("Main menu", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
+            self.display.mlx.mlx_hook(self.display.win, 2, 1, self.no_score_menu_handle_key_press, self.menu_current)
 
-        self.display.mlx.mlx_hook(self.display.win, 2, 1, self.victory_handle_key_press, self.menu_current)
+
 
 
     # LEVEL FINISHED SCREEN
@@ -195,6 +218,9 @@ class Game:
             return
 
     def level_completed(self):
+        if self.stats.stats["level"] == len(self.config.level):
+            self.victory()
+            return
         self.status = GameStatus.PAUSED
         self.display.show(self.display.images["big_background"], 0, 0)
         # self.display.show(self.display.images["logo_big"],
@@ -447,19 +473,19 @@ class Game:
             self.pacman.invisible()
         # elif key == 119 or key == 65362:
         elif key == 65362:
-            pacman.direction_next = Direction.TOP
+            self.pacman.direction_next = Direction.TOP
         # elif key == 100 or key == 65363:
         elif key == 65363:
-            pacman.direction_next = Direction.RIGHT
+            self.pacman.direction_next = Direction.RIGHT
         # elif key == 115 or key == 65364:
         elif key == 65364:
-            pacman.direction_next = Direction.BOTTOM
+            self.pacman.direction_next = Direction.BOTTOM
         # elif key == 97 or key == 65361:
         elif key == 65361:
-            pacman.direction_next = Direction.LEFT
+            self.pacman.direction_next = Direction.LEFT
 
-        if not pacman.direction:
-            pacman.direction = pacman.direction_next
+        if not self.pacman.direction:
+            self.pacman.direction = pacman.direction_next
 
     def move_object(self, obj: PacMan | Ghost):
         if self.status != GameStatus.RUN:
@@ -672,10 +698,10 @@ class Game:
 
     #INSTRUCTIONS SCREEN
 
-    def game_over_handle_key_press(self, key, current_hover):
-        if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
-            self.menu()
-            return
+    # def game_over_handle_key_press(self, key, current_hover):
+    #     if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
+    #         self.menu()
+    #         return
 
     def instructions(self) -> None:
         if not self.display.images.get("instructions_screen"):
@@ -693,4 +719,4 @@ class Game:
 
         self.display.show(self.display.images["instructions_screen"], 0, 0)
 
-        self.display.mlx.mlx_hook(self.display.win, 2, 1, self.game_over_handle_key_press, self.menu_current)
+        self.display.mlx.mlx_hook(self.display.win, 2, 1, self.no_score_menu_handle_key_press, self.menu_current)

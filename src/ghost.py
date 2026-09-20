@@ -1,4 +1,5 @@
 import random
+import time
 from collections import deque
 
 from .types import Direction, GhostStatus, GhostBehavior, PacManStatus
@@ -8,6 +9,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .game import Game
+
+REBORN_DELAY = 5
 
 class Ghost:
     def __init__(self, name: str, x: int = 0, y: int = 0) -> None:
@@ -29,6 +32,7 @@ class Ghost:
         self.direction = Direction.RIGHT
         self.status = GhostStatus.ACTIVE
         self.freeze = False
+        self.time_reborn = int(time.perf_counter())
         self.game: Game
 
     def set_image(self, image_direction: str) -> None:
@@ -187,7 +191,7 @@ class Ghost:
 
             # print(f"Ghost {self.image} move to {move_to_x} {move_to_y}")
 
-    def make_freeze(self, flag: bool = True):
+    def make_freeze(self, flag: bool = True) -> None:
         if flag is False:
             self.freeze = False
         else:
@@ -196,15 +200,18 @@ class Ghost:
             else:
                 self.freeze = True
 
-    def death(self):
+    def death(self) -> None:
         self.speed = 20
         self.status = GhostStatus.DEATH
         self.set_behavior(GhostBehavior.DEATH)
         self.target = self.get_random_corner_far_from_pacman()
         self.set_image("right")
+        self.time_reborn = int(time.perf_counter()) + REBORN_DELAY
         print(self.name, "Death in position", self.x, self.y)
 
-    def reborn(self):
+    def reborn(self) -> None:
+        if time.perf_counter() < self.time_reborn:
+            return
         print(self.name, "Reborn in position", self.x, self.y)
         self.speed = 2
         self.status = GhostStatus.ACTIVE
