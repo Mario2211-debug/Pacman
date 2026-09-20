@@ -10,6 +10,7 @@ class GameStatus(Enum):
   RUN = 1
   PAUSED = 2
   GAME_OVER = 3
+  VICTORY = 3
 
 class PacManStatus(Enum):
   NORMAL = 1
