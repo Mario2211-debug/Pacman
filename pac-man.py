@@ -30,8 +30,8 @@ if __name__ == "__main__":
     config_json = open_config_file(config_filename)
     cfg = Config.model_validate(config_json)
 
-    game = Game()
-    game.config = cfg
+    game = Game(cfg)
+    # game.config = cfg
 
     try:
         display = Display()
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     display.mlx.mlx_hook(display.win, 33, 0, game.exit, display)
 
     game.menu()
-    # game.highscores()
+    # game.victory()
 
 
     # game.game_over()
