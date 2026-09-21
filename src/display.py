@@ -57,6 +57,9 @@ class Display:
         self.wall_width = 10
         self.cell_width = self.corridor_width + self.wall_width
 
+        self.maze_x = 0
+        self.maze_y = 0
+
     def show(self, img: ImgData, x: int, y: int) -> None:
         # print("SHOW ", img.name)
         self.mlx.mlx_put_image_to_window(self.mlx_ptr, self.win, img.img, x, y)
@@ -281,10 +284,12 @@ class Display:
         self.show_filled_block(self.images["emptiness"], 1250, 0, 3, 30, 4, 4, "maze_screen")
         self.add_to_bitmap("maze_screen", "logo_small", 1450, 50)
         plants: list = [name for name in self.images.keys() if name.startswith("plant_")]
-        pos_y = 0
+        self.maze_x = 575 - self.game.maze_width * self.cell_width // 2
+        self.maze_y = 465 - self.game.maze_height * self.cell_width // 2
+        pos_y = self.maze_y
         for y in range(self.game.maze_height):
             pos_y += self.corridor_width
-            pos_x = 0
+            pos_x = self.maze_x
             for x in range(self.game.maze_width):
                 pos_x += self.corridor_width
                 if self.game.maze[y][x] == 15:
@@ -328,8 +333,8 @@ class Display:
                     self.add_to_bitmap(bitmap, img.name, pos_x, y + img_height * j)
 
     def show_pacgum(self, x: int, y: int, type: str) -> None:
-        pos_x = (x + 1) * (self.corridor_width + self.wall_width)
-        pos_y = (y + 1) * (self.corridor_width + self.wall_width)
+        pos_x = (x + 1) * (self.corridor_width + self.wall_width) + self.maze_x
+        pos_y = (y + 1) * (self.corridor_width + self.wall_width) + self.maze_y
         # pos_y = (y + 1) * (self.corridor_width) + y * self.wall_width
         if type == "small":
             self.add_to_bitmap("maze_screen", "pacgum", pos_x + 13, pos_y + 13)

@@ -65,8 +65,8 @@ class PacMan:
 
     def death(self) -> None:
         # Clear old
-        pos_x = self.game.display.cell_width + 5 + self.x_px
-        pos_y = self.game.display.cell_width + 5 + self.y_px
+        pos_x = self.game.display.cell_width + 5 + self.x_px + self.game.display.maze_x
+        pos_y = self.game.display.cell_width + 5 + self.y_px + self.game.display.maze_y
         # self.game.display.show(self.mask, pos_x, pos_y)
         self.game.display.add_to_bitmap("maze_screen", self.mask.name, pos_x, pos_y)
 
