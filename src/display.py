@@ -80,12 +80,12 @@ class Display:
             self.load_image("+", "img/chars/plus.png")
             self.load_image("?", "img/chars/question.png")
 
-            self.load_image("logo_small", "img/logo_400.png")
-            self.load_image("logo_big", "img/logo_800.png")
-            self.load_image("game_over", "img/game_over_800.png")
-            self.load_image("time_out", "img/time_out_800.png")
-            self.load_image("level_complete", "img/level_complete_1000.png")
-            self.load_image("victory", "img/victory_800.png")
+            self.load_image("logo_small", "img/logo_small.png")
+            self.load_image("logo_big", "img/logo_big.png")
+            self.load_image("game_over", "img/game_over.png")
+            self.load_image("time_out", "img/time_out.png")
+            self.load_image("level_complete", "img/level_complete.png")
+            self.load_image("victory", "img/victory.png")
             self.load_image("background1", "img/walls_128.png")
             self.load_image("background2", "img/walls_256.png")
             self.load_image("emptiness", "img/emptiness.png")
@@ -389,10 +389,16 @@ class Display:
             else:
                 letter_img = self.images.get(letter)
                 if letter_img:
+                    pos_x_current = pos_x
+                    pos_y_current = pos_y
+                    if letter == "." or letter == ",":
+                        pos_y_current += int(self.images.get("a").height - self.images.get(".").height)
+                    elif letter == "-" or letter == "+" or letter == "=" or letter == ":":
+                        pos_y_current += int(self.images.get("a").height // 2 - self.images.get(letter).height // 2)
                     if not bitmap:
-                        self.show(letter_img, pos_x, pos_y)
+                        self.show(letter_img, pos_x_current, pos_y_current)
                     else:
-                        self.add_to_bitmap(bitmap, letter_img.name, pos_x, pos_y)
+                        self.add_to_bitmap(bitmap, letter_img.name, pos_x_current, pos_y_current)
                     pos_x += letter_img.width
 
 

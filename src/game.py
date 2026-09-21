@@ -74,23 +74,33 @@ class Game:
 
     # TIME OUT SCREEN
 
-    def time_out_handle_key_press(self, key, current_hover):
-        if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
-            self.menu()
-            return
+    # def time_out_handle_key_press(self, key, current_hover):
+    #     if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
+    #         self.menu()
+    #         return
 
     def time_out(self):
+        print("TIME OUT")
         self.display.clear_window()
         self.status = GameStatus.GAME_OVER
-        self.display.show(self.display.images["big_background"], 0, 0)
-        self.display.show(self.display.images["time_out"],
-                          self.display.screen_width // 2
-                          - self.display.images["time_out"].width // 2,
-                          350)
-        self.display.show_text("Time is out", 960, 150, "center")
-        self.display.show_button("Main menu", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
 
-        self.display.mlx.mlx_hook(self.display.win, 2, 1, self.time_out_handle_key_press, self.menu_current)
+        if self.stats.stats["score"] != 0:
+            self.display.show(self.display.images["save_score_tmp"], 0, 0)
+            self.display.show(self.display.images["game_over"],
+                            self.display.screen_width // 2
+                            - self.display.images["time_out"].width // 2,
+                            150)
+            self.display.show_text(str(self.stats.stats["score"]), 840, 500)
+            self.display.mlx.mlx_hook(self.display.win, 2, 1, self.score_menu_handle_key_press, self.menu_current)
+        else:
+            self.display.show(self.display.images["big_background"], 0, 0)
+            self.display.show(self.display.images["time_out"],
+                            self.display.screen_width // 2
+                            - self.display.images["time_out"].width // 2,
+                            150)
+            self.display.show_text("Your score: 0", 960, 550, "center")
+            self.display.show_button("Main menu", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
+            self.display.mlx.mlx_hook(self.display.win, 2, 1, self.no_score_menu_handle_key_press, self.menu_current)
 
 
     # GAME OVER SCREEN
@@ -102,23 +112,26 @@ class Game:
 
     def game_over(self):
         print("GAME OVER")
-        self.display.clear_window()
+        # self.display.clear_window()
         self.status = GameStatus.GAME_OVER
-        self.display.show(self.display.images["big_background"], 0, 0)
-        self.display.show(self.display.images["game_over"],
-                          self.display.screen_width // 2
-                          - self.display.images["game_over"].width // 2,
-                          150)
 
-        # if self.stats.stats["score"] != 0:
-        #     self.display.show_text("Your score: " + str(self.stats.stats["score"]) + "\nEnter your name:", 500, 500)
-        #     self.show_score_input()
-        #     self.show_score_menu()
-        #     self.display.mlx.mlx_hook(self.display.win, 2, 1, self.score_menu_handle_key_press, self.menu_current)
-        # else:
-        self.display.show_text("Your score: 0", 960, 550, "center")
-        self.display.show_button("Main menu", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
-        self.display.mlx.mlx_hook(self.display.win, 2, 1, self.no_score_menu_handle_key_press, self.menu_current)
+        if self.stats.stats["score"] != 0:
+            self.display.show(self.display.images["save_score_tmp"], 0, 0)
+            self.display.show(self.display.images["game_over"],
+                            self.display.screen_width // 2
+                            - self.display.images["game_over"].width // 2,
+                            150)
+            self.display.show_text(str(self.stats.stats["score"]), 840, 500)
+            self.display.mlx.mlx_hook(self.display.win, 2, 1, self.score_menu_handle_key_press, self.menu_current)
+        else:
+            self.display.show(self.display.images["big_background"], 0, 0)
+            self.display.show(self.display.images["game_over"],
+                            self.display.screen_width // 2
+                            - self.display.images["game_over"].width // 2,
+                            150)
+            self.display.show_text("Your score: 0", 960, 550, "center")
+            self.display.show_button("Main menu", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
+            self.display.mlx.mlx_hook(self.display.win, 2, 1, self.no_score_menu_handle_key_press, self.menu_current)
 
         # self.display.show_text("Game Over", 960, 500, "center")
         # self.display.show_button("Main menu", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
@@ -190,19 +203,21 @@ class Game:
 
     def victory(self):
         self.status = GameStatus.VICTORY
-        self.display.show(self.display.images["big_background"], 0, 0)
-
-        self.display.show(self.display.images["victory"],
-                          self.display.screen_width // 2
-                          - self.display.images["victory"].width // 2,
-                          150)
 
         if self.stats.stats["score"] != 0:
-            self.display.show_text("Your score: " + str(self.stats.stats["score"]) + "\nEnter your name:", 500, 500)
-            self.show_score_input()
-            self.show_score_menu()
+            self.display.show(self.display.images["save_score_tmp"], 0, 0)
+            self.display.show(self.display.images["victory"],
+                            self.display.screen_width // 2
+                            - self.display.images["victory"].width // 2,
+                            150)
+            self.display.show_text(str(self.stats.stats["score"]), 840, 500)
             self.display.mlx.mlx_hook(self.display.win, 2, 1, self.score_menu_handle_key_press, self.menu_current)
         else:
+            self.display.show(self.display.images["big_background"], 0, 0)
+            self.display.show(self.display.images["victory"],
+                            self.display.screen_width // 2
+                            - self.display.images["victory"].width // 2,
+                            150)
             self.display.show_text("Your score: 0", 960, 550, "center")
             self.display.show_button("Main menu", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
             self.display.mlx.mlx_hook(self.display.win, 2, 1, self.no_score_menu_handle_key_press, self.menu_current)
@@ -238,7 +253,7 @@ class Game:
         self.display.mlx.mlx_hook(self.display.win, 2, 1, self.level_completed_handle_key_press, self.menu_current)
 
 
-    # MENU SCREEN
+    # MAIN MENU SCREEN
 
     def menu_handle_key_press(self, key, current_hover):
         # print(f"Pressed key {key}")
@@ -358,7 +373,7 @@ class Game:
         maze_width = self.config.level[level_num - 1]["width"]
         maze_height = self.config.level[level_num - 1]["height"]
 
-        mazegen = MazeGenerator((maze_width, maze_height), False, (0, 0), (1, 1), self.config.seed)
+        mazegen = MazeGenerator((maze_width, maze_height), False, (0, 0), (1, 1), self.config.seed + level_num)
         if not mazegen.maze:
             return
         self.maze = mazegen.maze
@@ -373,11 +388,12 @@ class Game:
 
         for ghost in self.ghosts:
             ghost.set_image("right")
+            ghost.status = GhostStatus.ACTIVE
             if self.pacman.status != PacManStatus.INVISIBLE:
                 ghost.set_behavior(ghost.behavior_default)
             else:
                 ghost.set_behavior(GhostBehavior.RANDOM)
-            ghost.speed = 2
+            ghost.speed_reset()
 
         self.ghosts[0].set_start_position(0, 0)
         self.ghosts[1].set_start_position(maze_width - 1, 0)
@@ -405,10 +421,11 @@ class Game:
         if on:
             self.edible_time += EDIBLE_TIME
             for ghost in self.ghosts:
-                ghost.status = GhostStatus.EDIBLE
-                ghost.set_behavior(GhostBehavior.SCARED)
-                if not ghost.freeze:
-                    ghost.target = ghost.get_random_cell_far_from_pacman()
+                if ghost.status != GhostStatus.DEATH:
+                    ghost.status = GhostStatus.EDIBLE
+                    ghost.set_behavior(GhostBehavior.SCARED)
+                # if not ghost.freeze:
+                #     ghost.target = ghost.get_random_cell_far_from_pacman()
 
                 pos_x = self.display.cell_width + 5 + ghost.x_px
                 pos_y = self.display.cell_width + 5 + ghost.y_px
@@ -609,7 +626,7 @@ class Game:
             return
         self.create_level(self.stats.stats["level"])
         self.stats.reset_time()
-        self.pacman.speed = 3
+        self.pacman.speed_reset()
         self.pacman.direction = None
         self.pacman.direction_next = None
         self.pacman.set_image("right")
@@ -617,10 +634,11 @@ class Game:
 
     def start(self) -> None:
         self.display.clear_window()
+        self.score_menu_current = 0
         print("Let's start!")
         self.stats.reset_stats()
         self.pacman.status = PacManStatus.NORMAL
-        self.pacman.speed = 3
+        self.pacman.speed_reset()
         self.pacman.direction = None
         self.pacman.direction_next = None
         self.pacman.set_image("right")
@@ -720,3 +738,37 @@ class Game:
         self.display.show(self.display.images["instructions_screen"], 0, 0)
 
         self.display.mlx.mlx_hook(self.display.win, 2, 1, self.no_score_menu_handle_key_press, self.menu_current)
+
+
+    def create_save_score_template(self):
+        if self.display.images.get("save_score_tmp"):
+            return
+
+        self.display.create_bitmap("save_score_tmp", self.display.screen_width, self.display.screen_height)
+        self.display.add_to_bitmap("save_score_tmp", "big_background", 0, 0)
+
+        # for i in range(10):
+        plants: list = [name for name in self.display.images.keys() if name.startswith("plant_")] * 20
+        for plant in plants:
+            rand_x = random.randint(0, 450)
+            rand_y = random.randint(0, self.display.screen_height - 25)
+            if random.getrandbits(1):
+                rand_x += 1430
+            # if self.display.screen_width // 2 - self.display.images["button"].width - 50 // 2 <= rand_x <= self.display.screen_width // 2:
+            #     rand_x -= self.display.images["button"].width
+            # elif self.display.screen_width // 2 <= rand_x <= self.display.screen_width // 2 + self.display.images["button"].width // 2:
+            #     rand_x += self.display.images["button"].width
+
+            self.display.add_to_bitmap("save_score_tmp", plant, rand_x, rand_y)
+
+        self.display.show_text("Your score:\nEnter your name:", 500, 500, "align", "save_score_tmp")
+        self.display.show_filled_block(self.display.images["emptiness"], 500, 640, 25, 2, 4, 4, "save_score_tmp")
+
+        pos_x_start = self.display.screen_width // 2 - (self.display.images["button"].width + 20)
+        pos_y = self.display.screen_height - self.display.images["button"].height - 100
+        for i in range(len(self.score_menu_list)):
+            pos_x = pos_x_start + (self.display.images["button"].width + 20) * i
+            self.display.show_button(self.score_menu_list[i][0],
+                                     pos_x, pos_y,
+                                     ("hover" if i == self.score_menu_current else "normal"),
+                                     "save_score_tmp")
