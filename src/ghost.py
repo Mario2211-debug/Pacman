@@ -10,7 +10,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .game import Game
 
-REBORN_DELAY = 5
+REBORN_DELAY = 1
+SPEED_BASE = 2
+SPEED_DEATH = 20
 
 class Ghost:
     def __init__(self, name: str, x: int = 0, y: int = 0) -> None:
@@ -25,7 +27,7 @@ class Ghost:
         self.next_y = y
         self.x_px = x
         self.y_px = y
-        self.speed = 2
+        self.speed = SPEED_BASE
         self.behavior_default = GhostBehavior.PLAYER
         self.behavior = GhostBehavior.PLAYER
         self.target: tuple
@@ -51,6 +53,9 @@ class Ghost:
 
     def set_behavior(self, behavior: GhostBehavior):
         self.behavior = behavior
+
+    def speed_reset(self):
+        self.speed = SPEED_BASE
 
     def set_start_position(self, x: int, y: int) -> None:
         self.start_x = x
@@ -166,7 +171,7 @@ class Ghost:
                 # print(self.name, self.x, self.y, "Scared and run to:", self.target)
             elif self.behavior == GhostBehavior.DEATH:
                 if self.target == (self.x, self.y):
-                    print("Death found target")
+                    # print("Death found target")
                     self.reborn()
             elif self.behavior == GhostBehavior.TO_START:
                 if (self.x, self.y) != (self.start_x, self.start_y):
@@ -202,10 +207,10 @@ class Ghost:
                 self.freeze = True
 
     def death(self) -> None:
-        self.speed = 20
+        self.speed = SPEED_DEATH
         self.status = GhostStatus.DEATH
-        self.set_behavior(GhostBehavior.DEATH)
-        self.target = self.get_random_corner_far_from_pacman()
+        self.set_behavior(GhostBehavior.TO_START)
+        # self.target = self.get_random_corner_far_from_pacman()
         self.set_image("right")
         self.time_reborn = int(time.perf_counter()) + REBORN_DELAY
         print(self.name, "Death in position", self.x, self.y)
@@ -214,7 +219,7 @@ class Ghost:
         if time.perf_counter() < self.time_reborn:
             return
         print(self.name, "Reborn in position", self.x, self.y)
-        self.speed = 2
+        self.speed_reset()
         self.status = GhostStatus.ACTIVE
         if self.game.pacman.status != PacManStatus.INVISIBLE:
             self.set_behavior(self.behavior_default)

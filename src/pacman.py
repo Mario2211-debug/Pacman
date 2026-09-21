@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .game import Game
 
+SPEED_BASE = 3
+
 class PacMan:
     def __init__(self, name: str = "pacman", x: int = 0, y: int = 0) -> None:
         self.name = name
@@ -22,7 +24,7 @@ class PacMan:
         self.next_y = y
         self.x_px = x
         self.y_px = y
-        self.speed = 3
+        self.speed = SPEED_BASE
         self.direction = None
         self.direction_next = None
         self.status = PacManStatus.NORMAL
@@ -102,10 +104,13 @@ class PacMan:
         # print("PacMan CAN'T move", self.direction, self.direction_next, self.x, self.y)
         # print(self.next_x, self.next_y)
 
+    def speed_reset(self):
+        self.speed = SPEED_BASE
+
     def increase_speed(self, num: int = 1) -> None:
         self.speed += num
         if self.speed > 10:
-            self.speed = 3
+            self.speed_reset()
 
     def invisible(self) -> None:
         if self.status == PacManStatus.NORMAL:

@@ -41,6 +41,7 @@ if __name__ == "__main__":
 
     game.display = display
     display.game = game
+
     try:
         display.load_all_images()
         display.create_rectangle("block_42_img", display.corridor_width, display.corridor_width, 0xAA000066)
@@ -75,7 +76,8 @@ if __name__ == "__main__":
 
 
     display.mlx.mlx_hook(display.win, 33, 0, game.exit, display)
-
+    display.mlx.mlx_do_key_autorepeatoff(display.mlx_ptr)
+    game.create_save_score_template()
     game.menu()
     # game.victory()
 
