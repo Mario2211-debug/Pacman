@@ -111,7 +111,7 @@ class Config(BaseModel):
         i = 0
         while i < len(self.level):
             if (self.level[i].get("width") is None
-               and self.level[i].get("height") is None):
+                    and self.level[i].get("height") is None):
                 self.level.pop(i)
                 continue
 

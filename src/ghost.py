@@ -14,6 +14,7 @@ REBORN_DELAY = 5
 SPEED_BASE = 2
 SPEED_DEATH = 20
 
+
 class Ghost:
     def __init__(self, name: str, x: int = 0, y: int = 0) -> None:
         self.name = name
@@ -65,7 +66,7 @@ class Ghost:
         self.next_x = x
         self.next_y = y
         self.x_px = x * self.game.display.cell_width
-        self.y_px = y  * self.game.display.cell_width
+        self.y_px = y * self.game.display.cell_width
         self.target = (x, y)
 
     def find_next_position(self, target: tuple) -> tuple[int]:
@@ -75,18 +76,25 @@ class Ghost:
         goal = target
         prev: dict = {start: None}
         queue = deque([start])
-        ghosts_next_positions = [(ghost.next_x, ghost.next_y) for ghost in self.game.ghosts if ghost is not self and ghost.status != GhostStatus.DEATH]
+        ghosts_next_positions = [(ghost.next_x, ghost.next_y) for ghost
+                                 in self.game.ghosts
+                                 if (ghost is not self
+                                     and ghost.status != GhostStatus.DEATH)]
         while queue:
             x, y = queue.popleft()
             if (x, y) == goal:
                 break
             for dx, dy, code in moves:
                 nx, ny = x + dx, y + dy
-                if (nx, ny) in ghosts_next_positions and self.status != GhostStatus.DEATH:
+                if ((nx, ny) in ghosts_next_positions
+                        and self.status != GhostStatus.DEATH):
                     continue
-                if self.behavior == GhostBehavior.SCARED and nx == self.game.pacman.x and ny == self.game.pacman.y:
+                if (self.behavior == GhostBehavior.SCARED
+                        and nx == self.game.pacman.x
+                        and ny == self.game.pacman.y):
                     continue
-                if (0 <= nx < self.game.maze_width and 0 <= ny < self.game.maze_height
+                if (0 <= nx < self.game.maze_width
+                        and 0 <= ny < self.game.maze_height
                         and (self.game.maze[y][x] & code) == 0
                         and (nx, ny) not in prev):
                     prev[(nx, ny)] = ((x, y))
@@ -100,9 +108,7 @@ class Ghost:
             parents.append(parent)
             cur = parent
 
-
         if len(parents) > 1:
-            # print(parents)
             self.next_x = parents[-2][0]
             self.next_y = parents[-2][1]
             return parents[-2]
@@ -112,7 +118,10 @@ class Ghost:
             return goal
 
     def get_random_corner(self) -> tuple:
-        corners = [(0, 0), (self.game.maze_width - 1, 0), (0, self.game.maze_height - 1), (self.game.maze_width - 1, self.game.maze_height - 1)]
+        corners = [(0, 0),
+                   (self.game.maze_width - 1, 0),
+                   (0, self.game.maze_height - 1),
+                   (self.game.maze_width - 1, self.game.maze_height - 1)]
         if (self.x, self.y) in corners:
             corners.remove((self.x, self.y))
         return random.choice(corners)
@@ -120,30 +129,40 @@ class Ghost:
     def get_random_cell(self) -> tuple:
         rand_x = random.randint(0, self.game.maze_width - 1)
         rand_y = random.randint(0, self.game.maze_height - 1)
-        if self.game.maze[rand_y][rand_x] !=  15:
+        if self.game.maze[rand_y][rand_x] != 15:
             return (rand_x, rand_y)
         return self.get_random_cell()
 
     def get_random_corner_far_from_pacman(self) -> tuple:
-        corners = [(0, 0), (self.game.maze_width - 1, 0), (0, self.game.maze_height - 1), (self.game.maze_width - 1, self.game.maze_height - 1)]
-        pacman_quarter_x = min(1, (self.game.pacman.x // (self.game.maze_width // 2)))
-        pacman_quarter_y = min(1, (self.game.pacman.y // (self.game.maze_height // 2)))
-        corner_x = pacman_quarter_x * (self.game.maze_width- 1)
-        corner_y = pacman_quarter_y * (self.game.maze_height- 1)
-        # print("pacman near corner:", (pacman_quarter_x * (self.game.maze_width- 1), pacman_quarter_y * (self.game.maze_height - 1)))
+        corners = [(0, 0),
+                   (self.game.maze_width - 1, 0),
+                   (0, self.game.maze_height - 1),
+                   (self.game.maze_width - 1, self.game.maze_height - 1)]
+        maze_width_half = self.game.maze_width // 2
+        maze_height_half = self.game.maze_height // 2
+        pacman_quarter_x = min(1, (self.game.pacman.x // maze_width_half))
+        pacman_quarter_y = min(1, (self.game.pacman.y // maze_height_half))
+        corner_x = pacman_quarter_x * (self.game.maze_width - 1)
+        corner_y = pacman_quarter_y * (self.game.maze_height - 1)
+        # print("pacman near corner:", (corner_x, corner_y))
         if (corner_x, corner_y) in corners:
             corners.remove((corner_x, corner_y))
         return random.choice(corners)
 
     def get_random_cell_far_from_pacman(self) -> tuple:
-        ghosts_targets = [ghost.target for ghost in self.game.ghosts if ghost is not self]
+        ghosts_targets = [ghost.target for ghost in self.game.ghosts
+                          if ghost is not self]
         # print("ghosts_targets:", ghosts_targets)
         rand_x = random.randint(0, self.game.maze_width - 1)
         rand_y = random.randint(0, self.game.maze_height - 1)
-        if (self.game.maze[rand_y][rand_x] ==  15 or
-            (rand_x, rand_y) in ghosts_targets or
-            (self.game.pacman.x - self.game.maze_width // 4 < rand_x < self.game.pacman.x + self.game.maze_width // 4 and
-            self.game.pacman.y - self.game.maze_height // 4 < rand_x < self.game.pacman.y + self.game.maze_height // 4)):
+        maze_width_quarter = self.game.maze_width // 4
+        maze_height_quarter = self.game.maze_height // 4
+        if (self.game.maze[rand_y][rand_x] == 15 or
+                (rand_x, rand_y) in ghosts_targets or
+                (self.game.pacman.x - maze_width_quarter < rand_x
+                 and rand_x < self.game.pacman.x + maze_width_quarter
+                 and self.game.pacman.y - maze_height_quarter < rand_y
+                 and rand_y < self.game.pacman.y + maze_height_quarter)):
             return self.get_random_cell_far_from_pacman()
         return (rand_x, rand_y)
 
@@ -155,7 +174,8 @@ class Ghost:
             # print(f"Ghost {self.image} position: {self.x}, {self.y}")
 
             if self.behavior == GhostBehavior.PLAYER:
-                self.target = (self.game.pacman.next_x, self.game.pacman.next_y)
+                self.target = (self.game.pacman.next_x,
+                               self.game.pacman.next_y)
             elif self.behavior == GhostBehavior.CORNERS:
                 if self.target == (self.x, self.y):
                     self.target = self.get_random_corner()
@@ -166,9 +186,6 @@ class Ghost:
                 if self.target == (self.x, self.y):
                     self.target = self.get_random_cell_far_from_pacman()
                     # self.target = self.get_random_corner_far_from_pacman()
-                # if self.target == (self.x, self.y):
-                # self.target = self.get_random_cell_far_from_pacman()
-                # print(self.name, self.x, self.y, "Scared and run to:", self.target)
             elif self.behavior == GhostBehavior.DEATH:
                 if self.target == (self.x, self.y):
                     # print("Death found target")
@@ -191,17 +208,12 @@ class Ghost:
                 self.direction = Direction.BOTTOM
             elif move_to_y - self.y == -1:
                 self.direction = Direction.TOP
-            # else:
-            #     print("Ghost", self.name, self.x, self.y, "can't move to", self.target)
-            #     print("Next position:", self.next_x, self.next_y)
-
-            # print(f"Ghost {self.image} move to {move_to_x} {move_to_y}")
 
     def make_freeze(self, flag: bool = True) -> None:
         if flag is False:
             self.freeze = False
         else:
-            if self.freeze == True:
+            if self.freeze is True:
                 self.freeze = False
             else:
                 self.freeze = True

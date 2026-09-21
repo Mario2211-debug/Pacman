@@ -44,7 +44,7 @@ class Stats:
                 13, 2, 4, 4, "maze_screen")
             if self.stat != "lives":
                 if (self.stat == "score" and
-                   self.game.stats.stats["score"] > 999999999999999):
+                        self.game.stats.stats["score"] > 999999999999999):
                     self.game.display.show_text("999999999999999",
                                                 self.x + 15, self.y + 67,
                                                 "left", "maze_screen")

@@ -1,5 +1,3 @@
-from enum import Enum
-
 from .display import ImgData
 from .types import PacManStatus, GhostStatus, GhostBehavior
 from typing import TYPE_CHECKING
@@ -8,6 +6,7 @@ if TYPE_CHECKING:
     from .game import Game
 
 SPEED_BASE = 3
+
 
 class PacMan:
     def __init__(self, name: str = "pacman", x: int = 0, y: int = 0) -> None:
@@ -30,8 +29,8 @@ class PacMan:
         self.status = PacManStatus.NORMAL
         self.game: Game
 
-    def set_image(self, image_direction: str) -> None:
-        image_name = self.name + "_" + str(self.image_sprite) + "_" + image_direction
+    def set_image(self, direction: str) -> None:
+        image_name = self.name + "_" + str(self.image_sprite) + "_" + direction
         if not self.game.display.images.get(image_name):
             return
 
@@ -61,14 +60,17 @@ class PacMan:
         self.next_x = x
         self.next_y = y
         self.x_px = x * self.game.display.cell_width
-        self.y_px = y  * self.game.display.cell_width
+        self.y_px = y * self.game.display.cell_width
 
     def death(self) -> None:
         # Clear old
-        pos_x = self.game.display.cell_width + 5 + self.x_px + self.game.display.maze_x
-        pos_y = self.game.display.cell_width + 5 + self.y_px + self.game.display.maze_y
+        pos_x = self.game.display.cell_width + 5 \
+            + self.x_px + self.game.display.maze_x
+        pos_y = self.game.display.cell_width + 5 \
+            + self.y_px + self.game.display.maze_y
         # self.game.display.show(self.mask, pos_x, pos_y)
-        self.game.display.add_to_bitmap("maze_screen", self.mask.name, pos_x, pos_y)
+        self.game.display.add_to_bitmap("maze_screen", self.mask.name,
+                                        pos_x, pos_y)
 
         self.set_start_position(self.start_x, self.start_y)
         self.direction = None
@@ -86,7 +88,7 @@ class PacMan:
         dx, dy, code = moves[self.direction_next.value]
         nx, ny = self.x + dx, self.y + dy
         if (0 <= nx < self.game.maze_width and 0 <= ny < self.game.maze_height
-            and (self.game.maze[self.y][self.x] & code) == 0):
+                and (self.game.maze[self.y][self.x] & code) == 0):
             self.next_x, self.next_y = nx, ny
             self.direction = self.direction_next
             # print(f"PacMan change {self.direction_next.name} to {nx}, {ny}")
@@ -94,15 +96,10 @@ class PacMan:
         dx, dy, code = moves[self.direction.value]
         nx, ny = self.x + dx, self.y + dy
         if (0 <= nx < self.game.maze_width and 0 <= ny < self.game.maze_height
-            and (self.game.maze[self.y][self.x] & code) == 0):
+                and (self.game.maze[self.y][self.x] & code) == 0):
             self.next_x, self.next_y = nx, ny
             # print(f"PacMan move {self.direction.name} to {nx}, {ny}")
-            # print(f"PacMan move {self.direction.name} to {nx}, {ny}")
             return
-        # print("PacMan CAN'T move", self.direction, self.direction_next, self.x, self.y)
-        # print(self.next_x, self.next_y)
-        # print("PacMan CAN'T move", self.direction, self.direction_next, self.x, self.y)
-        # print(self.next_x, self.next_y)
 
     def speed_reset(self):
         self.speed = SPEED_BASE
@@ -117,11 +114,13 @@ class PacMan:
             # print("INVISIBLE")
             self.status = PacManStatus.INVISIBLE
             for ghost in self.game.ghosts:
-                if ghost.status != GhostStatus.DEATH and ghost.behavior != GhostBehavior.TO_START:
+                if (ghost.status != GhostStatus.DEATH
+                   and ghost.behavior != GhostBehavior.TO_START):
                     ghost.set_behavior(GhostBehavior.RANDOM)
         else:
             # print("VISIBLE")
             self.status = PacManStatus.NORMAL
             for ghost in self.game.ghosts:
-                if ghost.status == GhostStatus.ACTIVE and ghost.behavior != GhostBehavior.TO_START:
+                if (ghost.status == GhostStatus.ACTIVE
+                   and ghost.behavior != GhostBehavior.TO_START):
                     ghost.set_behavior(ghost.behavior_default)
