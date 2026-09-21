@@ -100,7 +100,7 @@ class Config(BaseModel):
 
         if not self.highscore_filename.lower().endswith(".json"):
             print(f'\033[91mInvalid value for "highscore_filename".')
-            print(f'Using default: "highscore.json"')
+            print(f'Using default: "highscore.json"\033[0m')
             self.highscore_filename = CONFIG_DEFAULTS.get("highscore_filename")
 
         i = 0

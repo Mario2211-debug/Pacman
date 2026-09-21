@@ -66,7 +66,7 @@ class Game:
         self.accumulator = 0.0
         self.player_name: str = ""
 
-    def exit(self, error = ""):
+    def exit(self, error = None):
         for image in self.display.images.values():
             self.display.mlx.mlx_destroy_image(self.display.mlx_ptr, image.img)
         self.display.mlx.mlx_loop_exit(self.display.mlx_ptr)
@@ -90,7 +90,7 @@ class Game:
                             self.display.screen_width // 2
                             - self.display.images["time_out"].width // 2,
                             150)
-            self.display.show_text(str(self.stats.stats["score"]), 840, 500)
+            self.display.show_text(str(self.stats.stats["score"]), 1040, 500)
             self.display.mlx.mlx_hook(self.display.win, 2, 1, self.score_menu_handle_key_press, self.menu_current)
         else:
             self.display.show(self.display.images["big_background"], 0, 0)
@@ -121,7 +121,7 @@ class Game:
                             self.display.screen_width // 2
                             - self.display.images["game_over"].width // 2,
                             150)
-            self.display.show_text(str(self.stats.stats["score"]), 840, 500)
+            self.display.show_text(str(self.stats.stats["score"]), 1040, 500)
             self.display.mlx.mlx_hook(self.display.win, 2, 1, self.score_menu_handle_key_press, self.menu_current)
         else:
             self.display.show(self.display.images["big_background"], 0, 0)
@@ -142,7 +142,8 @@ class Game:
     # VICTORY SCREEN
 
     def score_menu_handle_key_press(self, key, current_hover) -> None:
-        # print(f"PAUSE Pressed key {key}")
+        # self.display.show(self.display.images["save_score_tmp"], 0, 0)
+        # print("Handle")
         if key == 65307 and self.stats.stats["score"] == 0:  # ESC
             self.menu()
             return
@@ -175,8 +176,9 @@ class Game:
                 self.player_name = self.player_name[0: -1]
                 self.show_score_input()
         else:
-            if (len(self.player_name) < 25 and
-                self.display.images.get(chr(key))
+            if (len(self.player_name) < 10
+                and chr(key).isalnum
+                and self.display.images.get(chr(key))
                 or (chr(key) == " " and self.player_name[-1] != " ")):
                 self.player_name += chr(key)
                 self.show_score_input()
@@ -191,9 +193,9 @@ class Game:
                                      ("hover" if i == self.score_menu_current else "normal"))
 
     def show_score_input(self) -> None:
-        self.display.show_filled_block(self.display.images["emptiness"], 500, 640, 25, 2, 4, 4)
+        self.display.show_filled_block(self.display.images["emptiness"], 700, 640, 13, 2, 4, 4)
         if self.player_name:
-            self.display.show_text(self.player_name, 520, 660)
+            self.display.show_text(self.player_name, 720, 660)
 
 
     def no_score_menu_handle_key_press(self, key, current_hover):
@@ -210,7 +212,7 @@ class Game:
                             self.display.screen_width // 2
                             - self.display.images["victory"].width // 2,
                             150)
-            self.display.show_text(str(self.stats.stats["score"]), 840, 500)
+            self.display.show_text(str(self.stats.stats["score"]), 1040, 500)
             self.display.mlx.mlx_hook(self.display.win, 2, 1, self.score_menu_handle_key_press, self.menu_current)
         else:
             self.display.show(self.display.images["big_background"], 0, 0)
@@ -293,10 +295,7 @@ class Game:
     def menu(self) -> None:
         if not self.display:
             return
-        # self.display.clear_window()
-        # self.display.show_filled_block(self.display.images["background2"], 0, 0,
-        #                                self.display.screen_width // self.display.images["background2"].width + 1,
-        #                                self.display.screen_height // self.display.images["background2"].height + 1)
+        self.highscores_menu_current = 0
         self.display.show(self.display.images["big_background"], 0, 0)
         self.display.show(self.display.images["logo_big"],
                           self.display.screen_width // 2
@@ -372,9 +371,18 @@ class Game:
     def create_level(self, level_num) -> None:
         maze_width = self.config.level[level_num - 1]["width"]
         maze_height = self.config.level[level_num - 1]["height"]
+        try:
+            mazegen = MazeGenerator((maze_width, maze_height),
+                                    False,
+                                    (0, 0),
+                                    (maze_width - 1, maze_height - 1),
+                                    self.config.seed + level_num)
+        except Exception as err:
+            self.status = GameStatus.ERROR
+            return
 
-        mazegen = MazeGenerator((maze_width, maze_height), False, (0, 0), (1, 1), self.config.seed + level_num)
         if not mazegen.maze:
+            self.status = GameStatus.ERROR
             return
         self.maze = mazegen.maze
         self.maze_width = len(mazegen.maze[0])
@@ -407,7 +415,7 @@ class Game:
     # GAME SCREEN
 
     def death(self) -> None:
-        print("LIVES:", self.stats.stats["lives"])
+        # print("LIVES:", self.stats.stats["lives"])
         self.stats.increase_lives(-1)
         if self.stats.stats["lives"] == 0:
             self.game_over()
@@ -625,6 +633,10 @@ class Game:
             self.victory()
             return
         self.create_level(self.stats.stats["level"])
+        if self.status == GameStatus.ERROR:
+            print("\033[91mAn unexpected error occured.\033[0m")
+            self.exit()
+            return
         self.stats.reset_time()
         self.pacman.speed_reset()
         self.pacman.direction = None
@@ -635,7 +647,8 @@ class Game:
     def start(self) -> None:
         self.display.clear_window()
         self.score_menu_current = 0
-        print("Let's start!")
+        self.player_name = ""
+        # print("Let's start!")
         self.stats.reset_stats()
         self.pacman.status = PacManStatus.NORMAL
         self.pacman.speed_reset()
@@ -643,6 +656,10 @@ class Game:
         self.pacman.direction_next = None
         self.pacman.set_image("right")
         self.create_level(self.stats.stats["level"])
+        if self.status == GameStatus.ERROR:
+            print("\033[91mAn unexpected error occured.\033[0m")
+            self.exit()
+            return
         for ghost in self.ghosts:
             ghost.make_freeze(False)
             ghost.reborn()
@@ -761,8 +778,8 @@ class Game:
 
             self.display.add_to_bitmap("save_score_tmp", plant, rand_x, rand_y)
 
-        self.display.show_text("Your score:\nEnter your name:", 500, 500, "align", "save_score_tmp")
-        self.display.show_filled_block(self.display.images["emptiness"], 500, 640, 25, 2, 4, 4, "save_score_tmp")
+        self.display.show_text("Your score:\nEnter your name:", 700, 500, "align", "save_score_tmp")
+        self.display.show_filled_block(self.display.images["emptiness"], 700, 640, 13, 2, 4, 4, "save_score_tmp")
 
         pos_x_start = self.display.screen_width // 2 - (self.display.images["button"].width + 20)
         pos_y = self.display.screen_height - self.display.images["button"].height - 100
