@@ -341,35 +341,6 @@ class Display:
         elif type == "big":
             self.add_to_bitmap("maze_screen", "pacgum_big", pos_x + 7, pos_y + 7)
 
-    # def show_maze(self):
-    #     pos_y = 0
-    #     for y in range(self.game.maze_height):
-    #         pos_y += self.corridor_width
-    #         pos_x = 0
-    #         for x in range(self.game.maze_width):
-    #             pos_x += self.corridor_width
-    #             if self.game.maze[y][x] == 15:
-    #                 pos_x += self.wall_width
-    #                 self.show(self.images["block_42_img"], pos_x, pos_y + self.wall_width)
-    #                 continue
-
-    #             if not self.game.maze[y][x] & 8:
-    #                 # print(x, y, "don't has left wall")
-    #                 self.show(self.images["emptiness"], pos_x, pos_y + self.wall_width)
-    #             pos_x += self.wall_width
-    #             if not self.game.maze[y][x] & 1:
-    #                 # print(x, y, "don't has top wall")
-    #                 self.show(self.images["emptiness"], pos_x, pos_y)
-
-    #             self.show(self.images["emptiness"], pos_x, pos_y + self.wall_width)
-
-    #             if self.game.pacgums[y][x] == 1:
-    #                 self.show_pacgum(x, y, "small")
-    #             elif self.game.pacgums[y][x] == 2:
-    #                 self.show_pacgum(x, y, "big")
-
-    #         pos_y += self.wall_width
-
     def show_text(self, text: str, x: int, y: int, align: str = "left", bitmap: str | None = None) -> None:
         if align == "center":
             max_height = 0

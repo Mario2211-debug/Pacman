@@ -28,8 +28,6 @@ class Game:
         self.config: Config = config
 
         self.stats: Stats = Stats(self)
-        self.stats.level = 1
-        self.stats.points = 0
 
         self.pacman: PacMan = PacMan()
         self.pacman.game = self

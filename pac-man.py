@@ -1,5 +1,4 @@
 import sys
-from enum import Enum
 # import traceback
 
 from src.game import Game
@@ -16,7 +15,6 @@ if __name__ == "__main__":
     cfg = Config.model_validate(config_json)
 
     game = Game(cfg)
-    # game.config = cfg
 
     try:
         display = Display()
@@ -29,8 +27,6 @@ if __name__ == "__main__":
 
     try:
         display.load_all_images()
-        display.create_rectangle("block_42_img", display.corridor_width, display.corridor_width, 0xAA000066)
-        # display.create_rectangle("pacman_mask", display.images["pacman"].width, display.images["pacman"].height, 0xFF000000)
     except Exception as e:
         print(e)
         exit(1)
@@ -38,9 +34,9 @@ if __name__ == "__main__":
 
     try:
         ghosts = [Ghost("ghost_red"),
-                Ghost("ghost_blue"),
-                Ghost("ghost_orange"),
-                Ghost("ghost_pink")]
+                  Ghost("ghost_blue"),
+                  Ghost("ghost_orange"),
+                  Ghost("ghost_pink")]
         ghosts[1].set_behavior_default(GhostBehavior.CORNERS)
         ghosts[2].set_behavior_default(GhostBehavior.RANDOM)
         game.ghosts = ghosts

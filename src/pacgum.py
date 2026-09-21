@@ -1,12 +1,12 @@
 import random
-# import time
+
 
 def pacgums_generate(maze: list[list[int]], number: int) -> list[list[int]]:
     maze_width = len(maze[0])
     maze_height = len(maze)
     pacgums = [[0] * maze_width for _ in range(maze_height)]
 
-    pacgums_max = min(number, sum(1 for row in maze for x in row if x != 15) - 4)
+    pacgums_max = min(number, sum(1 for row in maze for x in row if x != 15)-4)
 
     pacgums[0][0] = 2
     pacgums[maze_height - 1][0] = 2

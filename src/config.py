@@ -28,23 +28,27 @@ CONFIG_DEFAULTS = {
         ]
     }
 
+
 def open_config_file(filename: str) -> Any:
     try:
         with open(filename, "r") as f:
-            config_content = "".join(line for line in f.readlines() if not line.lstrip().startswith(('#', '//')))
+            config_content = "".join(line for line in f.readlines()
+                                     if not line.lstrip().startswith(('#',
+                                                                      '//')))
             return json.loads(config_content)
-    except FileNotFoundError as err:
+    except FileNotFoundError:
         print("\033[91mConfig file not found.")
         print("Default config loaded.\033[0m")
         return CONFIG_DEFAULTS
-    except PermissionError as err:
+    except PermissionError:
         print("\033[91mConfig file can't be read.")
         print("Default config loaded.\033[0m")
         return CONFIG_DEFAULTS
-    except Exception as err:
+    except Exception:
         print("\033[91mConfig file is invalid.")
         print("Default config loaded.\033[0m")
         return CONFIG_DEFAULTS
+
 
 def validate_config_fields(value: Any, handler, info: ValidationInfo) -> Any:
     try:
@@ -92,21 +96,22 @@ class Config(BaseModel):
                     Field(ge=0, default=None, validate_default=True),
                     WrapValidator(validate_config_fields)]
     level_max_time: Annotated[int,
-                              Field(ge=10, le=999999999999999, default=None, validate_default=True),
+                              Field(ge=10, le=999999999999999,
+                                    default=None, validate_default=True),
                               WrapValidator(validate_config_fields)]
 
     @model_validator(mode='after')
     def check_level_list(self) -> "Config":
 
         if not self.highscore_filename.lower().endswith(".json"):
-            print(f'\033[91mInvalid value for "highscore_filename".')
-            print(f'Using default: "highscore.json"\033[0m')
+            print('\033[91mInvalid value for "highscore_filename".\n'
+                  'Using default: "highscore.json"\033[0m')
             self.highscore_filename = CONFIG_DEFAULTS.get("highscore_filename")
 
         i = 0
         while i < len(self.level):
             if (self.level[i].get("width") is None
-                and self.level[i].get("height") is None):
+               and self.level[i].get("height") is None):
                 self.level.pop(i)
                 continue
 
@@ -128,11 +133,11 @@ class Config(BaseModel):
                 print(f'Using default: {CONFIG_DEFAULT_HEIGHT}.\033[0m')
                 self.level[i]["height"] = CONFIG_DEFAULT_HEIGHT
             elif self.level[i].get("height") < 10:
-                print(f'\033[91mValue "height" for level {i + 1} is too small.')
+                print(f'\033[91mValue "height" for level {i+1} is too small.')
                 print(f'Using default: {CONFIG_DEFAULT_HEIGHT}.\033[0m')
                 self.level[i]["height"] = CONFIG_DEFAULT_HEIGHT
             elif self.level[i].get("height") > 20:
-                print(f'\033[91mValue "height" for level {i + 1} is too big.')
+                print(f'\033[91mValue "height" for level {i+1} is too big.')
                 print(f'Using default: {CONFIG_DEFAULT_HEIGHT}.\033[0m')
                 self.level[i]["height"] = CONFIG_DEFAULT_HEIGHT
 
@@ -142,6 +147,7 @@ class Config(BaseModel):
             print('\033[91mNumber of levels must be at least 10.')
             print(f'{10 - len(self.level)} added.\033[0m')
             for i in range(10 - len(self.level)):
-                self.level.append({"width": CONFIG_DEFAULT_WIDTH, "height": 10})
+                self.level.append({"width": CONFIG_DEFAULT_WIDTH,
+                                   "height": CONFIG_DEFAULT_HEIGHT})
 
         return self
