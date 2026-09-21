@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .game import Game
 
-REBORN_DELAY = 1
+REBORN_DELAY = 5
 SPEED_BASE = 2
 SPEED_DEATH = 20
 

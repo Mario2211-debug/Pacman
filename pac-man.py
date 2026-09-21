@@ -77,6 +77,7 @@ if __name__ == "__main__":
 
     display.mlx.mlx_hook(display.win, 33, 0, game.exit, display)
     display.mlx.mlx_do_key_autorepeatoff(display.mlx_ptr)
+    display.mlx.mlx_mouse_hide(display.mlx_ptr)
     game.create_save_score_template()
     game.menu()
     # game.victory()
