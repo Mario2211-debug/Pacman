@@ -271,7 +271,8 @@ class Display:
                 self.images[bitmap].data[pos_new:pos_new + 4] = self.images[source].data[pos:pos + 4]
                 if self.game.pacman.status == PacManStatus.INVISIBLE and self.images[source].type == ImgType.PACMAN:
                     # print("Invisible pacman")
-                    self.images[bitmap].data[pos_new + 3] = 16
+                    self.images[bitmap].data[pos_new + 3] = 12
+                    self.images[bitmap].data[pos_new] = 225
 
     def create_maze_bitmap(self):
         self.create_bitmap("maze_screen", self.screen_width, self.screen_height)

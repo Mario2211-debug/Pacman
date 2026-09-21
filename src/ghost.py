@@ -213,12 +213,12 @@ class Ghost:
         # self.target = self.get_random_corner_far_from_pacman()
         self.set_image("right")
         self.time_reborn = int(time.perf_counter()) + REBORN_DELAY
-        print(self.name, "Death in position", self.x, self.y)
+        # print(self.name, "Death in position", self.x, self.y)
 
     def reborn(self) -> None:
         if time.perf_counter() < self.time_reborn:
             return
-        print(self.name, "Reborn in position", self.x, self.y)
+        # print(self.name, "Reborn in position", self.x, self.y)
         self.speed_reset()
         self.status = GhostStatus.ACTIVE
         if self.game.pacman.status != PacManStatus.INVISIBLE:
