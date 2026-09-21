@@ -72,7 +72,7 @@ class Game:
         self.display.mlx.mlx_loop_exit(self.display.mlx_ptr)
         # exit()
 
-    # TIME IS OUT SCREEN
+    # TIME OUT SCREEN
 
     def time_out_handle_key_press(self, key, current_hover):
         if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
@@ -83,9 +83,9 @@ class Game:
         self.display.clear_window()
         self.status = GameStatus.GAME_OVER
         self.display.show(self.display.images["big_background"], 0, 0)
-        self.display.show(self.display.images["game_over"],
+        self.display.show(self.display.images["time_out"],
                           self.display.screen_width // 2
-                          - self.display.images["game_over"].width // 2,
+                          - self.display.images["time_out"].width // 2,
                           350)
         self.display.show_text("Time is out", 960, 150, "center")
         self.display.show_button("Main menu", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
@@ -110,15 +110,15 @@ class Game:
                           - self.display.images["game_over"].width // 2,
                           150)
 
-        if self.stats.stats["score"] != 0:
-            self.display.show_text("Your score: " + str(self.stats.stats["score"]) + "\nEnter your name:", 500, 500)
-            self.show_score_input()
-            self.show_score_menu()
-            self.display.mlx.mlx_hook(self.display.win, 2, 1, self.score_menu_handle_key_press, self.menu_current)
-        else:
-            self.display.show_text("Your score: 0", 960, 550, "center")
-            self.display.show_button("Main menu", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
-            self.display.mlx.mlx_hook(self.display.win, 2, 1, self.no_score_menu_handle_key_press, self.menu_current)
+        # if self.stats.stats["score"] != 0:
+        #     self.display.show_text("Your score: " + str(self.stats.stats["score"]) + "\nEnter your name:", 500, 500)
+        #     self.show_score_input()
+        #     self.show_score_menu()
+        #     self.display.mlx.mlx_hook(self.display.win, 2, 1, self.score_menu_handle_key_press, self.menu_current)
+        # else:
+        self.display.show_text("Your score: 0", 960, 550, "center")
+        self.display.show_button("Main menu", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
+        self.display.mlx.mlx_hook(self.display.win, 2, 1, self.no_score_menu_handle_key_press, self.menu_current)
 
         # self.display.show_text("Game Over", 960, 500, "center")
         # self.display.show_button("Main menu", 960 - self.display.images["button_hover"].width // 2, 700, "hover")
@@ -210,7 +210,7 @@ class Game:
 
 
 
-    # LEVEL FINISHED SCREEN
+    # LEVEL COMPLETED SCREEN
 
     def level_completed_handle_key_press(self, key, current_hover):
         if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
@@ -228,9 +228,9 @@ class Game:
         #                   - self.display.images["logo_big"].width // 2,
         #                   50)
 
-        self.display.show(self.display.images["victory"],
+        self.display.show(self.display.images["level_complete"],
                           self.display.screen_width // 2
-                          - self.display.images["victory"].width // 2,
+                          - self.display.images["level_complete"].width // 2,
                           350)
         # self.display.show_text("Level finished", 960, 500, "center")
         self.display.show_button("Next level", 960 - self.display.images["button_hover"].width // 2, 700, "hover")

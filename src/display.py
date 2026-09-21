@@ -1,5 +1,6 @@
 from os import listdir
 from os.path import isfile, join
+import random
 # from time import sleep
 
 from enum import Enum
@@ -82,12 +83,17 @@ class Display:
             self.load_image("logo_small", "img/logo_400.png")
             self.load_image("logo_big", "img/logo_800.png")
             self.load_image("game_over", "img/game_over_800.png")
+            self.load_image("time_out", "img/time_out_800.png")
+            self.load_image("level_complete", "img/level_complete_1000.png")
             self.load_image("victory", "img/victory_800.png")
             self.load_image("background1", "img/walls_128.png")
             self.load_image("background2", "img/walls_256.png")
             self.load_image("emptiness", "img/emptiness.png")
             self.load_image("button", "img/button.png")
             self.load_image("button_hover", "img/button_hover.png")
+
+            self.load_image("pacgum", "img/pacgum_12.png")
+            self.load_image("pacgum_big", "img/pacgum_24.png")
 
             self.create_background("background2", "big_background", self.screen_width // self.images["background2"].width + 1, self.screen_height // self.images["background2"].height + 1)
             self.create_background("background1", "background_left", 10, self.screen_height // self.images["background1"].height + 1)
@@ -125,6 +131,10 @@ class Display:
                 self.create_mask(name + "_right", name + "_right_mask")
                 self.create_mirror(name + "_right", name + "_left")
                 self.create_mask(name + "_left", name + "_left_mask")
+
+            for file in [f for f in listdir("img/plants") if isfile(join("img/plants", f)) and f.endswith(".png")]:
+                name = file.rstrip(".png")
+                self.load_image("plant_" + name, join("img/plants", file))
 
         except Exception as e:
             raise(e)
@@ -269,6 +279,7 @@ class Display:
         self.add_to_bitmap("maze_screen", "background_right", 1330, 0)
         self.show_filled_block(self.images["emptiness"], 1250, 0, 3, 30, 4, 4, "maze_screen")
         self.add_to_bitmap("maze_screen", "logo_small", 1450, 50)
+        plants: list = [name for name in self.images.keys() if name.startswith("plant_")]
         pos_y = 0
         for y in range(self.game.maze_height):
             pos_y += self.corridor_width
@@ -276,8 +287,14 @@ class Display:
             for x in range(self.game.maze_width):
                 pos_x += self.corridor_width
                 if self.game.maze[y][x] == 15:
+                    # print("Closed room")
                     pos_x += self.wall_width
-                    # self.add_to_bitmap("maze_screen", "block_42_img", pos_x, pos_y + self.wall_width)
+                    self.add_to_bitmap("maze_screen", "emptiness", pos_x, pos_y + self.wall_width)
+                    plant = random.choice(plants)
+                    plants.remove(plant)
+                    plant_x = pos_x + self.corridor_width // 2 - self.images[plant].width // 2
+                    plant_y = pos_y + self.corridor_width // 2 - self.images[plant].width // 2 + self.wall_width + 2
+                    self.add_to_bitmap("maze_screen", plant, plant_x, plant_y)
                     continue
 
                 if not self.game.maze[y][x] & 8:
@@ -311,12 +328,12 @@ class Display:
 
     def show_pacgum(self, x: int, y: int, type: str) -> None:
         pos_x = (x + 1) * (self.corridor_width + self.wall_width)
-        pos_y = y * (self.corridor_width + self.wall_width) + self.corridor_width
+        pos_y = (y + 1) * (self.corridor_width + self.wall_width)
         # pos_y = (y + 1) * (self.corridor_width) + y * self.wall_width
         if type == "small":
-            self.add_to_bitmap("maze_screen", ".", pos_x + 5, pos_y + self.wall_width + 5)
+            self.add_to_bitmap("maze_screen", "pacgum", pos_x + 13, pos_y + 13)
         elif type == "big":
-            self.add_to_bitmap("maze_screen", "+", pos_x, pos_y + self.wall_width)
+            self.add_to_bitmap("maze_screen", "pacgum_big", pos_x + 7, pos_y + 7)
 
     # def show_maze(self):
     #     pos_y = 0
