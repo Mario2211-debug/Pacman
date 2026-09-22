@@ -171,7 +171,9 @@ class Game:
             if (len(self.player_name) < 10
                 and chr(key).isalnum
                 and self.display.images.get(chr(key))
-                or (chr(key) == " " and self.player_name[-1] != " ")):
+                or (len(self.player_name) > 0 and
+                    chr(key) == " "
+                    and self.player_name[-1] != " ")):
                 self.player_name += chr(key)
                 self.show_score_input()
 
