@@ -18,8 +18,9 @@ if __name__ == "__main__":
 
     try:
         display = Display()
-    except Exception as e:
-        print(e)
+    except Exception:
+        print("\033[91mAn unexpected error occured.\033[0m")
+        # print(e)
         exit(1)
 
     game.display = display
@@ -27,8 +28,9 @@ if __name__ == "__main__":
 
     try:
         display.load_all_images()
-    except Exception as e:
-        print(e)
+    except Exception:
+        # print(e)
+        print("\033[91mAn unexpected error occured.\033[0m")
         exit(1)
         # traceback.print_exc()
 
@@ -51,6 +53,7 @@ if __name__ == "__main__":
         game.menu()
 
         display.mlx.mlx_loop(display.mlx_ptr)
-    except Exception as e:
-        print(e)
+    except Exception:
+        # print(e)
+        print("\033[91mAn unexpected error occured.\033[0m")
         exit(1)
