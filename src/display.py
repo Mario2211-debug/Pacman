@@ -1,23 +1,20 @@
 from os import listdir
 from os.path import isfile, join
-import random
-# from time import sleep
-
 from enum import Enum
-
-from mlx import Mlx
+import random
 from typing import TYPE_CHECKING
 
+from mlx import Mlx
 from .types import PacManStatus
-
 if TYPE_CHECKING:
     from .game import Game
 
 
 class ImgType(Enum):
-  REGULAR = 0
-  MASK = 1
-  PACMAN = 2
+    REGULAR = 0
+    MASK = 1
+    PACMAN = 2
+
 
 class ImgData:
     """Structure for image data"""
@@ -32,23 +29,27 @@ class ImgData:
         self.name = None
         self.type = ImgType.REGULAR
 
+
 class Display:
     """Structure for main vars"""
     def __init__(self):
         try:
             self.mlx = Mlx()
-        except Exception as e:
+        except Exception:
             raise Exception("Error: Can't initialize MLX")
         self.mlx_ptr = self.mlx.mlx_init()
         screen_size = self.mlx.mlx_get_screen_size(self.mlx_ptr)
         self.screen_width = screen_size[1]
         self.screen_height = screen_size[2]
         try:
-            self.win = self.mlx.mlx_new_window(self.mlx_ptr, self.screen_width, self.screen_height, "Pac-Man")
+            self.win = self.mlx.mlx_new_window(self.mlx_ptr,
+                                               self.screen_width,
+                                               self.screen_height,
+                                               "Pac-Man")
             if not self.win:
                 raise Exception("Can't create main window")
-        except Exception as e:
-            raise("Can't create main window")
+        except Exception:
+            raise ("Can't create main window")
 
         self.game: Game
         self.images: dict[str, ImgData] = {}
@@ -61,7 +62,6 @@ class Display:
         self.maze_y = 0
 
     def show(self, img: ImgData, x: int, y: int) -> None:
-        # print("SHOW ", img.name)
         self.mlx.mlx_put_image_to_window(self.mlx_ptr, self.win, img.img, x, y)
 
     def clear_window(self) -> None:
@@ -69,9 +69,13 @@ class Display:
 
     def load_all_images(self) -> None:
         try:
-            for file in [f for f in listdir("img/chars/letters") if isfile(join("img/chars/letters", f)) and f.endswith(".png")]:
+            for file in [f for f in listdir("img/chars/letters")
+                         if (isfile(join("img/chars/letters", f))
+                             and f.endswith(".png"))]:
                 self.load_image(file[0], join("img/chars/letters", file))
-            for file in [f for f in listdir("img/chars/numbers") if isfile(join("img/chars/numbers", f)) and f.endswith(".png")]:
+            for file in [f for f in listdir("img/chars/numbers")
+                         if (isfile(join("img/chars/numbers", f))
+                             and f.endswith(".png"))]:
                 self.load_image(file[0], join("img/chars/numbers", file))
 
             self.load_image(":", "img/chars/colon.png")
@@ -98,49 +102,60 @@ class Display:
             self.load_image("pacgum", "img/pacgum_12.png")
             self.load_image("pacgum_big", "img/pacgum_24.png")
 
-            self.create_background("background2", "big_background", self.screen_width // self.images["background2"].width + 1, self.screen_height // self.images["background2"].height + 1)
-            self.create_background("background1", "background_left", 10, self.screen_height // self.images["background1"].height + 1)
-            self.create_background("background2", "background_right", 3, self.screen_height // self.images["background2"].height + 1)
-            # self.create_background("emptiness", "stat_window", 13, 2)
+            self.create_background("background2", "big_background",
+                                   self.screen_width //
+                                   self.images["background2"].width + 1,
+                                   self.screen_height //
+                                   self.images["background2"].height + 1)
+            self.create_background("background1", "background_left",
+                                   10, self.screen_height //
+                                   self.images["background1"].height + 1)
+            self.create_background("background2", "background_right",
+                                   3, self.screen_height //
+                                   self.images["background2"].height + 1)
 
-
-            for file in [f for f in listdir("img/pacman") if isfile(join("img/pacman", f)) and f.endswith(".png")]:
+            for file in [f for f in listdir("img/pacman")
+                         if (isfile(join("img/pacman", f))
+                             and f.endswith(".png"))]:
                 name = file.rstrip(".png")
-                self.load_image("pacman_" + name + "_right", join("img/pacman", file))
-                self.create_mask("pacman_" + name + "_right", "pacman_" + name + "_right_mask")
-                self.create_mirror("pacman_" + name + "_right", "pacman_" + name + "_left")
-                self.create_mask("pacman_" + name + "_left", "pacman_" + name + "_left_mask")
-                self.create_rotate90("pacman_" + name + "_right", "pacman_" + name + "_bottom")
-                self.create_mask("pacman_" + name + "_bottom", "pacman_" + name + "_bottom_mask")
-                self.create_rotate90("pacman_" + name + "_left", "pacman_" + name + "_top")
-                self.create_mask("pacman_" + name + "_top", "pacman_" + name + "_top_mask")
+                self.load_image("pacman_" + name + "_right",
+                                join("img/pacman", file))
+                self.create_mask("pacman_" + name + "_right",
+                                 "pacman_" + name + "_right_mask")
+                self.create_mirror("pacman_" + name + "_right",
+                                   "pacman_" + name + "_left")
+                self.create_mask("pacman_" + name + "_left",
+                                 "pacman_" + name + "_left_mask")
+                self.create_rotate90("pacman_" + name + "_right",
+                                     "pacman_" + name + "_bottom")
+                self.create_mask("pacman_" + name + "_bottom",
+                                 "pacman_" + name + "_bottom_mask")
+                self.create_rotate90("pacman_" + name + "_left",
+                                     "pacman_" + name + "_top")
+                self.create_mask("pacman_" + name + "_top",
+                                 "pacman_" + name + "_top_mask")
                 self.images["pacman_" + name + "_right"].type = ImgType.PACMAN
                 self.images["pacman_" + name + "_left"].type = ImgType.PACMAN
                 self.images["pacman_" + name + "_bottom"].type = ImgType.PACMAN
                 self.images["pacman_" + name + "_top"].type = ImgType.PACMAN
 
-            # self.load_image("pacman_right", "img/pacman/3.png")
-            # self.create_mask("pacman_right", "pacman_right_mask")
-            # self.create_mirror("pacman_right", "pacman_left")
-            # self.create_mask("pacman_left", "pacman_left_mask")
-            # self.create_rotate90("pacman_right", "pacman_bottom")
-            # self.create_mask("pacman_bottom", "pacman_bottom_mask")
-            # self.create_rotate90("pacman_left", "pacman_top")
-            # self.create_mask("pacman_top", "pacman_top_mask")
-
-            for file in [f for f in listdir("img/ghosts") if isfile(join("img/ghosts", f)) and f.endswith(".png")]:
+            for file in [f for f in listdir("img/ghosts")
+                         if (isfile(join("img/ghosts", f))
+                             and f.endswith(".png"))]:
                 name = file.rstrip(".png")
                 self.load_image(name + "_right", join("img/ghosts", file))
                 self.create_mask(name + "_right", name + "_right_mask")
                 self.create_mirror(name + "_right", name + "_left")
                 self.create_mask(name + "_left", name + "_left_mask")
 
-            for file in [f for f in listdir("img/plants") if isfile(join("img/plants", f)) and f.endswith(".png")]:
+            for file in [f for f in listdir("img/plants")
+                         if (isfile(join("img/plants", f))
+                             and f.endswith(".png"))]:
                 name = file.rstrip(".png")
                 self.load_image("plant_" + name, join("img/plants", file))
 
         except Exception as e:
-            raise(e)
+            raise (e)
 
     def load_image(self, name: str, img: str) -> None:
         new_img = ImgData()
@@ -159,7 +174,8 @@ class Display:
         new_img = ImgData()
         new_img.width = self.images[source].width
         new_img.height = self.images[source].height
-        new_img.img = self.mlx.mlx_new_image(self.mlx_ptr, new_img.width, new_img.height)
+        new_img.img = self.mlx.mlx_new_image(self.mlx_ptr,
+                                             new_img.width, new_img.height)
         if not new_img.img:
             raise Exception(f"Can't create image {source}")
         new_img.data, new_img.bpp, new_img.sl, new_img.iformat = \
@@ -177,7 +193,8 @@ class Display:
         new_img = ImgData()
         new_img.width = self.images[source].width
         new_img.height = self.images[source].height
-        new_img.img = self.mlx.mlx_new_image(self.mlx_ptr, new_img.width, new_img.height)
+        new_img.img = self.mlx.mlx_new_image(self.mlx_ptr,
+                                             new_img.width, new_img.height)
         if not new_img.img:
             raise Exception(f"Can't create image {source}")
         new_img.data, new_img.bpp, new_img.sl, new_img.iformat = \
@@ -188,22 +205,17 @@ class Display:
                 pos = x + (y * new_img.sl)
                 pos_new = new_img.sl - x - 4 + y * new_img.sl
                 # print(pos, "=>", pos_new)
-                new_img.data[pos_new:pos_new + 4] = self.images[source].data[pos:pos + 4]
+                new_img.data[pos_new:pos_new + 4] = \
+                    self.images[source].data[pos:pos + 4]
         new_img.name = name_new
         self.images.update({name_new: new_img})
-
-        # j = self.images[source].sl * self.images[source].height
-        # for i in range(0, self.images[source].sl * self.images[source].height, 4):
-        #     j -= 4
-        #     new_img.data[j:j + 4] = self.images[source].data[i:i + 4]
-        # new_img.name = name_new
-        # self.images.update({name_new: new_img})
 
     def create_rotate90(self, source: str, name_new: str) -> ImgData:
         new_img = ImgData()
         new_img.width = self.images[source].height
         new_img.height = self.images[source].width
-        new_img.img = self.mlx.mlx_new_image(self.mlx_ptr, new_img.width, new_img.height)
+        new_img.img = self.mlx.mlx_new_image(self.mlx_ptr,
+                                             new_img.width, new_img.height)
         if not new_img.img:
             raise Exception(f"Can't create image {source}")
         new_img.data, new_img.bpp, new_img.sl, new_img.iformat = \
@@ -211,13 +223,15 @@ class Display:
         for y in range(0, self.images[source].height):
             for x in range(0, self.images[source].sl, 4):
                 pos = x + (y * new_img.sl)
-                pos_new = (self.images[source].height - y - 1) * 4 + x * self.images[source].height
-                # print(pos, "=>", pos_new)
-                new_img.data[pos_new:pos_new + 4] = self.images[source].data[pos:pos + 4]
+                pos_new = (self.images[source].height - y - 1) * 4 + \
+                    x * self.images[source].height
+                new_img.data[pos_new:pos_new + 4] = \
+                    self.images[source].data[pos:pos + 4]
         new_img.name = name_new
         self.images.update({name_new: new_img})
 
-    def create_rectangle(self, name_new: str, width: int, height: int, color) -> None:
+    def create_rectangle(self, name_new: str,
+                         width: int, height: int, color) -> None:
         new_img = ImgData()
         new_img.width = width
         new_img.height = height
@@ -233,33 +247,38 @@ class Display:
         new_img.name = name_new
         self.images.update({name_new: new_img})
 
-    def create_background(self, source: str, name_new: str, num_x: int, num_y: int) -> None:
+    def create_background(self, source: str, name_new: str,
+                          num_x: int, num_y: int) -> None:
         new_img = ImgData()
         new_img.width = self.images[source].height * num_x
         new_img.height = self.images[source].width * num_y
-        new_img.img = self.mlx.mlx_new_image(self.mlx_ptr, new_img.width, new_img.height)
+        new_img.img = self.mlx.mlx_new_image(self.mlx_ptr,
+                                             new_img.width, new_img.height)
         if not new_img.img:
             raise Exception(f"Can't create image {name_new}")
         new_img.data, new_img.bpp, new_img.sl, new_img.iformat = \
             self.mlx.mlx_get_data_addr(new_img.img)
-        # for i in range(0, new_img.sl * new_img.height, 4):
-        #     new_img.data[i:i + 4] = (0x00000000).to_bytes(4, 'little')
         for pos_x in range(num_x):
             for pos_y in range(num_y):
                 for y in range(0, self.images[source].height):
                     for x in range(0, self.images[source].sl, 4):
                         pos = x + (y * self.images[source].sl)
-                        pos_new = pos_x * self.images[source].sl + x +  ((pos_y * self.images[source].height + y) * new_img.sl)
-                        new_img.data[pos_new:pos_new + 4] = self.images[source].data[pos:pos + 4]
+                        pos_new = pos_x * self.images[source].sl + x + \
+                            ((pos_y * self.images[source].height + y) *
+                             new_img.sl)
+                        new_img.data[pos_new:pos_new + 4] = \
+                            self.images[source].data[pos:pos + 4]
         new_img.name = name_new
         self.images.update({name_new: new_img})
 
     def create_bitmap(self, name_new: str, width, height) -> None:
         if self.images.get(name_new):
-            self.mlx.mlx_destroy_image(self.mlx_ptr, self.images.get(name_new).img)
+            self.mlx.mlx_destroy_image(self.mlx_ptr,
+                                       self.images.get(name_new).img)
         self.create_rectangle(name_new, width, height, 0xFF000000)
 
-    def add_to_bitmap(self, bitmap: str, source: str, pos_x: int, pos_y: int) -> None:
+    def add_to_bitmap(self, bitmap: str, source: str,
+                      pos_x: int, pos_y: int) -> None:
         for y in range(0, self.images[source].height):
             for x in range(0, self.images[source].sl, 4):
                 pos = x + (y * self.images[source].sl)
@@ -267,23 +286,28 @@ class Display:
                     continue
                 if pos_x * 4 + x >= self.images[bitmap].sl:
                     continue
-                pos_new = pos_x * 4 + x + ((pos_y + y) * self.images[bitmap].sl)
-                if pos_new >= self.images[bitmap].sl * self.images[bitmap].height:
+                pos_new = pos_x*4 + x + ((pos_y + y) * self.images[bitmap].sl)
+                if pos_new >= self.images[bitmap].sl * \
+                        self.images[bitmap].height:
                     return
-                # print(pos, "=>", pos_new)
-                self.images[bitmap].data[pos_new:pos_new + 4] = self.images[source].data[pos:pos + 4]
-                if self.game.pacman.status == PacManStatus.INVISIBLE and self.images[source].type == ImgType.PACMAN:
+                self.images[bitmap].data[pos_new:pos_new + 4] = \
+                    self.images[source].data[pos:pos + 4]
+                if (self.game.pacman.status == PacManStatus.INVISIBLE
+                        and self.images[source].type == ImgType.PACMAN):
                     # print("Invisible pacman")
                     self.images[bitmap].data[pos_new + 3] = 12
                     self.images[bitmap].data[pos_new] = 225
 
     def create_maze_bitmap(self):
-        self.create_bitmap("maze_screen", self.screen_width, self.screen_height)
+        self.create_bitmap("maze_screen",
+                           self.screen_width, self.screen_height)
         self.add_to_bitmap("maze_screen", "background_left", 0, 0)
         self.add_to_bitmap("maze_screen", "background_right", 1330, 0)
-        self.show_filled_block(self.images["emptiness"], 1250, 0, 3, 30, 4, 4, "maze_screen")
+        self.show_filled_block(self.images["emptiness"],
+                               1250, 0, 3, 30, 4, 4, "maze_screen")
         self.add_to_bitmap("maze_screen", "logo_small", 1450, 50)
-        plants: list = [name for name in self.images.keys() if name.startswith("plant_")]
+        plants: list = [name for name in self.images.keys()
+                        if name.startswith("plant_")]
         self.maze_x = 575 - self.game.maze_width * self.cell_width // 2
         self.maze_y = 465 - self.game.maze_height * self.cell_width // 2
         pos_y = self.maze_y
@@ -295,23 +319,30 @@ class Display:
                 if self.game.maze[y][x] == 15:
                     # print("Closed room")
                     pos_x += self.wall_width
-                    self.add_to_bitmap("maze_screen", "emptiness", pos_x, pos_y + self.wall_width)
+                    self.add_to_bitmap("maze_screen", "emptiness",
+                                       pos_x, pos_y + self.wall_width)
                     plant = random.choice(plants)
                     plants.remove(plant)
-                    plant_x = pos_x + self.corridor_width // 2 - self.images[plant].width // 2
-                    plant_y = pos_y + self.corridor_width // 2 - self.images[plant].width // 2 + self.wall_width + 2
-                    self.add_to_bitmap("maze_screen", plant, plant_x, plant_y)
+                    plant_x = pos_x + self.corridor_width // 2 - \
+                        self.images[plant].width // 2
+                    plant_y = pos_y + self.corridor_width // 2 - \
+                        self.images[plant].width // 2 + self.wall_width + 2
+                    self.add_to_bitmap("maze_screen", plant,
+                                       plant_x, plant_y)
                     continue
 
                 if not self.game.maze[y][x] & 8:
                     # print(x, y, "don't has left wall")
-                    self.add_to_bitmap("maze_screen", "emptiness", pos_x, pos_y + self.wall_width)
+                    self.add_to_bitmap("maze_screen", "emptiness",
+                                       pos_x, pos_y + self.wall_width)
                 pos_x += self.wall_width
                 if not self.game.maze[y][x] & 1:
                     # print(x, y, "don't has top wall")
-                    self.add_to_bitmap("maze_screen", "emptiness", pos_x, pos_y)
+                    self.add_to_bitmap("maze_screen", "emptiness",
+                                       pos_x, pos_y)
 
-                self.add_to_bitmap("maze_screen", "emptiness", pos_x, pos_y + self.wall_width)
+                self.add_to_bitmap("maze_screen", "emptiness",
+                                   pos_x, pos_y + self.wall_width)
 
                 if self.game.pacgums[y][x] == 1:
                     self.show_pacgum(x, y, "small")
@@ -320,8 +351,10 @@ class Display:
 
             pos_y += self.wall_width
 
-
-    def show_filled_block(self, img: ImgData, x: int, y: int, num_x: int, num_y: int, shift_x: int = 0, shift_y: int = 0, bitmap: str | None = None) -> None:
+    def show_filled_block(self, img: ImgData, x: int, y: int,
+                          num_x: int, num_y: int,
+                          shift_x: int = 0, shift_y: int = 0,
+                          bitmap: str | None = None) -> None:
         img_width = img.width - shift_x
         img_height = img.height - shift_x
         for i in range(num_x):
@@ -330,21 +363,25 @@ class Display:
                 if not bitmap:
                     self.show(img, pos_x, y + img_height * j)
                 else:
-                    self.add_to_bitmap(bitmap, img.name, pos_x, y + img_height * j)
+                    self.add_to_bitmap(bitmap, img.name,
+                                       pos_x, y + img_height * j)
 
     def show_pacgum(self, x: int, y: int, type: str) -> None:
         pos_x = (x + 1) * (self.corridor_width + self.wall_width) + self.maze_x
         pos_y = (y + 1) * (self.corridor_width + self.wall_width) + self.maze_y
         # pos_y = (y + 1) * (self.corridor_width) + y * self.wall_width
         if type == "small":
-            self.add_to_bitmap("maze_screen", "pacgum", pos_x + 13, pos_y + 13)
+            self.add_to_bitmap("maze_screen", "pacgum",
+                               pos_x + 13, pos_y + 13)
         elif type == "big":
-            self.add_to_bitmap("maze_screen", "pacgum_big", pos_x + 7, pos_y + 7)
+            self.add_to_bitmap("maze_screen", "pacgum_big",
+                               pos_x + 7, pos_y + 7)
 
-    def show_text(self, text: str, x: int, y: int, align: str = "left", bitmap: str | None = None) -> None:
+    def show_text(self, text: str, x: int, y: int,
+                  align: str = "left", bitmap: str | None = None) -> None:
         if align == "center":
             max_height = 0
-            text_width =  0
+            text_width = 0
             for letter in text.lower():
                 if letter == " ":
                     text_width += self.images.get(".").width
@@ -370,32 +407,36 @@ class Display:
                     pos_x_current = pos_x
                     pos_y_current = pos_y
                     if letter == "." or letter == ",":
-                        pos_y_current += int(self.images.get("a").height - self.images.get(".").height)
-                    elif letter == "-" or letter == "+" or letter == "=" or letter == ":":
-                        pos_y_current += int(self.images.get("a").height // 2 - self.images.get(letter).height // 2)
+                        pos_y_current += int(self.images.get("a").height -
+                                             self.images.get(".").height)
+                    elif (letter == "-" or letter == "+"
+                          or letter == "=" or letter == ":"):
+                        pos_y_current += int(self.images.get("a").height//2 -
+                                             self.images.get(letter).height//2)
                     if not bitmap:
                         self.show(letter_img, pos_x_current, pos_y_current)
                     else:
-                        self.add_to_bitmap(bitmap, letter_img.name, pos_x_current, pos_y_current)
+                        self.add_to_bitmap(bitmap, letter_img.name,
+                                           pos_x_current, pos_y_current)
                     pos_x += letter_img.width
 
-
-    def show_button(self, text: str, x: int, y: int, type: str = "normal", bitmap: str | None = None):
+    def show_button(self, text: str, x: int, y: int,
+                    type: str = "normal", bitmap: str | None = None):
         if not bitmap:
             if type == "hover":
                 self.show(self.images["button_hover"], x, y)
             else:
                 self.show(self.images["button"], x, y)
             self.show_text(text,
-                        x + self.images["button"].width // 2,
-                        y + self.images["button"].height // 2,
-                        "center")
+                           x + self.images["button"].width // 2,
+                           y + self.images["button"].height // 2,
+                           "center")
         else:
             if type == "hover":
                 self.add_to_bitmap(bitmap, "button_hover", x, y)
             else:
                 self.add_to_bitmap(bitmap, "button", x, y)
             self.show_text(text,
-                        x + self.images["button"].width // 2,
-                        y + self.images["button"].height // 2,
-                        "center", bitmap)
+                           x + self.images["button"].width // 2,
+                           y + self.images["button"].height // 2,
+                           "center", bitmap)
