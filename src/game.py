@@ -371,7 +371,7 @@ class Game:
                                     (0, 0),
                                     (maze_width - 1, maze_height - 1),
                                     self.config.seed + level_num)
-        except Exception as err:
+        except Exception:
             self.status = GameStatus.ERROR
             return
 
@@ -405,7 +405,6 @@ class Game:
         self.display.create_maze_bitmap()
         # print("LEVEL CREATED")
 
-
     # GAME SCREEN
 
     def death(self) -> None:
@@ -422,30 +421,22 @@ class Game:
     def edible_mode(self, on: bool = True) -> None:
         if on:
             self.edible_time += EDIBLE_TIME
-            for ghost in self.ghosts:
-                if ghost.status != GhostStatus.DEATH:
+        pos_x_base = self.display.cell_width + 5 + self.display.maze_x
+        pos_y_base = self.display.cell_width + 5 + self.display.maze_x
+        for ghost in self.ghosts:
+            if ghost.status != GhostStatus.DEATH:
+                if on:
                     ghost.status = GhostStatus.EDIBLE
                     ghost.set_behavior(GhostBehavior.SCARED)
-                # if not ghost.freeze:
-                #     ghost.target = ghost.get_random_cell_far_from_pacman()
-
-                pos_x = self.display.cell_width + 5 + ghost.x_px + self.display.maze_x
-                pos_y = self.display.cell_width + 5 + ghost.y_px + self.display.maze_y
-                self.display.add_to_bitmap("maze_screen", ghost.mask.name, pos_x, pos_y)
-                ghost.set_image("right")
-                # print(ghost.name, "Scared in position", ghost.x, ghost.y)
-        else:
-            for ghost in self.ghosts:
-                if ghost.status != GhostStatus.DEATH:
+                else:
                     ghost.status = GhostStatus.ACTIVE
                     ghost.set_behavior(ghost.behavior_default)
-                # if not ghost.freeze:
-                #     ghost.target = ghost.get_random_cell_far_from_pacman()
-                pos_x = self.display.cell_width + 5 + ghost.x_px + self.display.maze_x
-                pos_y = self.display.cell_width + 5 + ghost.y_px + self.display.maze_y
-                self.display.add_to_bitmap("maze_screen", ghost.mask.name, pos_x, pos_y)
-                ghost.set_image("right")
 
+            pos_x = pos_x_base + ghost.x_px
+            pos_y = pos_y_base + ghost.y_px
+            self.display.add_to_bitmap("maze_screen", ghost.mask.name,
+                                       pos_x, pos_y)
+            ghost.set_image("right")
 
     def eat_ghost(self, ghost: Ghost) -> None:
         if ghost.status != GhostStatus.EDIBLE:
@@ -504,14 +495,14 @@ class Game:
             self.pacman.direction_next = Direction.LEFT
 
         if not self.pacman.direction:
-            self.pacman.direction = pacman.direction_next
+            self.pacman.direction = self.pacman.direction_next
 
     def move_object(self, obj: PacMan | Ghost):
         if self.status != GameStatus.RUN:
             return
         shift_x = self.display.cell_width + 5 + self.display.maze_x
         shift_y = self.display.cell_width + 5 + self.display.maze_y
-        # Clear old
+        # Clear old (show mask)
         pos_x = shift_x + obj.x_px
         pos_y = shift_y + obj.y_px
         # self.display.show(obj.mask, pos_x, pos_y)
@@ -530,22 +521,22 @@ class Game:
             if obj.x_px <= obj.next_x * self.display.cell_width:
                 obj.move()
         elif obj.direction == Direction.TOP:
-            if type(obj) == PacMan:
+            if isinstance(obj, PacMan):
                 obj.set_image("top")
             if obj.y_px > obj.next_y * self.display.cell_width:
                 obj.y_px -= obj.speed
             if obj.y_px <= obj.next_y * self.display.cell_width:
                 obj.move()
         elif obj.direction == Direction.BOTTOM:
-            if type(obj) == PacMan:
+            if isinstance(obj, PacMan):
                 obj.set_image("bottom")
             if obj.y_px < obj.next_y * self.display.cell_width:
                 obj.y_px += obj.speed
             if obj.y_px >= obj.next_y * self.display.cell_width:
                 obj.move()
 
-        #Show pacgum
-        if type(obj) == Ghost:
+        # Show pacgum
+        if isinstance(obj, Ghost):
             if self.pacgums[obj.y][obj.x] == 1:
                 self.display.show_pacgum(obj.x, obj.y, "small")
             elif self.pacgums[obj.y][obj.x] == 2:
@@ -554,9 +545,7 @@ class Game:
         # Show new
         pos_x = shift_x + obj.x_px
         pos_y = shift_y + obj.y_px
-        # self.display.show(obj.image, pos_x, pos_y)
         self.display.add_to_bitmap("maze_screen", obj.image.name, pos_x, pos_y)
-
 
     def playing(self, nothing):
         if self.status != GameStatus.RUN:
@@ -587,27 +576,20 @@ class Game:
             self.move_object(self.pacman)
             for ghost in self.ghosts:
                 self.move_object(ghost)
-                if (self.pacman.x_px - self.pacman.image.width // 1.5 <= ghost.x_px <= self.pacman.x_px + self.pacman.image.width // 1.5
-                    and self.pacman.y_px - self.pacman.image.height // 1.5 <= ghost.y_px <= self.pacman.y_px + self.pacman.image.height // 1.5 and ghost.status != GhostStatus.DEATH):
-                    # print(f"!!!! CATCHED BY {ghost.name} at {ghost.x}, {ghost.y}")
-                    # print("GhostStatus:", ghost.status)
-                    # print("GhostBehavior:", ghost.behavior)
+                if (ghost.status != GhostStatus.DEATH
+                   and self.pacman.x_px-ghost.image.width//1.5 <= ghost.x_px
+                   and ghost.x_px <= self.pacman.x_px+ghost.image.width//1.5
+                   and self.pacman.y_px-ghost.image.height//1.5 <= ghost.y_px
+                   and ghost.y_px <= self.pacman.y_px+ghost.image.height//1.5):
+
                     if ghost.status == GhostStatus.EDIBLE:
                         self.eat_ghost(ghost)
-                    elif ghost.behavior != GhostBehavior.TO_START and self.pacman.status != PacManStatus.INVISIBLE:
+                    elif (ghost.behavior != GhostBehavior.TO_START and
+                            self.pacman.status != PacManStatus.INVISIBLE):
                         self.death()
 
     def resume(self) -> None:
-        # self.display.clear_window()
-        # self.display.show_filled_block(self.display.images["background1"], 0, 0, 10, self.display.screen_height // self.display.images["background1"].height + 1)
-        # self.display.show(self.display.images["background_left"], 0, 0)
-        # self.display.show(self.display.images["background_right"], 1350, 0)
-        # self.display.show_filled_block(self.display.images["background2"], 1350, 0, 3, self.display.screen_height // self.display.images["background2"].height + 1)
-
-        # self.display.show_maze()
         self.display.show(self.display.images["maze_screen"], 0, 0)
-        # self.display.show(self.display.images["logo_small"], 1450, 50)
-
         self.stats.show_stats()
 
         self.previous = time.perf_counter()
@@ -616,9 +598,10 @@ class Game:
 
         self.status = GameStatus.RUN
 
-        self.display.mlx.mlx_hook(self.display.win, 2, 1, self.game_handle_key_press, self.pacman)
-        self.display.mlx.mlx_loop_hook(self.display.mlx_ptr, self.playing, None)
-
+        self.display.mlx.mlx_hook(self.display.win, 2, 1,
+                                  self.game_handle_key_press, self.pacman)
+        self.display.mlx.mlx_loop_hook(self.display.mlx_ptr,
+                                       self.playing, None)
 
     def next_level(self) -> None:
         print("New level")
@@ -659,9 +642,7 @@ class Game:
             ghost.reborn()
         self.resume()
 
-
-
-    #HIGHSCORES SCREEN
+    # HIGHSCORES SCREEN
 
     def highscores_over_handle_key_press(self, key, current_hover) -> None:
         # print(f"PAUSE Pressed key {key}")
@@ -673,7 +654,10 @@ class Game:
                 # print("clear highscores")
                 clear_highscores_file(self.config.highscore_filename)
                 if self.display.images.get("highscores_screen"):
-                    self.display.mlx.mlx_destroy_image(self.display.mlx_ptr, self.display.images["highscores_screen"].img)
+                    self.display.mlx.mlx_destroy_image(
+                        self.display.mlx_ptr,
+                        self.display.images["highscores_screen"].img
+                        )
                     self.display.images.pop("highscores_screen")
                 self.highscores()
                 return
