@@ -1,3 +1,6 @@
+"""Score, lives, level and time, and the HUD that shows them."""
+
+from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -5,7 +8,9 @@ if TYPE_CHECKING:
 
 
 class Stats:
+    """Game counters and their HUD windows."""
     def __init__(self, game: Game) -> None:
+        """Create the counters and one HUD window for each of them."""
         self.stats = {"level": 1,
                       "score": 110,
                       "lives": 0,
@@ -22,9 +27,11 @@ class Stats:
                         self.Window("Time", 1400, 800, "time", game)}
 
     class Window:
+        """One HUD box: a title and the value shown below it."""
         def __init__(self, text: str,
                      x: int, y: int,
                      stat: str, game: Game) -> None:
+            """Create a HUD window for `stat` at (x, y)."""
             self.text = text
             self.x = x
             self.y = y
@@ -32,12 +39,14 @@ class Stats:
             self.game: Game = game
 
         def show_window(self) -> None:
+            """Draw the title and the value."""
             self.game.display.show_text(self.text,
                                         self.x, self.y,
                                         "left", "maze_screen")
             self.update_window()
 
         def update_window(self) -> None:
+            """Redraw the value only, as pacman sprites for the lives."""
             self.game.display.show_filled_block(
                 self.game.display.images["emptiness"],
                 self.x, self.y + 50,
@@ -63,12 +72,14 @@ class Stats:
                         self.y + 70)
 
     def show_stats(self) -> None:
+        """Draw every HUD window."""
         if not self.game.display:
             return
         for window in self.windows.values():
             window.show_window()
 
     def reset_stats(self) -> None:
+        """Reset every counter for a new game."""
         self.stats["level"] = 1
         self.stats["score"] = 0
         self.reset_time()
@@ -76,17 +87,21 @@ class Stats:
         self.stats["time"] = self.game.config.level_max_time
 
     def increase_score(self, num: int = 1) -> None:
+        """Add `num` points to the score."""
         self.stats["score"] += num
         self.windows["score"].update_window()
 
     def increase_time(self, num: int = 1) -> None:
+        """Add `num` seconds to the level timer."""
         self.stats["time"] += num
         self.windows["time"].update_window()
 
     def reset_time(self, num: int = 1) -> None:
+        """Put the level timer back to its configured value."""
         self.stats["time"] = self.game.config.level_max_time
 
     def increase_lives(self, num: int = 1) -> None:
+        """Add `num` lives, capped at ten."""
         self.stats["lives"] += num
         if self.stats["lives"] > 10:
             self.stats["lives"] = 10
@@ -94,6 +109,7 @@ class Stats:
             self.windows["lives"].update_window()
 
     def increase_level(self, num: int = 1) -> None:
+        """Move the level counter forward."""
         self.stats["level"] += num
         if self.stats["level"] > 999999999999999:
             self.stats["level"] = 999999999999999

@@ -1,4 +1,4 @@
-.PHONY: all install run debug clean fclean lint lint-strict
+.PHONY: all install run debug clean fclean lint lint-strict package
 
 UV = @uv run
 UV_PYTHON = @uv run python
@@ -11,6 +11,9 @@ MYPYFLAGS = --warn-return-any --warn-unused-ignores\
 			  --check-untyped-defs
 
 all: run
+
+package:
+	$(UV) --with pyinstaller pyinstaller pac-man.spec --noconfirm
 
 run:
 	$(UV_PYTHON) $(MAIN) config.json
@@ -28,7 +31,7 @@ install:
 	uv pip install mazegenerator-2.1.0-py3-none-any.whl
 
 debug:
-	$(UV_PYTHON) pdb $(MAIN)
+	$(UV_PYTHON) -m pdb $(MAIN) config.json
 
 lint:
 	$(UV) flake8 .

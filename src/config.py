@@ -1,3 +1,5 @@
+"""Configuration file loading, validation and defaults."""
+
 import json
 from pydantic import BaseModel, Field, ValidationInfo, model_validator
 from pydantic.functional_validators import WrapValidator
@@ -30,6 +32,11 @@ CONFIG_DEFAULTS = {
 
 
 def open_config_file(filename: str) -> Any:
+    """Read a JSON config file, ignoring `#` and `//` comment lines.
+
+    Returns the default configuration when the file is missing,
+    unreadable or invalid.
+    """
     try:
         with open(filename, "r") as f:
             config_content = "".join(line for line in f.readlines()
@@ -53,6 +60,7 @@ def open_config_file(filename: str) -> Any:
 def validate_config_fields(value: Any,
                            handler: Any,
                            info: ValidationInfo) -> Any:
+    """Fall back to the default when a field is missing or invalid."""
     try:
         return handler(value)
     except ValueError:
@@ -67,6 +75,7 @@ def validate_config_fields(value: Any,
 
 
 class Config(BaseModel):
+    """Game settings read from the config file, with safe defaults."""
     highscore_filename: Annotated[str,
                                   Field(min_length=1,
                                         default=None,
@@ -107,6 +116,7 @@ class Config(BaseModel):
     @model_validator(mode='after')
     def check_level_list(self) -> "Config":
 
+        """Drop empty levels and clamp sizes that are out of range."""
         if not self.highscore_filename.lower().endswith(".json"):
             print('\033[91mInvalid value for "highscore_filename".\n'
                   'Using default: "highscore.json"\033[0m')

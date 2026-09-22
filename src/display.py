@@ -1,3 +1,5 @@
+"""MLX window, image loading and every drawing primitive."""
+
 from os import listdir
 from os.path import isfile, join
 from enum import Enum
@@ -11,6 +13,7 @@ if TYPE_CHECKING:
 
 
 class ImgType(Enum):
+    """What an image is used for: regular, mask or pacman sprite."""
     REGULAR = 0
     MASK = 1
     PACMAN = 2
@@ -19,6 +22,7 @@ class ImgType(Enum):
 class ImgData:
     """Structure for image data"""
     def __init__(self) -> None:
+        """Create an empty image holder."""
         self.img = None
         self.width = 0
         self.height = 0
@@ -33,6 +37,7 @@ class ImgData:
 class Display:
     """Structure for main vars"""
     def __init__(self) -> None:
+        """Open the MLX window and prepare the image table."""
         try:
             self.mlx = Mlx()
         except Exception:
@@ -62,12 +67,15 @@ class Display:
         self.maze_y = 0
 
     def show(self, img: ImgData, x: int, y: int) -> None:
+        """Draw an image on the window at (x, y)."""
         self.mlx.mlx_put_image_to_window(self.mlx_ptr, self.win, img.img, x, y)
 
     def clear_window(self) -> None:
+        """Erase the whole window."""
         self.mlx.mlx_clear_window(self.mlx_ptr, self.win)
 
     def load_all_images(self) -> None:
+        """Load every PNG asset and build the derived images."""
         try:
             for file in [f for f in listdir("img/chars/letters")
                          if (isfile(join("img/chars/letters", f))
@@ -158,6 +166,7 @@ class Display:
             raise (e)
 
     def load_image(self, name: str, img: str) -> None:
+        """Load one PNG into the image table under `name`."""
         new_img = ImgData()
         result = self.mlx.mlx_png_file_to_image(self.mlx_ptr, img)
         if not result:
@@ -171,6 +180,7 @@ class Display:
         self.images.update({name: new_img})
 
     def create_mask(self, source: str, name_new: str) -> None:
+        """Build the silhouette of `source`, used to erase it from a bitmap."""
         new_img = ImgData()
         new_img.width = self.images[source].width
         new_img.height = self.images[source].height
@@ -190,6 +200,7 @@ class Display:
         self.images.update({name_new: new_img})
 
     def create_mirror(self, source: str, name_new: str) -> None:
+        """Build a horizontally mirrored copy of `source`."""
         new_img = ImgData()
         new_img.width = self.images[source].width
         new_img.height = self.images[source].height
@@ -211,6 +222,7 @@ class Display:
         self.images.update({name_new: new_img})
 
     def create_rotate90(self, source: str, name_new: str) -> None:
+        """Build a copy of `source` rotated by 90 degrees."""
         new_img = ImgData()
         new_img.width = self.images[source].height
         new_img.height = self.images[source].width
@@ -232,6 +244,7 @@ class Display:
 
     def create_rectangle(self, name_new: str,
                          width: int, height: int, color: Any) -> None:
+        """Create a width x height image filled with `color`."""
         new_img = ImgData()
         new_img.width = width
         new_img.height = height
@@ -249,6 +262,7 @@ class Display:
 
     def create_background(self, source: str, name_new: str,
                           num_x: int, num_y: int) -> None:
+        """Tile `source` num_x by num_y times into a new image."""
         new_img = ImgData()
         new_img.width = self.images[source].height * num_x
         new_img.height = self.images[source].width * num_y
@@ -272,6 +286,7 @@ class Display:
         self.images.update({name_new: new_img})
 
     def create_bitmap(self, name_new: str, width: int, height: int) -> None:
+        """Create, or replace, an off-screen bitmap of the given size."""
         img = self.images.get(name_new)
         if img:
             self.mlx.mlx_destroy_image(self.mlx_ptr, img.img)
@@ -279,6 +294,7 @@ class Display:
 
     def add_to_bitmap(self, bitmap: str, source: str,
                       pos_x: int, pos_y: int) -> None:
+        """Blend `source` into `bitmap`, skipping transparent pixels."""
         for y in range(0, self.images[source].height):
             for x in range(0, self.images[source].sl, 4):
                 pos = x + (y * self.images[source].sl)
@@ -299,6 +315,7 @@ class Display:
                     self.images[bitmap].data[pos_new] = 225
 
     def create_maze_bitmap(self) -> None:
+        """Compose the in-game screen: side panels, logo and plants."""
         self.create_bitmap("maze_screen",
                            self.screen_width, self.screen_height)
         self.add_to_bitmap("maze_screen", "background_left", 0, 0)
@@ -355,6 +372,7 @@ class Display:
                           num_x: int, num_y: int,
                           shift_x: int = 0, shift_y: int = 0,
                           bitmap: str | None = None) -> None:
+        """Draw `img` num_x by num_y times, on screen or into a bitmap."""
         img_width = img.width - shift_x
         img_height = img.height - shift_x
         for i in range(num_x):
@@ -367,6 +385,7 @@ class Display:
                                        pos_x, y + img_height * j)
 
     def show_pacgum(self, x: int, y: int, type: str) -> None:
+        """Draw a small or big pacgum at the maze cell (x, y)."""
         pos_x = (x + 1) * (self.corridor_width + self.wall_width) + self.maze_x
         pos_y = (y + 1) * (self.corridor_width + self.wall_width) + self.maze_y
         # pos_y = (y + 1) * (self.corridor_width) + y * self.wall_width
@@ -380,6 +399,7 @@ class Display:
     def show_text(self, text: str, x: int, y: int,
                   align: str = "left", bitmap: str | None = None) -> None:
 
+        """Draw `text` with the letter images, optionally centered."""
         q_letter = self.images.get("q")
         a_letter = self.images.get("a")
         dot_letter = self.images.get(".")
@@ -428,6 +448,7 @@ class Display:
 
     def show_button(self, text: str, x: int, y: int,
                     type: str = "normal", bitmap: str | None = None) -> None:
+        """Draw a button and its label, in normal or hover state."""
         if not bitmap:
             if type == "hover":
                 self.show(self.images["button_hover"], x, y)

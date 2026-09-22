@@ -1,3 +1,5 @@
+"""Ghost movement, chase behaviors and respawn."""
+
 import random
 import time
 from collections import deque
@@ -16,7 +18,9 @@ SPEED_DEATH = 20
 
 
 class Ghost:
+    """One ghost: its position, its behavior and its path finding."""
     def __init__(self, name: str, x: int = 0, y: int = 0) -> None:
+        """Create a ghost with its name and starting cell."""
         self.name = name
         self.image: ImgData
         self.mask: ImgData
@@ -39,6 +43,7 @@ class Ghost:
         self.game: Game
 
     def set_image(self, image_direction: str) -> None:
+        """Pick the sprite matching the status and the direction."""
         if self.status == GhostStatus.DEATH:
             image_name = "ghost_dead_right"
         elif self.status == GhostStatus.EDIBLE:
@@ -50,15 +55,19 @@ class Ghost:
             self.mask = self.game.display.images[image_name + "_mask"]
 
     def set_behavior_default(self, behavior: GhostBehavior) -> None:
+        """Set the behavior the ghost goes back to once active again."""
         self.behavior_default = behavior
 
     def set_behavior(self, behavior: GhostBehavior) -> None:
+        """Set the current behavior."""
         self.behavior = behavior
 
     def speed_reset(self) -> None:
+        """Put the speed back to its base value."""
         self.speed = SPEED_BASE
 
     def set_start_position(self, x: int, y: int) -> None:
+        """Place the ghost at its corner and reset its target."""
         self.start_x = x
         self.start_y = y
         self.x = x
@@ -70,6 +79,12 @@ class Ghost:
         self.target = (x, y)
 
     def find_next_position(self, target: tuple[int, int]) -> tuple[int, int]:
+        """Return the next cell on the shortest path to `target`.
+
+        Breadth-first search over the maze, avoiding the cells the other
+        ghosts are moving to. Falls back to the current cell when the
+        target cannot be reached.
+        """
         moves = [(0, -1, 1), (1, 0, 2),
                  (0, 1, 4), (-1, 0, 8)]
         start = (self.x, self.y)
@@ -119,6 +134,7 @@ class Ghost:
             return goal
 
     def get_random_corner(self) -> tuple[int, int]:
+        """Pick one of the four maze corners at random."""
         corners = [(0, 0),
                    (self.game.maze_width - 1, 0),
                    (0, self.game.maze_height - 1),
@@ -128,6 +144,7 @@ class Ghost:
         return random.choice(corners)
 
     def get_random_cell(self) -> tuple[int, int]:
+        """Pick a random cell of the maze."""
         rand_x = random.randint(0, self.game.maze_width - 1)
         rand_y = random.randint(0, self.game.maze_height - 1)
         if self.game.maze[rand_y][rand_x] != 15:
@@ -135,6 +152,7 @@ class Ghost:
         return self.get_random_cell()
 
     def get_random_corner_far_from_pacman(self) -> tuple[int, int]:
+        """Pick a corner away from pacman."""
         corners = [(0, 0),
                    (self.game.maze_width - 1, 0),
                    (0, self.game.maze_height - 1),
@@ -151,6 +169,7 @@ class Ghost:
         return random.choice(corners)
 
     def get_random_cell_far_from_pacman(self) -> tuple[int, int]:
+        """Pick a cell away from pacman."""
         ghosts_targets = [ghost.target for ghost in self.game.ghosts
                           if ghost is not self]
         # print("ghosts_targets:", ghosts_targets)
@@ -168,6 +187,7 @@ class Ghost:
         return (rand_x, rand_y)
 
     def move(self) -> None:
+        """Step to the next cell, picking a target for the behavior."""
         if self.freeze is False:
             self.x, self.y = self.next_x, self.next_y
             self.x_px = self.x * self.game.display.cell_width
@@ -211,6 +231,7 @@ class Ghost:
                 self.direction = Direction.TOP
 
     def make_freeze(self, flag: bool = True) -> None:
+        """Freeze cheat: toggle it, or clear it when `flag` is False."""
         if flag is False:
             self.freeze = False
         else:
@@ -220,6 +241,7 @@ class Ghost:
                 self.freeze = True
 
     def death(self) -> None:
+        """Mark the ghost as eaten and send it back to its corner."""
         self.speed = SPEED_DEATH
         self.status = GhostStatus.DEATH
         self.set_behavior(GhostBehavior.TO_START)
@@ -229,6 +251,7 @@ class Ghost:
         # print(self.name, "Death in position", self.x, self.y)
 
     def reborn(self) -> None:
+        """Come back to life once the respawn delay has passed."""
         if time.perf_counter() < self.time_reborn:
             return
         # print(self.name, "Reborn in position", self.x, self.y)

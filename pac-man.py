@@ -1,3 +1,5 @@
+"""Entry point: build the game, open the window and run the MLX loop."""
+
 import sys
 # import traceback
 
@@ -8,9 +10,10 @@ from src.game_types import GhostBehavior
 from src.display import Display
 
 if __name__ == "__main__":
-    config_filename = ""
-    if len(sys.argv) == 2:
-        config_filename = sys.argv[1]
+    if len(sys.argv) != 2:
+        print("\033[91mUsage: python3 pac-man.py config.json\033[0m")
+        sys.exit(1)
+    config_filename = sys.argv[1]
     config_json = open_config_file(config_filename)
     cfg = Config.model_validate(config_json)
 

@@ -1,27 +1,65 @@
-# GOAL
-In this project, you will create a complete and playable Pac-Man game in Python, using
-object-oriented programming, a simple graphical library (MLX or similar), and a modular, reusable architecture.
-### The game must support:
-- A custom configuration via a file (JSON with comments) to set game parameters.
-- Robust error handling, no crash!
-- Level generation based on an external ‘A-Maze-ing‘ package (not yours!).
-- A persistent highscore system of your choice (stored in a json file on project, saved
-to disk, etc.).
-- A polished graphical UI with main menu, game view, and game-over handling.
-- A cheat mode for evaluation purposes.
-- Deployment to a public gaming platform (Steam/Itch.io or similar) for demonstration.
-# Configuration file
-The config file uses JSON. In addition to the standard JSON format, you must handle comments. Lines starting with # are comments and must be ignored. You may also support additional comment styles (e.g., C or C++). The exact structure is up to you, but document your keys in the README and provide robust defaults.
+# TODO
 
-Suggested keys (names are indicative):
-- highscore_filename
-- level array of multiple levels
-- width , height for each level
-- lives : 3
-- pacgum : 42
-- points_per_pacgum : 10
-- points_per_super_pacgum : 50
-- points_per_ghost : 200
-- seed : 42
-- level_max_time : 90
-## Faulty config handlingV.3 Faulty config handling
+What is left before the defense. The numbers in brackets point to the line of
+[`SPECS.md`](SPECS.md) the item comes from.
+
+## Blocking — a deliverable is missing
+
+- [ ] **Publish the build on itch.io** as a free, unlisted game. [81]
+      The build itself is done and tested (`make package`); only the upload is
+      left. Steps in [`packaging/README.md`](packaging/README.md).
+- [ ] Put the controls, the cheat keys and a word about `config.json` in the
+      itch.io page description. [82]
+- [ ] Write the page URL into `packaging/README.md`, and say who owns the
+      account, so the build can be regenerated during the review. [81]
+
+## Documents to finish
+
+- [ ] `project-management/timeline.md` — the dates planned at the start, so the
+      table reads as *planned vs actual*. [86]
+- [ ] `project-management/team-organisation.md` — how decisions were taken day
+      to day and how disagreements were settled. [87]
+- [ ] `project-management/test-plan.md` — the manual play sessions: who, on
+      which machine, what was observed. [89]
+- [ ] `README.md`, section **Use of AI** — read it and make it ours. The
+      subject is explicit: we have to be able to explain and defend anything AI
+      touched. [93]
+
+## Decisions to take, then code
+
+- [ ] **`GameStatus.VICTORY` is an alias of `GAME_OVER`** (both are `3`, so
+      Python makes them the same member). Nothing compares against them today,
+      so the game behaves correctly, but the two states cannot be told apart.
+      Giving `VICTORY` the value `5` is a one-line fix.
+- [ ] **Running out of time ends the game**, whatever the number of lives left
+      (`Game.time_out()`). The subject leaves the choice to us, so this is
+      valid, but a player expects to lose one life and restart the level.
+      Decide, and write the choice down in the README. [68]
+- [ ] Keep only the top 10 in the highscore file, instead of keeping every
+      record and sorting at display time. [32]
+- [ ] Load the highscores once at startup instead of when the screen is
+      opened, which is what the subject describes. [33]
+
+## Nice to have
+
+- [ ] Accept WASD as well as the arrow keys. [44]
+- [ ] Uppercase glyphs for the letters, so names are not limited to
+      lowercase. [30]
+- [ ] Commit the scripted test runs, so a reviewer can replay them. [14]
+- [ ] Remove the leftover `engine/`, `models/`, `utils/` and `test/`
+      directories: the tracked files are gone, only orphan `__pycache__`
+      directories are left.
+
+## Before the defense
+
+- [ ] Try a few odd configuration files: values out of range, missing keys,
+      fewer than ten levels, an unreadable file. The configuration **will be
+      changed during the defense**. [23]
+- [ ] Reinstall the assigned A-Maze-ing package from its own wheel and check
+      the game still runs, since the reviewer will do exactly that. [24]
+- [ ] `make fclean && make install && make run` from a clean clone, on the
+      machine used for the defense.
+- [ ] Run through the game once with each cheat key, so the demonstration is
+      fluid. [58-62]
+- [ ] Both of us must be able to explain every part of the code, including the
+      parts written by the other. [101]

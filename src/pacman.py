@@ -1,3 +1,5 @@
+"""Pacman position, movement and sprites."""
+
 from .display import ImgData
 from .game_types import Direction, PacManStatus, GhostStatus, GhostBehavior
 from typing import TYPE_CHECKING
@@ -9,7 +11,9 @@ SPEED_BASE = 3
 
 
 class PacMan:
+    """The player character."""
     def __init__(self, name: str = "pacman", x: int = 0, y: int = 0) -> None:
+        """Create pacman at the given cell."""
         self.name = name
         self.image: ImgData
         self.mask: ImgData
@@ -30,6 +34,7 @@ class PacMan:
         self.game: Game
 
     def set_image(self, direction: str) -> None:
+        """Pick the sprite for `direction` and advance the animation."""
         image_name = self.name + "_" + str(self.image_sprite) + "_" + direction
         if not self.game.display.images.get(image_name):
             return
@@ -49,6 +54,7 @@ class PacMan:
                 self.image_sprite_direction = 1
 
     def set_start_position(self, x: int, y: int) -> None:
+        """Place pacman at (x, y), moving out of a wall if needed."""
         if self.game.maze[y][x] == 15:
             x += 1
         if self.game.maze[y][x] == 15:
@@ -64,6 +70,7 @@ class PacMan:
 
     def death(self) -> None:
         # Clear old
+        """Erase pacman and put it back at its starting cell."""
         pos_x = self.game.display.cell_width + 5 \
             + self.x_px + self.game.display.maze_x
         pos_y = self.game.display.cell_width + 5 \
@@ -78,6 +85,7 @@ class PacMan:
         self.set_image("right")
 
     def move(self) -> None:
+        """Step to the next cell, eat what is there and pick the next one."""
         if self.direction_next is None:
             return
 
@@ -107,14 +115,17 @@ class PacMan:
             return
 
     def speed_reset(self) -> None:
+        """Put the speed back to its base value."""
         self.speed = SPEED_BASE
 
     def increase_speed(self, num: int = 1) -> None:
+        """Speed cheat: go faster, wrapping back to the base speed."""
         self.speed += num
         if self.speed > 10:
             self.speed_reset()
 
     def invisible(self) -> None:
+        """Invincibility cheat: toggle the invisible status."""
         if self.status == PacManStatus.NORMAL:
             # print("INVISIBLE")
             self.status = PacManStatus.INVISIBLE

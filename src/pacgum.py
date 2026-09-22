@@ -1,7 +1,12 @@
+"""Pacgum placement inside a maze."""
+
 import random
 
 
 def pacgums_generate(maze: list[list[int]], number: int) -> list[list[int]]:
+    """Put super-pacgums in the four corners and `number` pacgums in
+    the corridors.
+    """
     maze_width = len(maze[0])
     maze_height = len(maze)
     pacgums = [[0] * maze_width for _ in range(maze_height)]

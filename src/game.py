@@ -1,5 +1,8 @@
+"""Game state machine: menus, levels, movement and scoring."""
+
 import random
 import time
+from random import SystemRandom
 from typing import Any
 
 from mazegenerator import MazeGenerator
@@ -15,13 +18,16 @@ from .pacman import PacMan
 from .ghost import Ghost
 from .pacgum import pacgums_generate
 
+MAX_SEED = 2 ** 31 - 1
 TICK_RATE = 60
 TICK_TIME = 1.0 / TICK_RATE
 EDIBLE_TIME = 10
 
 
 class Game:
+    """Owns the game state and drives every screen of the game."""
     def __init__(self, config: Config):
+        """Set up the state, the menu entries and the counters."""
         self.config: Config = config
 
         self.stats: Stats = Stats(self)
@@ -62,6 +68,7 @@ class Game:
         self.player_name: str = ""
 
     def exit(self, error: Any = None) -> None:
+        """Destroy the loaded images and leave the MLX loop."""
         for image in self.display.images.values():
             self.display.mlx.mlx_destroy_image(self.display.mlx_ptr, image.img)
         self.display.mlx.mlx_loop_exit(self.display.mlx_ptr)
@@ -73,6 +80,7 @@ class Game:
     def score_menu_handle_key_press(self, key: int, nothing: Any) -> None:
         # self.display.show(self.display.images["save_score_tmp"], 0, 0)
         # print("Handle")
+        """Handle the name typing and the Save/Cancel choice."""
         if key == 65307 and self.stats.stats["score"] == 0:  # ESC
             self.menu()
             return
@@ -119,6 +127,7 @@ class Game:
                 self.show_score_input()
 
     def show_score_menu(self) -> None:
+        """Draw the Save and Cancel buttons."""
         pos_x_1 = self.display.screen_width // 2 - \
             (self.display.images["button"].width + 20)
         pos_y = self.display.screen_height - \
@@ -131,17 +140,20 @@ class Game:
                                       else "normal"))
 
     def show_score_input(self) -> None:
+        """Redraw the name being typed."""
         self.display.show_filled_block(self.display.images["emptiness"],
                                        700, 640, 13, 2, 4, 4)
         if self.player_name:
             self.display.show_text(self.player_name, 720, 660)
 
     def no_score_menu_handle_key_press(self, key: int, nothing: Any) -> None:
+        """Go back to the main menu when there is no score to save."""
         if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
             self.menu()
             return
 
     def victory(self) -> None:
+        """Show the victory screen and offer to save the score."""
         self.status = GameStatus.VICTORY
 
         if self.stats.stats["score"] != 0:
@@ -174,6 +186,7 @@ class Game:
     def time_out(self) -> None:
         # print("TIME OUT")
         # self.display.clear_window()
+        """Show the time out screen and offer to save the score."""
         self.status = GameStatus.GAME_OVER
 
         if self.stats.stats["score"] != 0:
@@ -206,6 +219,7 @@ class Game:
     def game_over(self) -> None:
         # print("GAME OVER")
         # self.display.clear_window()
+        """Show the game over screen and offer to save the score."""
         self.status = GameStatus.GAME_OVER
 
         if self.stats.stats["score"] != 0:
@@ -236,11 +250,13 @@ class Game:
     #
 
     def level_completed_handle_key_press(self, key: int, nothing: Any) -> None:
+        """Start the next level on ESC or ENTER."""
         if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
             self.next_level()
             return
 
     def level_completed(self) -> None:
+        """Show the level completed screen, or win on the last level."""
         if self.stats.stats["level"] == len(self.config.level):
             self.victory()
             return
@@ -264,6 +280,7 @@ class Game:
 
     def menu_handle_key_press(self, key: int, nothing: Any) -> None:
         # print(f"Pressed key {key}")
+        """Move the main menu cursor and run the selected entry."""
         if key == 65293 or key == 65421:  # ENTER
             if self.menu_list[self.menu_cur][1] == "exit":
                 self.exit()
@@ -289,6 +306,7 @@ class Game:
             self.show_menu()
 
     def show_menu(self) -> None:
+        """Draw the main menu buttons."""
         pos_x = self.display.screen_width // 2 - \
             self.display.images["button"].width // 2
         pos_y_1 = self.display.images["logo_big"].height + 100
@@ -300,6 +318,7 @@ class Game:
                                       else "normal"))
 
     def menu(self) -> None:
+        """Show the main menu, with its background and random ghosts."""
         if not self.display:
             return
 
@@ -335,6 +354,7 @@ class Game:
 
     def pause_menu_handle_key_press(self, key: int, nothing: Any) -> None:
         # print(f"PAUSE Pressed key {key}")
+        """Resume on ESC, or run the selected pause menu entry."""
         if key == 65307:  # ESC
             self.resume()
             return
@@ -357,6 +377,7 @@ class Game:
             self.show_pause_menu()
 
     def show_pause_menu(self) -> None:
+        """Draw the pause menu buttons."""
         pos_x = self.display.screen_width // 2 - \
             self.display.images["button"].width // 2
         pos_y_1 = self.display.screen_height // 2 - \
@@ -369,6 +390,7 @@ class Game:
                                       else "normal"))
 
     def pause(self) -> None:
+        """Freeze the game and show the pause menu."""
         if not self.display.images.get("pause_background"):
             self.display.create_rectangle("pause_background",
                                           self.display.screen_width,
@@ -385,14 +407,23 @@ class Game:
     #
 
     def create_level(self, level_num: int) -> None:
+        """Generate the maze, the pacgums and the starting positions.
+
+        The first level uses the seed from the config file, the next ones
+        use a random one.
+        """
         maze_width = self.config.level[level_num - 1]["width"]
         maze_height = self.config.level[level_num - 1]["height"]
         try:
+            # The generator reseeds the global RNG, so a plain
+            # random.randrange() here would repeat run after run.
+            seed = (self.config.seed if level_num == 1
+                    else SystemRandom().randrange(MAX_SEED))
             mazegen = MazeGenerator((maze_width, maze_height),
                                     False,
                                     (0, 0),
                                     (maze_width - 1, maze_height - 1),
-                                    self.config.seed + level_num)
+                                    seed)
         except Exception:
             self.status = GameStatus.ERROR
             return
@@ -433,6 +464,7 @@ class Game:
 
     def death(self) -> None:
         # print("LIVES:", self.stats.stats["lives"])
+        """Take one life: game over when none is left, respawn otherwise."""
         self.stats.increase_lives(-1)
         if self.stats.stats["lives"] == 0:
             self.game_over()
@@ -443,6 +475,7 @@ class Game:
         self.pacman.death()
 
     def edible_mode(self, on: bool = True) -> None:
+        """Make the ghosts edible, or put them back to normal."""
         if on:
             self.edible_time += EDIBLE_TIME
         pos_x_base = self.display.cell_width + 5 + self.display.maze_x
@@ -463,18 +496,21 @@ class Game:
             ghost.set_image("right")
 
     def eat_ghost(self, ghost: Ghost) -> None:
+        """Kill an edible ghost and award the ghost points."""
         if ghost.status != GhostStatus.EDIBLE:
             return
         ghost.death()
         self.stats.increase_score(self.config.points_per_ghost)
 
     def check_pacgums(self) -> None:
+        """Complete the level once every pacgum has been eaten."""
         if sum(1 for row in self.pacgums for x in row if x != 0) > 0:
             return
         self.status = GameStatus.PAUSED
         self.level_completed()
 
     def eat_pacgum(self, x: int, y: int) -> None:
+        """Eat the pacgum at (x, y) and award its points."""
         if self.pacgums[y][x] == 2:
             self.pacgums[y][x] = 0
             self.stats.increase_score(self.config.points_per_super_pacgum)
@@ -489,6 +525,7 @@ class Game:
 
     def game_handle_key_press(self, key: int, nothing: Any) -> None:
         # print(f"Pressed key {key}")
+        """Handle the gameplay keys: directions, pause and cheats."""
         if key == 65307:  # ESC
             if self.status == GameStatus.RUN:
                 self.status = GameStatus.PAUSED
@@ -522,6 +559,7 @@ class Game:
             self.pacman.direction = self.pacman.direction_next
 
     def move_object(self, obj: PacMan | Ghost) -> None:
+        """Advance pacman or a ghost by one frame and redraw it."""
         if self.status != GameStatus.RUN:
             return
         shift_x = self.display.cell_width + 5 + self.display.maze_x
@@ -572,6 +610,7 @@ class Game:
         self.display.add_to_bitmap("maze_screen", obj.image.name, pos_x, pos_y)
 
     def playing(self, nothing: Any) -> None:
+        """Run one frame: timer, movement and pacman/ghost collisions."""
         if self.status != GameStatus.RUN:
             return
 
@@ -612,6 +651,7 @@ class Game:
                         self.death()
 
     def resume(self) -> None:
+        """Put the game back in running state and hook the gameplay keys."""
         self.display.show(self.display.images["maze_screen"], 0, 0)
         self.stats.show_stats()
 
@@ -628,6 +668,7 @@ class Game:
 
     def next_level(self) -> None:
         # print("New level")
+        """Go to the next level, or win the game after the last one."""
         self.stats.increase_level()
         if self.stats.stats["level"] > len(self.config.level):
             self.victory()
@@ -645,6 +686,7 @@ class Game:
         self.resume()
 
     def start(self) -> None:
+        """Start a new game from the first level."""
         self.display.clear_window()
         self.score_menu_cur = 0
         self.player_name = ""
@@ -671,6 +713,7 @@ class Game:
 
     def highscores_over_handle_key_press(self, key: int, nothing: Any) -> None:
         # print(f"PAUSE Pressed key {key}")
+        """Handle the Main menu and Clear entries."""
         if key == 65307:  # ESC
             self.menu()
             return
@@ -701,6 +744,7 @@ class Game:
             self.highscores()
 
     def show_highscores_menu(self) -> None:
+        """Draw the highscores screen buttons."""
         pos_x_1 = self.display.screen_width // 2 - \
             (self.display.images["button"].width + 20)
         pos_y = self.display.screen_height - \
@@ -714,6 +758,7 @@ class Game:
                                      "highscores_screen")
 
     def highscores(self) -> None:
+        """Show the ten best scores read from the highscore file."""
         if not self.display.images.get("highscores_screen"):
             self.display.create_bitmap("highscores_screen",
                                        self.display.screen_width,
@@ -751,6 +796,7 @@ class Game:
     #
 
     def instructions(self) -> None:
+        """Show the controls, the rules and the cheat keys."""
         if not self.display.images.get("instructions_screen"):
             self.display.create_bitmap("instructions_screen",
                                        self.display.screen_width,
@@ -783,6 +829,7 @@ class Game:
                                   self.menu_cur)
 
     def create_save_score_templates(self) -> None:
+        """Build the background shared by the end of game screens."""
         if self.display.images.get("save_score_tmp"):
             return
 
