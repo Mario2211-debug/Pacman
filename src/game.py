@@ -289,6 +289,7 @@ class Game:
     def menu(self) -> None:
         if not self.display:
             return
+
         self.hs_menu_cur = 0
         self.display.show(self.display.images["big_background"], 0, 0)
         self.display.show(self.display.images["logo_big"],
@@ -296,22 +297,24 @@ class Game:
                           - self.display.images["logo_big"].width // 2,
                           50)
 
-        for i in range(3):
+        for i in range(5):
             for ghost in self.ghosts:
-                rand_x = random.randint(50, self.display.screen_width - 50)
+
+                rand_x = random.randint(50, 450)
                 rand_y = random.randint(50, self.display.screen_height - 100)
-                if self.display.screen_width // 2 - self.display.images["button"].width - 50 // 2 <= rand_x <= self.display.screen_width // 2:
-                    rand_x -= self.display.images["button"].width
-                elif self.display.screen_width // 2 <= rand_x <= self.display.screen_width // 2 + self.display.images["button"].width // 2:
-                    rand_x += self.display.images["button"].width
+                if random.getrandbits(1):
+                    rand_x += 1430
                 if rand_x > self.display.screen_width // 2:
-                    self.display.show(self.display.images[ghost.name + "_left"], rand_x, rand_y)
+                    self.display.show(self.display.images[ghost.name+"_left"],
+                                      rand_x, rand_y)
                 else:
-                    self.display.show(self.display.images[ghost.name + "_right"], rand_x, rand_y)
+                    self.display.show(self.display.images[ghost.name+"_right"],
+                                      rand_x, rand_y)
 
         self.show_menu()
-        self.display.mlx.mlx_hook(self.display.win, 2, 1, self.menu_handle_key_press, self.menu_cur)
-
+        self.display.mlx.mlx_hook(self.display.win, 2, 1,
+                                  self.menu_handle_key_press,
+                                  self.menu_cur)
 
     # PAUSE SCREEN
 
@@ -339,26 +342,28 @@ class Game:
             self.show_pause_menu()
 
     def show_pause_menu(self) -> None:
-        pos_x = self.display.screen_width // 2 - self.display.images["button"].width // 2
-        pos_y_start = self.display.screen_height // 2 - (self.display.images["button"].height + 20)
+        pos_x = self.display.screen_width // 2 - \
+            self.display.images["button"].width // 2
+        pos_y_1 = self.display.screen_height // 2 - \
+            (self.display.images["button"].height + 20)
         for i in range(len(self.pause_menu_list)):
-            pos_y = pos_y_start + (self.display.images["button"].height + 20) * i
+            pos_y = pos_y_1 + (self.display.images["button"].height + 20) * i
             self.display.show_button(self.pause_menu_list[i][0],
                                      pos_x, pos_y,
-                                     ("hover" if i == self.pause_menu_cur else "normal"))
+                                     ("hover" if i == self.pause_menu_cur
+                                      else "normal"))
 
     def pause(self) -> None:
-        if not self.display:
-            return
         if not self.display.images.get("pause_background"):
-            self.display.create_rectangle("pause_background", self.display.screen_width, self.display.screen_height, 0xAA000000)
+            self.display.create_rectangle("pause_background",
+                                          self.display.screen_width,
+                                          self.display.screen_height,
+                                          0xAA000000)
         self.display.show(self.display.images["pause_background"], 0, 0)
-        # self.display.show_filled_block(self.display.images["pause_background"], 0, 0,
-        #                                self.display.screen_width // self.display.images["pause_background"].width + 1,
-        #                                self.display.screen_height // self.display.images["pause_background"].height + 1)
         self.show_pause_menu()
-        self.display.mlx.mlx_hook(self.display.win, 2, 1, self.pause_menu_handle_key_press, self.pause_menu_cur)
-
+        self.display.mlx.mlx_hook(self.display.win, 2, 1,
+                                  self.pause_menu_handle_key_press,
+                                  self.pause_menu_cur)
 
     # GENERATE LEVEL
 
