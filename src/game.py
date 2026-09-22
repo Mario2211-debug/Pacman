@@ -774,7 +774,7 @@ class Game:
                                   self.no_score_menu_handle_key_press,
                                   self.menu_cur)
 
-    def create_save_score_template(self):
+    def create_save_score_templates(self):
         if self.display.images.get("save_score_tmp"):
             return
 
@@ -809,6 +809,5 @@ class Game:
                 (self.display.images["button"].width + 20) * i
             self.display.show_button(self.score_menu_list[i][0],
                                      pos_x, pos_y,
-                                     ("hover" if i == self.score_menu_cur
-                                      else "normal"),
+                                     "normal",
                                      "save_score_tmp")

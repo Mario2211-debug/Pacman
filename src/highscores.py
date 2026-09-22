@@ -4,7 +4,18 @@ import json
 def open_highscores_file(filename: str) -> None:
     try:
         with open(filename, "r") as f:
-            return json.loads(f.read())
+            highscores_json = json.loads(f.read())
+            i = 0
+            while i < len(highscores_json):
+                if (highscores_json[i].get("name") is None
+                        or highscores_json[i].get("name") == ""
+                        or highscores_json[i].get("score") is None
+                        or highscores_json[i].get("score") == 0):
+                    highscores_json.pop(i)
+                    continue
+                i += 1
+            # print(highscores_json)
+            return highscores_json
     # except FileNotFoundError as err:
     #     print("\033[91mHighscores file not found.\033[0m")
     #     return
