@@ -4,7 +4,7 @@ import sys
 from src.game import Game
 from src.config import Config, open_config_file
 from src.ghost import Ghost
-from src.types import GhostBehavior
+from src.game_types import GhostBehavior
 from src.display import Display
 
 if __name__ == "__main__":

@@ -1,7 +1,8 @@
 import json
+from typing import Any
 
 
-def open_highscores_file(filename: str) -> None:
+def open_highscores_file(filename: str) -> Any:
     try:
         with open(filename, "r") as f:
             highscores_json = json.loads(f.read())
@@ -28,7 +29,7 @@ def open_highscores_file(filename: str) -> None:
         return
 
 
-def save_to_highscores_file(filename: str, record: dict) -> None:
+def save_to_highscores_file(filename: str, record: dict[Any, Any]) -> None:
     try:
         highscores_json = open_highscores_file(filename)
     except Exception:

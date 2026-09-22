@@ -1,15 +1,17 @@
 import random
 import time
+from typing import Any
 
 from mazegenerator import MazeGenerator
 from .config import Config
-from .types import Direction, GameStatus, GhostStatus, GhostBehavior
+from .game_types import Direction, GameStatus, GhostStatus, GhostBehavior, \
+    PacManStatus
 from .display import Display
 from .highscores import open_highscores_file, clear_highscores_file, \
     save_to_highscores_file
 from .stats import Stats
 
-from .pacman import PacMan, PacManStatus
+from .pacman import PacMan
 from .ghost import Ghost
 from .pacgum import pacgums_generate
 
@@ -53,13 +55,13 @@ class Game:
                                 ("Cancel", "cancel")]
         self.score_menu_cur = 0
 
-        self.time = int(time.perf_counter())
-        self.previous = self.time
+        self.time: int = int(time.perf_counter())
+        self.previous: float = self.time
         self.edible_time = 0
         self.accumulator = 0.0
         self.player_name: str = ""
 
-    def exit(self, error=None):
+    def exit(self, error: Any = None) -> None:
         for image in self.display.images.values():
             self.display.mlx.mlx_destroy_image(self.display.mlx_ptr, image.img)
         self.display.mlx.mlx_loop_exit(self.display.mlx_ptr)
@@ -68,7 +70,7 @@ class Game:
     # VICTORY SCREEN
     #
 
-    def score_menu_handle_key_press(self, key, current_hover) -> None:
+    def score_menu_handle_key_press(self, key: int, nothing: Any) -> None:
         # self.display.show(self.display.images["save_score_tmp"], 0, 0)
         # print("Handle")
         if key == 65307 and self.stats.stats["score"] == 0:  # ESC
@@ -108,7 +110,7 @@ class Game:
                 self.show_score_input()
         else:
             if (len(self.player_name) < 10
-                and chr(key).isalnum
+                and chr(key).isalnum()
                 and self.display.images.get(chr(key))
                 or (len(self.player_name) > 0 and
                     chr(key) == " "
@@ -134,12 +136,12 @@ class Game:
         if self.player_name:
             self.display.show_text(self.player_name, 720, 660)
 
-    def no_score_menu_handle_key_press(self, key, current_hover):
+    def no_score_menu_handle_key_press(self, key: int, nothing: Any) -> None:
         if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
             self.menu()
             return
 
-    def victory(self):
+    def victory(self) -> None:
         self.status = GameStatus.VICTORY
 
         if self.stats.stats["score"] != 0:
@@ -169,7 +171,7 @@ class Game:
     # TIME OUT SCREEN
     #
 
-    def time_out(self):
+    def time_out(self) -> None:
         # print("TIME OUT")
         # self.display.clear_window()
         self.status = GameStatus.GAME_OVER
@@ -201,7 +203,7 @@ class Game:
     # GAME OVER SCREEN
     #
 
-    def game_over(self):
+    def game_over(self) -> None:
         # print("GAME OVER")
         # self.display.clear_window()
         self.status = GameStatus.GAME_OVER
@@ -233,12 +235,12 @@ class Game:
     # LEVEL COMPLETED SCREEN
     #
 
-    def level_completed_handle_key_press(self, key, current_hover):
+    def level_completed_handle_key_press(self, key: int, nothing: Any) -> None:
         if key == 65307 or key == 65293 or key == 65421:  # ESC or ENTER
             self.next_level()
             return
 
-    def level_completed(self):
+    def level_completed(self) -> None:
         if self.stats.stats["level"] == len(self.config.level):
             self.victory()
             return
@@ -260,7 +262,7 @@ class Game:
     # MAIN MENU SCREEN
     #
 
-    def menu_handle_key_press(self, key, current_hover):
+    def menu_handle_key_press(self, key: int, nothing: Any) -> None:
         # print(f"Pressed key {key}")
         if key == 65293 or key == 65421:  # ENTER
             if self.menu_list[self.menu_cur][1] == "exit":
@@ -331,7 +333,7 @@ class Game:
     # PAUSE SCREEN
     #
 
-    def pause_menu_handle_key_press(self, key, current_hover) -> None:
+    def pause_menu_handle_key_press(self, key: int, nothing: Any) -> None:
         # print(f"PAUSE Pressed key {key}")
         if key == 65307:  # ESC
             self.resume()
@@ -382,7 +384,7 @@ class Game:
     # GENERATE LEVEL
     #
 
-    def create_level(self, level_num) -> None:
+    def create_level(self, level_num: int) -> None:
         maze_width = self.config.level[level_num - 1]["width"]
         maze_height = self.config.level[level_num - 1]["height"]
         try:
@@ -485,7 +487,7 @@ class Game:
             self.check_pacgums()
             # print(self.game.points)
 
-    def game_handle_key_press(self, key, pacman):
+    def game_handle_key_press(self, key: int, nothing: Any) -> None:
         # print(f"Pressed key {key}")
         if key == 65307:  # ESC
             if self.status == GameStatus.RUN:
@@ -519,7 +521,7 @@ class Game:
         if not self.pacman.direction:
             self.pacman.direction = self.pacman.direction_next
 
-    def move_object(self, obj: PacMan | Ghost):
+    def move_object(self, obj: PacMan | Ghost) -> None:
         if self.status != GameStatus.RUN:
             return
         shift_x = self.display.cell_width + 5 + self.display.maze_x
@@ -569,7 +571,7 @@ class Game:
         pos_y = shift_y + obj.y_px
         self.display.add_to_bitmap("maze_screen", obj.image.name, pos_x, pos_y)
 
-    def playing(self, nothing):
+    def playing(self, nothing: Any) -> None:
         if self.status != GameStatus.RUN:
             return
 
@@ -667,7 +669,7 @@ class Game:
     # HIGHSCORES SCREEN
     #
 
-    def highscores_over_handle_key_press(self, key, current_hover) -> None:
+    def highscores_over_handle_key_press(self, key: int, nothing: Any) -> None:
         # print(f"PAUSE Pressed key {key}")
         if key == 65307:  # ESC
             self.menu()
@@ -727,7 +729,7 @@ class Game:
             hs_json = open_highscores_file(self.config.highscore_filename)
             if hs_json:
                 highscores_str = "".join(rec["name"] + " - " +
-                                         str(rec["score"]) + "\n"
+                                         str(rec["score"])[:21] + "\n"
                                          for rec in sorted(
                                              hs_json,
                                              key=lambda rec: rec['score'],
@@ -742,7 +744,7 @@ class Game:
 
         self.display.mlx.mlx_hook(self.display.win, 2, 1,
                                   self.highscores_over_handle_key_press,
-                                  self.menu_cur)
+                                  None)
 
     #
     # INSTRUCTIONS SCREEN
@@ -780,7 +782,7 @@ class Game:
                                   self.no_score_menu_handle_key_press,
                                   self.menu_cur)
 
-    def create_save_score_templates(self):
+    def create_save_score_templates(self) -> None:
         if self.display.images.get("save_score_tmp"):
             return
 
@@ -790,8 +792,8 @@ class Game:
         self.display.add_to_bitmap("save_score_tmp", "big_background", 0, 0)
 
         # for i in range(10):
-        plants: list = [name for name in self.display.images.keys()
-                        if name.startswith("plant_")] * 20
+        plants: list[str] = [name for name in self.display.images.keys()
+                             if name.startswith("plant_")] * 20
         for plant in plants:
             rand_x = random.randint(0, 450)
             rand_y = random.randint(0, self.display.screen_height - 25)

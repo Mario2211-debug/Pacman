@@ -50,7 +50,9 @@ def open_config_file(filename: str) -> Any:
         return CONFIG_DEFAULTS
 
 
-def validate_config_fields(value: Any, handler, info: ValidationInfo) -> Any:
+def validate_config_fields(value: Any,
+                           handler: Any,
+                           info: ValidationInfo) -> Any:
     try:
         return handler(value)
     except ValueError:
@@ -58,8 +60,10 @@ def validate_config_fields(value: Any, handler, info: ValidationInfo) -> Any:
             print(f"\033[91mMissed value for \"{info.field_name}\"")
         else:
             print(f"\033[91mInvalid value for \"{info.field_name}\": {value}.")
-        print(f"Using default: {CONFIG_DEFAULTS.get(info.field_name)}.\033[0m")
-        return CONFIG_DEFAULTS.get(info.field_name)
+        if isinstance(info.field_name, str):
+            print(f"Using default: "
+                  f"{CONFIG_DEFAULTS.get(info.field_name)}.\033[0m")
+            return CONFIG_DEFAULTS.get(info.field_name)
 
 
 class Config(BaseModel):
@@ -106,7 +110,9 @@ class Config(BaseModel):
         if not self.highscore_filename.lower().endswith(".json"):
             print('\033[91mInvalid value for "highscore_filename".\n'
                   'Using default: "highscore.json"\033[0m')
-            self.highscore_filename = CONFIG_DEFAULTS.get("highscore_filename")
+            default_filename = CONFIG_DEFAULTS.get("highscore_filename")
+            if default_filename and isinstance(default_filename, str):
+                self.highscore_filename = default_filename
 
         i = 0
         while i < len(self.level):
@@ -115,28 +121,30 @@ class Config(BaseModel):
                 self.level.pop(i)
                 continue
 
-            if self.level[i].get("width") is None:
+            level_width = self.level[i].get("width")
+            if level_width is None:
                 print(f'\033[91mMissed value "width" for level {i + 1}')
                 print(f'Using default: {CONFIG_DEFAULT_WIDTH}.\033[0m')
                 self.level[i]["width"] = CONFIG_DEFAULT_WIDTH
-            elif self.level[i].get("width") < 10:
+            elif level_width < 10:
                 print(f'\033[91mValue "width" for level {i + 1} is too small.')
                 print(f'Using default: {CONFIG_DEFAULT_WIDTH}.\033[0m')
                 self.level[i]["width"] = CONFIG_DEFAULT_WIDTH
-            elif self.level[i].get("width") > 25:
+            elif level_width > 25:
                 print(f'\033[91mValue "width" for level {i + 1} is too big.')
                 print(f'Using default: {CONFIG_DEFAULT_WIDTH}.\033[0m')
                 self.level[i]["width"] = CONFIG_DEFAULT_WIDTH
 
-            if self.level[i].get("height") is None:
+            level_height = self.level[i].get("height")
+            if level_height is None:
                 print(f'\033[91mMissed value "height" for level {i + 1}')
                 print(f'Using default: {CONFIG_DEFAULT_HEIGHT}.\033[0m')
                 self.level[i]["height"] = CONFIG_DEFAULT_HEIGHT
-            elif self.level[i].get("height") < 10:
+            elif level_height < 10:
                 print(f'\033[91mValue "height" for level {i+1} is too small.')
                 print(f'Using default: {CONFIG_DEFAULT_HEIGHT}.\033[0m')
                 self.level[i]["height"] = CONFIG_DEFAULT_HEIGHT
-            elif self.level[i].get("height") > 20:
+            elif level_height > 20:
                 print(f'\033[91mValue "height" for level {i+1} is too big.')
                 print(f'Using default: {CONFIG_DEFAULT_HEIGHT}.\033[0m')
                 self.level[i]["height"] = CONFIG_DEFAULT_HEIGHT

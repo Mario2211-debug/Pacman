@@ -2,7 +2,7 @@ import random
 import time
 from collections import deque
 
-from .types import Direction, GhostStatus, GhostBehavior, PacManStatus
+from .game_types import Direction, GhostStatus, GhostBehavior, PacManStatus
 from .display import ImgData
 
 from typing import TYPE_CHECKING
@@ -31,7 +31,7 @@ class Ghost:
         self.speed = SPEED_BASE
         self.behavior_default = GhostBehavior.PLAYER
         self.behavior = GhostBehavior.PLAYER
-        self.target: tuple
+        self.target: tuple[int, int]
         self.direction = Direction.RIGHT
         self.status = GhostStatus.ACTIVE
         self.freeze = False
@@ -49,13 +49,13 @@ class Ghost:
             self.image = self.game.display.images[image_name]
             self.mask = self.game.display.images[image_name + "_mask"]
 
-    def set_behavior_default(self, behavior: GhostBehavior):
+    def set_behavior_default(self, behavior: GhostBehavior) -> None:
         self.behavior_default = behavior
 
-    def set_behavior(self, behavior: GhostBehavior):
+    def set_behavior(self, behavior: GhostBehavior) -> None:
         self.behavior = behavior
 
-    def speed_reset(self):
+    def speed_reset(self) -> None:
         self.speed = SPEED_BASE
 
     def set_start_position(self, x: int, y: int) -> None:
@@ -69,12 +69,12 @@ class Ghost:
         self.y_px = y * self.game.display.cell_width
         self.target = (x, y)
 
-    def find_next_position(self, target: tuple) -> tuple[int]:
+    def find_next_position(self, target: tuple[int, int]) -> tuple[int, int]:
         moves = [(0, -1, 1), (1, 0, 2),
                  (0, 1, 4), (-1, 0, 8)]
         start = (self.x, self.y)
-        goal = target
-        prev: dict = {start: None}
+        goal: tuple[int, int] = target
+        prev: dict[tuple[int, int], tuple[int, int] | None] = {start: None}
         queue = deque([start])
         ghosts_next_positions = [(ghost.next_x, ghost.next_y) for ghost
                                  in self.game.ghosts
@@ -101,12 +101,13 @@ class Ghost:
                     queue.append((nx, ny))
         if goal not in prev:
             return (self.x, self.y)
-        parents = []
+        parents: list[tuple[int, int]] = []
         cur = goal
         while prev[cur] is not None:
             parent = prev[cur]
-            parents.append(parent)
-            cur = parent
+            if parent is not None:
+                parents.append(parent)
+                cur = parent
 
         if len(parents) > 1:
             self.next_x = parents[-2][0]
@@ -117,7 +118,7 @@ class Ghost:
             self.next_y = goal[1]
             return goal
 
-    def get_random_corner(self) -> tuple:
+    def get_random_corner(self) -> tuple[int, int]:
         corners = [(0, 0),
                    (self.game.maze_width - 1, 0),
                    (0, self.game.maze_height - 1),
@@ -126,14 +127,14 @@ class Ghost:
             corners.remove((self.x, self.y))
         return random.choice(corners)
 
-    def get_random_cell(self) -> tuple:
+    def get_random_cell(self) -> tuple[int, int]:
         rand_x = random.randint(0, self.game.maze_width - 1)
         rand_y = random.randint(0, self.game.maze_height - 1)
         if self.game.maze[rand_y][rand_x] != 15:
             return (rand_x, rand_y)
         return self.get_random_cell()
 
-    def get_random_corner_far_from_pacman(self) -> tuple:
+    def get_random_corner_far_from_pacman(self) -> tuple[int, int]:
         corners = [(0, 0),
                    (self.game.maze_width - 1, 0),
                    (0, self.game.maze_height - 1),
@@ -149,7 +150,7 @@ class Ghost:
             corners.remove((corner_x, corner_y))
         return random.choice(corners)
 
-    def get_random_cell_far_from_pacman(self) -> tuple:
+    def get_random_cell_far_from_pacman(self) -> tuple[int, int]:
         ghosts_targets = [ghost.target for ghost in self.game.ghosts
                           if ghost is not self]
         # print("ghosts_targets:", ghosts_targets)
@@ -166,7 +167,7 @@ class Ghost:
             return self.get_random_cell_far_from_pacman()
         return (rand_x, rand_y)
 
-    def move(self):
+    def move(self) -> None:
         if self.freeze is False:
             self.x, self.y = self.next_x, self.next_y
             self.x_px = self.x * self.game.display.cell_width

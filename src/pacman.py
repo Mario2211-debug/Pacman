@@ -1,5 +1,5 @@
 from .display import ImgData
-from .types import PacManStatus, GhostStatus, GhostBehavior
+from .game_types import Direction, PacManStatus, GhostStatus, GhostBehavior
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -24,8 +24,8 @@ class PacMan:
         self.x_px = x
         self.y_px = y
         self.speed = SPEED_BASE
-        self.direction = None
-        self.direction_next = None
+        self.direction: Direction | None = None
+        self.direction_next: Direction | None = None
         self.status = PacManStatus.NORMAL
         self.game: Game
 
@@ -78,6 +78,9 @@ class PacMan:
         self.set_image("right")
 
     def move(self) -> None:
+        if self.direction_next is None:
+            return
+
         moves = [(0, -1, 1), (1, 0, 2),
                  (0, 1, 4), (-1, 0, 8)]
         self.x, self.y = self.next_x, self.next_y
@@ -93,6 +96,8 @@ class PacMan:
             self.direction = self.direction_next
             # print(f"PacMan change {self.direction_next.name} to {nx}, {ny}")
             return
+        if self.direction is None:
+            return
         dx, dy, code = moves[self.direction.value]
         nx, ny = self.x + dx, self.y + dy
         if (0 <= nx < self.game.maze_width and 0 <= ny < self.game.maze_height
@@ -101,7 +106,7 @@ class PacMan:
             # print(f"PacMan move {self.direction.name} to {nx}, {ny}")
             return
 
-    def speed_reset(self):
+    def speed_reset(self) -> None:
         self.speed = SPEED_BASE
 
     def increase_speed(self, num: int = 1) -> None:

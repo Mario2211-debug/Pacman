@@ -2,10 +2,10 @@ from os import listdir
 from os.path import isfile, join
 from enum import Enum
 import random
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mlx import Mlx
-from .types import PacManStatus
+from .game_types import PacManStatus
 if TYPE_CHECKING:
     from .game import Game
 
@@ -18,21 +18,21 @@ class ImgType(Enum):
 
 class ImgData:
     """Structure for image data"""
-    def __init__(self):
+    def __init__(self) -> None:
         self.img = None
         self.width = 0
         self.height = 0
-        self.data = None
+        self.data: list[int] = []
         self.sl = 0  # size line
         self.bpp = 0  # bits per pixel
         self.iformat = 0
-        self.name = None
+        self.name: str = ""
         self.type = ImgType.REGULAR
 
 
 class Display:
     """Structure for main vars"""
-    def __init__(self):
+    def __init__(self) -> None:
         try:
             self.mlx = Mlx()
         except Exception:
@@ -49,7 +49,7 @@ class Display:
             if not self.win:
                 raise Exception("Can't create main window")
         except Exception:
-            raise ("Can't create main window")
+            raise Exception("Can't create main window")
 
         self.game: Game
         self.images: dict[str, ImgData] = {}
@@ -170,7 +170,7 @@ class Display:
         new_img.name = name
         self.images.update({name: new_img})
 
-    def create_mask(self, source: str, name_new: str) -> ImgData:
+    def create_mask(self, source: str, name_new: str) -> None:
         new_img = ImgData()
         new_img.width = self.images[source].width
         new_img.height = self.images[source].height
@@ -189,7 +189,7 @@ class Display:
         new_img.type = ImgType.MASK
         self.images.update({name_new: new_img})
 
-    def create_mirror(self, source: str, name_new: str) -> ImgData:
+    def create_mirror(self, source: str, name_new: str) -> None:
         new_img = ImgData()
         new_img.width = self.images[source].width
         new_img.height = self.images[source].height
@@ -210,7 +210,7 @@ class Display:
         new_img.name = name_new
         self.images.update({name_new: new_img})
 
-    def create_rotate90(self, source: str, name_new: str) -> ImgData:
+    def create_rotate90(self, source: str, name_new: str) -> None:
         new_img = ImgData()
         new_img.width = self.images[source].height
         new_img.height = self.images[source].width
@@ -231,7 +231,7 @@ class Display:
         self.images.update({name_new: new_img})
 
     def create_rectangle(self, name_new: str,
-                         width: int, height: int, color) -> None:
+                         width: int, height: int, color: Any) -> None:
         new_img = ImgData()
         new_img.width = width
         new_img.height = height
@@ -271,10 +271,10 @@ class Display:
         new_img.name = name_new
         self.images.update({name_new: new_img})
 
-    def create_bitmap(self, name_new: str, width, height) -> None:
-        if self.images.get(name_new):
-            self.mlx.mlx_destroy_image(self.mlx_ptr,
-                                       self.images.get(name_new).img)
+    def create_bitmap(self, name_new: str, width: int, height: int) -> None:
+        img = self.images.get(name_new)
+        if img:
+            self.mlx.mlx_destroy_image(self.mlx_ptr, img.img)
         self.create_rectangle(name_new, width, height, 0xFF000000)
 
     def add_to_bitmap(self, bitmap: str, source: str,
@@ -298,7 +298,7 @@ class Display:
                     self.images[bitmap].data[pos_new + 3] = 12
                     self.images[bitmap].data[pos_new] = 225
 
-    def create_maze_bitmap(self):
+    def create_maze_bitmap(self) -> None:
         self.create_bitmap("maze_screen",
                            self.screen_width, self.screen_height)
         self.add_to_bitmap("maze_screen", "background_left", 0, 0)
@@ -306,8 +306,8 @@ class Display:
         self.show_filled_block(self.images["emptiness"],
                                1250, 0, 3, 30, 4, 4, "maze_screen")
         self.add_to_bitmap("maze_screen", "logo_small", 1450, 50)
-        plants: list = [name for name in self.images.keys()
-                        if name.startswith("plant_")]
+        plants: list[str] = [name for name in self.images.keys()
+                             if name.startswith("plant_")]
         self.maze_x = 575 - self.game.maze_width * self.cell_width // 2
         self.maze_y = 465 - self.game.maze_height * self.cell_width // 2
         pos_y = self.maze_y
@@ -379,12 +379,19 @@ class Display:
 
     def show_text(self, text: str, x: int, y: int,
                   align: str = "left", bitmap: str | None = None) -> None:
+
+        q_letter = self.images.get("q")
+        a_letter = self.images.get("a")
+        dot_letter = self.images.get(".")
+        if q_letter is None or a_letter is None or dot_letter is None:
+            return
+
         if align == "center":
             max_height = 0
             text_width = 0
             for letter in text.lower():
                 if letter == " ":
-                    text_width += self.images.get(".").width
+                    text_width += dot_letter.width
                     continue
                 letter_img = self.images.get(letter)
                 if letter_img:
@@ -398,21 +405,20 @@ class Display:
         for letter in text.lower():
             if letter == "\n":
                 pos_x = x
-                pos_y += int(self.images.get("q").height * 1.5)
+                pos_y += int(q_letter.height * 1.5)
             elif letter == " ":
-                pos_x += self.images.get(".").width
+                pos_x += dot_letter.width
             else:
                 letter_img = self.images.get(letter)
-                if letter_img:
+                if letter_img is not None:
                     pos_x_current = pos_x
                     pos_y_current = pos_y
                     if letter == "." or letter == ",":
-                        pos_y_current += int(self.images.get("a").height -
-                                             self.images.get(".").height)
+                        pos_y_current += int(a_letter.height-dot_letter.height)
                     elif (letter == "-" or letter == "+"
                           or letter == "=" or letter == ":"):
-                        pos_y_current += int(self.images.get("a").height//2 -
-                                             self.images.get(letter).height//2)
+                        pos_y_current += int(a_letter.height//2 -
+                                             letter_img.height//2)
                     if not bitmap:
                         self.show(letter_img, pos_x_current, pos_y_current)
                     else:
@@ -421,7 +427,7 @@ class Display:
                     pos_x += letter_img.width
 
     def show_button(self, text: str, x: int, y: int,
-                    type: str = "normal", bitmap: str | None = None):
+                    type: str = "normal", bitmap: str | None = None) -> None:
         if not bitmap:
             if type == "hover":
                 self.show(self.images["button_hover"], x, y)
