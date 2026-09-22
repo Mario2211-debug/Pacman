@@ -85,7 +85,7 @@ class Config(BaseModel):
                      Field(min_length=1, default=None, validate_default=True),
                      WrapValidator(validate_config_fields)]
     lives: Annotated[int,
-                     Field(ge=1, default=None, validate_default=True),
+                     Field(ge=1, le=10, default=None, validate_default=True),
                      WrapValidator(validate_config_fields)]
     pacgum: Annotated[int,
                       Field(ge=1, default=None, validate_default=True),
